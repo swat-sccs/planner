@@ -32,7 +32,7 @@ import Rating from "@mui/material/Rating";
 import { Alert } from "@nextui-org/alert";
 
 import axios from "axios";
-import { getProfs, getYears } from "../../app/actions/getProfs";
+import { getProfs, getUniqueProfs, getYears } from "../../app/actions/getProfs";
 
 const labels: { [index: string]: string } = {
   1: "Awful",
@@ -108,7 +108,7 @@ export default function RatingPage() {
 
   const getData = useCallback(async () => {
     setIsLoading(true);
-    const myProfs = await getProfs();
+    const myProfs = await getUniqueProfs();
     const myYears = await getYears();
     setProfs(myProfs);
     setYearOptions(myYears);
@@ -193,7 +193,7 @@ export default function RatingPage() {
 
   return (
     <>
-      <div className="overflow-auto h-[83vh] scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
+      <div className="overflow-auto pt-5 sm:pt-0 sm:h-[83vh] h-[80vh]  scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
         <div className="absolute top-30 right-20 bg-transparent w-2/12 z-50 ">
           <Alert
             isVisible={submitSuccess}
@@ -210,7 +210,7 @@ export default function RatingPage() {
           />{" "}
         </div>
 
-        <Card className="mx-10 justify-center items-center sm:w-3/6 flex ml-auto mr-auto w-5/6">
+        <Card className="bg-light_foreground mx-10 justify-center items-center sm:w-3/6 flex ml-auto mr-auto w-5/6">
           <CardHeader className="">
             <h1 className=" text-center ml-auto mr-auto col-span-3 row-start-1 row-span-1 text-2xl mb-2 mt-2">
               Leave a Rating

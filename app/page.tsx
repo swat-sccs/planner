@@ -5,6 +5,7 @@ import { Skeleton } from "@nextui-org/skeleton";
 import { cookies } from "next/headers";
 import Search from "../components/Search";
 import { FullCourseList } from "../components/FullCourseList";
+import Filters from "../components/Filters";
 import CreatePlan from "../components/CreatePlan";
 import {
   getInitialCourses,
@@ -83,18 +84,28 @@ async function Home(props: any) {
 
   return (
     <>
-      <div className="grid grid-cols-10 p-3 lg:p-4 h-full">
-        <div className="col-span-10 lg:col-span-7">
+      <div className="grid grid-cols-12 p-3 lg:p-4 h-full gap-5">
+        <div className=" lg:col-span-2 lg:flex hidden">
+          <Suspense
+            fallback={
+              <Skeleton className="rounded-lg w-8/12 h-fit align-top justify-start" />
+            }
+          >
+            <Filters codes={codes} terms={terms} times={uniqueTimes} />
+          </Suspense>
+        </div>
+        <div className="col-span-12 lg:col-span-7">
           <div className="flex flex-col gap-3 h-full">
-            <Search codes={codes} terms={terms} times={uniqueTimes} />
-            <div className="h-[70vh] overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
+            <div className="sm:hidden w-[95%]">
+              <Search codes={codes} terms={terms} times={uniqueTimes} />
+            </div>
+
+            <div className="h-[78vh] overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
               {props.fullCourseList}
             </div>
           </div>
         </div>
-        <div className="col-span-10 lg:col-span-3 lg:ml-[5vw]">
-          {props.createPlan}
-        </div>
+        <div className="col-span-12 lg:col-span-3 ">{props.createPlan}</div>
       </div>
     </>
   );

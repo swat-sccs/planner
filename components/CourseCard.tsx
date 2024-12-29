@@ -17,6 +17,7 @@ import { getPlanCookie, setSelectedCookie } from "app/actions/actions";
 import { useEffect, useState } from "react";
 import { getCourseIds, updateDBPlan } from "app/actions/getCourses";
 import { useRouter } from "next/navigation";
+import moment from "moment";
 
 export const card = tv({
   slots: {
@@ -141,24 +142,29 @@ export default function CourseCard(props: any) {
                     {props.course.facultyMeet.meetingTimes ? (
                       <div className="mt-1">
                         <div className="font-normal">
-                          {}
-                          {props.course.facultyMeet.meetingTimes.beginTime.slice(
-                            0,
-                            2
-                          ) +
-                            ":" +
+                          {moment(
                             props.course.facultyMeet.meetingTimes.beginTime.slice(
+                              0,
                               2
-                            )}{" "}
+                            ) +
+                              ":" +
+                              props.course.facultyMeet.meetingTimes.beginTime.slice(
+                                2
+                              ),
+                            "HH:mm"
+                          ).format("hh:mm A")}
                           -{" "}
-                          {props.course.facultyMeet.meetingTimes.endTime.slice(
-                            0,
-                            2
-                          ) +
-                            ":" +
+                          {moment(
                             props.course.facultyMeet.meetingTimes.endTime.slice(
+                              0,
                               2
-                            )}
+                            ) +
+                              ":" +
+                              props.course.facultyMeet.meetingTimes.endTime.slice(
+                                2
+                              ),
+                            "HH:mm"
+                          ).format("hh:mm A")}
                         </div>
                       </div>
                     ) : null}

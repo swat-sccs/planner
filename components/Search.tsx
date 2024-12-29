@@ -6,8 +6,9 @@ import { useDebouncedCallback } from "use-debounce";
 import { Select, SelectItem } from "@nextui-org/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import moment from "moment";
-import { Chip } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { useCookies } from "next-client-cookies";
+import { tv } from "tailwind-variants";
 
 export default function Search(props: any) {
   const router = useRouter();
@@ -80,6 +81,9 @@ export default function Search(props: any) {
   const firstLoad = useCallback(async () => {
     let termCookie = cookies.get("termCookie");
     let searchTermCookie = cookies.get("searchTermCookie");
+    setSelectedTerm(searchParams.get("term")?.toString().split(","));
+    setSelectedDOTW(searchParams.get("dotw")?.toString().split(","));
+    setSelectedStartTime(searchParams.get("stime")?.toString().split(","));
     if (!termCookie) {
       cookies.set("termCookie", "S2025");
       params.set("term", "S2025");
@@ -90,17 +94,7 @@ export default function Search(props: any) {
       replace(`${pathname}?${params.toString()}`);
       setSelectedTerm(searchParams.get("term")?.toString().split(","));
     }
-
-    //searchTermCookie;
   }, []);
-
-  useEffect(() => {
-    // Update the document title using the browser API
-    setSelectedTerm(searchParams.get("term")?.toString().split(","));
-    setSelectedDOTW(searchParams.get("dotw")?.toString().split(","));
-    setSelectedStartTime(searchParams.get("stime")?.toString().split(","));
-    //handleSelectionChange({ target: { value: selectedTerm } });
-  }, [searchParams]);
 
   useEffect(() => {
     // Update the document title using the browser API
@@ -150,29 +144,65 @@ export default function Search(props: any) {
       .map((term: any) => <SelectItem key={term.key}>{term.title}</SelectItem>);
   };
 
+  const inputStyle = {
+    trigger: [
+      "shadow-xl",
+      "bg-light_foreground",
+      "dark:bg-light_foreground",
+      "backdrop-blur-xl",
+      "backdrop-saturate-200",
+      "hover:bg-light_foreground/10",
+      "dark:hover:bg-light_foreground/70",
+      "group-data-[focus=true]:bg-default-200/50",
+      "dark:group-data-[focus=true]:bg-default/60",
+    ],
+    innerWrapper: "bg-transparent",
+  };
+
   return (
-    <div className="grid grid-cols-9 gap-3 w-[97%]">
+    <div className="w-full">
       <Input
-        isClearable
         size={"lg"}
-        className="col-span-9 lg:col-span-3 text-[16px]"
-        classNames={{
-          inputWrapper: ["border-primary", "border-[0.5px]"],
-        }}
+        className="text-[16px]"
+        endContent={
+          <div className="bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-5 rounded-e-xl ">
+            <SearchIcon className="align-middle mt-auto mb-auto flex" />
+          </div>
+        }
         defaultValue={searchParams.get("query")?.toString()}
         placeholder="Search"
         value={search}
-        variant="bordered"
+        classNames={{
+          label: "text-black/50 dark:text-white/90",
+          input: [
+            "bg-transparent",
+            "text-black/90 dark:text-white/90",
+            "placeholder:text-foreground dark:placeholder:text-white/60",
+          ],
+          innerWrapper: "bg-transparent",
+          inputWrapper: [
+            "shadow-xl",
+            "bg-light_foreground",
+            "dark:bg-default/60",
+            "backdrop-blur-xl",
+            "backdrop-saturate-200",
+            "hover:bg-light_foreground/10",
+            "dark:hover:bg-default/70",
+            "group-data-[focus=true]:bg-default-200/50",
+            "dark:group-data-[focus=true]:bg-default/60",
+            "!cursor-text",
+          ],
+        }}
         onChange={(e) => {
           handleSearch(e.target.value);
         }}
-        onClear={() => {
-          handleSearch("");
-        }}
       />
 
+      {/*
       <Select
         className="col-span-3 lg:col-span-2"
+        classNames={inputStyle}
+        size={"sm"}
         defaultSelectedKeys={searchParams.get("term")?.toString()}
         disallowEmptySelection={true}
         label="Select Term"
@@ -184,8 +214,10 @@ export default function Search(props: any) {
       </Select>
       <Select
         className="col-span-3 lg:col-span-2"
+        classNames={inputStyle}
         label="Day of the Week"
         selectedKeys={selectedDOTW}
+        size={"sm"}
         selectionMode={"multiple"}
         //defaultSelectedKeys={searchParams.get("dotw")?.toString()}
         onSelectionChange={handleDOTWChange}
@@ -214,11 +246,13 @@ export default function Search(props: any) {
       </Select>
 
       <Select
-        className="col-span-3 lg:col-span-2"
+        className="col-span-3 lg:col-span-2 "
         label="Start Time"
         selectedKeys={selectedStartTime}
+        size={"sm"}
         selectionMode={"multiple"}
         onSelectionChange={handleSTimeChange}
+        classNames={inputStyle}
       >
         {props.times.startTimes.map((startTime: any) => {
           const time = startTime.slice(0, 2) + ":" + startTime.slice(2);

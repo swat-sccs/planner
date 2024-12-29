@@ -222,6 +222,7 @@ export async function getCourses(
   stime: any
 ) {
   const startTime = stime.toString().split(",").filter(Number);
+  console.log(startTime);
 
   return await prisma.course.findMany({
     take: take,
@@ -299,36 +300,42 @@ export async function getCourses(
             ],
           }
         : {}),
-
-      ...(startTime.length > 0
-        ? {
-            facultyMeet: {
-              meetingTimes: {
-                beginTime: {
-                  in: startTime,
+      AND: [
+        {
+          ...(startTime.length > 0
+            ? {
+                facultyMeet: {
+                  meetingTimes: {
+                    beginTime: {
+                      in: startTime,
+                    },
+                  },
                 },
-              },
-            },
-          }
-        : {}),
-
-      ...(dotw.length > 0
-        ? {
-            facultyMeet: {
-              meetingTimes: {
-                is: {
-                  monday: dotw.includes("monday") ? true : Prisma.skip,
-                  tuesday: dotw.includes("tuesday") ? true : Prisma.skip,
-                  wednesday: dotw.includes("wednesday") ? true : Prisma.skip,
-                  thursday: dotw.includes("thursday") ? true : Prisma.skip,
-                  friday: dotw.includes("friday") ? true : Prisma.skip,
-                  saturday: dotw.includes("saturday") ? true : Prisma.skip,
-                  sunday: dotw.includes("sunday") ? true : Prisma.skip,
+              }
+            : {}),
+        },
+        {
+          ...(dotw.length > 0
+            ? {
+                facultyMeet: {
+                  meetingTimes: {
+                    is: {
+                      monday: dotw.includes("monday") ? true : Prisma.skip,
+                      tuesday: dotw.includes("tuesday") ? true : Prisma.skip,
+                      wednesday: dotw.includes("wednesday")
+                        ? true
+                        : Prisma.skip,
+                      thursday: dotw.includes("thursday") ? true : Prisma.skip,
+                      friday: dotw.includes("friday") ? true : Prisma.skip,
+                      saturday: dotw.includes("saturday") ? true : Prisma.skip,
+                      sunday: dotw.includes("sunday") ? true : Prisma.skip,
+                    },
+                  },
                 },
-              },
-            },
-          }
-        : {}),
+              }
+            : {}),
+        },
+      ],
     },
   });
 }

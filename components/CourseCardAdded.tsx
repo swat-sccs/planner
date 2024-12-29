@@ -6,6 +6,7 @@ import axios from "axios";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { generateColorFromName } from "./primitives";
 import { Error } from "@mui/icons-material";
+import moment from "moment";
 export const card = tv({
   slots: {
     base: "hover:cursor-pointer  bg-light_foreground min-h-32 max-h-62 w-[98%]  rounded-md scroll-none drop-shadow-lg transition-colors",
@@ -118,24 +119,29 @@ export default function CourseCardAdded(props: any) {
                   {props.course.facultyMeet.meetingTimes ? (
                     <div className="mt-1">
                       <div className="font-normal">
-                        {}
-                        {props.course.facultyMeet.meetingTimes.beginTime.slice(
-                          0,
-                          2
-                        ) +
-                          ":" +
+                        {moment(
                           props.course.facultyMeet.meetingTimes.beginTime.slice(
+                            0,
                             2
-                          )}{" "}
+                          ) +
+                            ":" +
+                            props.course.facultyMeet.meetingTimes.beginTime.slice(
+                              2
+                            ),
+                          "HH:mm"
+                        ).format("hh:mm A")}
                         -{" "}
-                        {props.course.facultyMeet.meetingTimes.endTime.slice(
-                          0,
-                          2
-                        ) +
-                          ":" +
+                        {moment(
                           props.course.facultyMeet.meetingTimes.endTime.slice(
+                            0,
                             2
-                          )}
+                          ) +
+                            ":" +
+                            props.course.facultyMeet.meetingTimes.endTime.slice(
+                              2
+                            ),
+                          "HH:mm"
+                        ).format("hh:mm A")}
                       </div>
                     </div>
                   ) : null}

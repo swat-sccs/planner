@@ -224,10 +224,10 @@ export default function CreatePlan(props: any) {
   return (
     <>
       <Button
-        className="rounded-full fixed md:hidden bottom-5 right-5 z-50 w-12 h-12 shadow-md"
+        className="rounded-full fixed md:hidden bottom-5 right-5 z-20 w-12 h-12 shadow-md"
         color="secondary"
         isIconOnly
-        onClick={() => {
+        onPress={() => {
           isScrolled ? scrollToTop() : scrollToPlan();
         }}
       >

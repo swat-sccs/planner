@@ -2,6 +2,7 @@
 //Just for pathname highlighting though, could always go back if it becomes too slow
 import React, { useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   Navbar as NextUINavbar,
   NavbarContent,
@@ -19,11 +20,13 @@ import {
 } from "@nextui-org/dropdown";
 import { Link } from "@nextui-org/link";
 import NextLink from "next/link";
+import Search from "../components/Search";
 
 import { usePathname } from "next/navigation";
 import { useCookies } from "next-client-cookies";
 import { button as buttonStyles } from "@nextui-org/theme";
 import InputIcon from "@mui/icons-material/Input";
+import SearchIcon from "@mui/icons-material/SearchOutlined";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import axios from "axios";
 
@@ -31,9 +34,11 @@ import { siteConfig } from "../config/site";
 import { ThemeSwitch } from "../components/theme-switch";
 import { title } from "../components/primitives";
 import { Button } from "@nextui-org/button";
+import Logo from "../public/logo.svg";
 
 export const Navbar = (props: any) => {
   const cookies = useCookies();
+  const router = useRouter();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
@@ -75,68 +80,75 @@ export const Navbar = (props: any) => {
         classNames={{
           toggleIcon: ["text-white"],
         }}
-        className="bg-inherit lg:py-2"
+        className="bg-inherit lg:py-1"
         maxWidth="full"
         position="sticky"
         isMenuOpen={isMenuOpen}
         onMenuOpenChange={setIsMenuOpen}
       >
-        <NavbarContent className="basis-1/5 lg:basis-full" justify="start">
-          <NavbarBrand as="li" className="gap-3 max-w-fit">
-            <NextLink
-              className="flex justify-start items-center gap-1"
+        <NavbarContent className="lg:basis-full ">
+          <NavbarBrand as="div" className="gap-2 lg:max-w-fit lg:mr-5 max-w-10">
+            <Link
+              className="flex justify-start items-center "
               href="/"
+              onPress={() => {
+                cookies.set("pagePref", "/");
+              }}
+              //onPress={() => router.push("/")}
             >
-              <span className={title({ size: "sm", color: "logo" })}>
+              <div>
+                <Logo className="h-9 lg:h-12" />
+              </div>
+              {/* OLD Navbar Header
+               <span className={title({ size: "sm", color: "logo" })}>
                 SCCS&nbsp;
               </span>
               <span className={title({ size: "xs" }) + " text-white"}>
                 Course Planner&nbsp;
               </span>
-            </NextLink>
-          </NavbarBrand>
-        </NavbarContent>
-
-        <NavbarContent
-          justify="center"
-          className="hidden lg:flex gap-3 flex-row"
-        >
-          {siteConfig.navItems.map((item) => (
-            <Link
-              key={item.href}
-              className={buttonStyles({
-                color: "primary",
-                radius: "full",
-                variant: pathname === item.href ? "shadow" : "ghost",
-              })}
-              onClick={() => {
-                cookies.set("pagePref", item.href);
-              }}
-              href={item.href}
-            >
-              {item.label}
+              */}
             </Link>
-          ))}
+          </NavbarBrand>
+
+          <NavbarContent className="gap-4 flex-row hidden lg:flex">
+            {siteConfig.navItems.map((item) => (
+              <NavbarItem isActive={pathname === item.href} key={item.href}>
+                <Link
+                  key={item.href}
+                  color={pathname === item.href ? "secondary" : "foreground"}
+                  className="text-lg dark"
+                  onPress={() => {
+                    cookies.set("pagePref", item.href);
+                  }}
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
+              </NavbarItem>
+            ))}
+          </NavbarContent>
+        </NavbarContent>
+        <NavbarContent className="lg:basis-full lg:flex hidden lg:w-full">
+          <Search />
         </NavbarContent>
 
         <NavbarContent
           className="hidden lg:flex basis-1/5 lg:basis-full"
           justify="end"
         >
-          <NavbarItem className="hidden lg:flex gap-2">
-            <ThemeSwitch />
-          </NavbarItem>
-
           <NavbarItem>
             {status === "authenticated" ? (
               <Dropdown>
                 <DropdownTrigger>
                   <Button
-                    variant="bordered"
+                    variant="flat"
                     className="text-primary border-primary"
+                    size={"sm"}
                   >
-                    <AccountCircleIcon className="fill-primary" />
-                    {session.user?.name || "Account"}
+                    <AccountCircleIcon className="fill-primary " />
+                    <div className="text-foreground ">
+                      {session.user?.name || "Account"}
+                    </div>
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Static Actions">
@@ -144,7 +156,7 @@ export const Navbar = (props: any) => {
                   {/* <DropdownItem key="admin" href="/admin">
                     Admin
                   </DropdownItem> */}
-                  <DropdownItem key="signOut" onClick={() => signOut()}>
+                  <DropdownItem key="signOut" onPress={() => signOut()}>
                     Sign Out
                   </DropdownItem>
                 </DropdownMenu>
@@ -159,6 +171,9 @@ export const Navbar = (props: any) => {
               </Button>
             )}
           </NavbarItem>
+          <NavbarItem className="hidden lg:flex gap-2">
+            <ThemeSwitch />
+          </NavbarItem>
         </NavbarContent>
 
         {/* Mobile?*/}
@@ -170,22 +185,24 @@ export const Navbar = (props: any) => {
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           />
         </NavbarContent>
-        <NavbarMenu className=" lg:flex">
-          <div className="mx-4 mt-2 flex flex-col gap-2">
+        <NavbarMenu className="lg:flex">
+          <div className="mx-4 mt-5 flex flex-col  text-center text-6xl">
             {siteConfig.navItems.map((item, index) => (
-              <NavbarMenuItem key={`${item}-${index}`}>
-                <Link
-                  href={item.href}
+              <div key={`${item}-${index}`}>
+                <NavbarMenuItem
+                  key={`${item}-${index}`}
+                  className=" h-[15vh]"
                   onClick={() => {
                     cookies.set("pagePref", item.href);
+                    router.push(item.href);
                   }}
                 >
-                  {item.label}
-                </Link>
-              </NavbarMenuItem>
+                  <div className="text-4xl">{item.label}</div>
+                </NavbarMenuItem>
+              </div>
             ))}
           </div>
-          <NavbarItem>
+          <NavbarItem className="justify-center text-center">
             {status === "authenticated" ? (
               <Dropdown>
                 <DropdownTrigger>
@@ -199,7 +216,11 @@ export const Navbar = (props: any) => {
                   {/* <DropdownItem key="admin" href="/admin">
                     Admin
                   </DropdownItem> */}
-                  <DropdownItem key="signOut" onClick={() => signOut()}>
+                  <DropdownItem
+                    key="signOut"
+                    onPress={() => signOut()}
+                    className="text-center"
+                  >
                     Sign Out
                   </DropdownItem>
                 </DropdownMenu>
@@ -208,7 +229,7 @@ export const Navbar = (props: any) => {
               <Button
                 type="button"
                 variant="bordered"
-                onClick={() => signIn("keycloak", { callbackUrl: "/" })}
+                onPress={() => signIn("keycloak", { callbackUrl: "/" })}
               >
                 <InputIcon className="fill-white text-primary" /> Log In
               </Button>
