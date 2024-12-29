@@ -16,10 +16,6 @@ export const siteConfig = {
       label: "Leave a Rating",
       href: "/rating",
     },
-    {
-      label: "Professors",
-      href: "/profs",
-    },
   ],
   navMenuItems: [
     {
