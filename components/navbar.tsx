@@ -128,9 +128,11 @@ export const Navbar = (props: any) => {
             ))}
           </NavbarContent>
         </NavbarContent>
-        <NavbarContent className="lg:basis-full lg:flex hidden lg:w-full">
-          <Search />
-        </NavbarContent>
+        {pathname === "/" ? (
+          <NavbarContent className="lg:basis-full lg:flex hidden lg:w-full">
+            <Search />
+          </NavbarContent>
+        ) : null}
 
         <NavbarContent
           className="hidden lg:flex basis-1/5 lg:basis-full"
@@ -138,25 +140,34 @@ export const Navbar = (props: any) => {
         >
           <NavbarItem>
             {status === "authenticated" ? (
-              <Dropdown>
+              <Dropdown
+                classNames={{
+                  content:
+                    "py-1 px-1 border border-default-200 bg-light_foreground",
+                }}
+              >
                 <DropdownTrigger>
                   <Button
                     variant="flat"
                     className="text-primary border-primary"
-                    size={"sm"}
+                    size={"md"}
                   >
                     <AccountCircleIcon className="fill-primary " />
-                    <div className="text-foreground ">
+                    <div className="text-foreground font-medium ">
                       {session.user?.name || "Account"}
                     </div>
                   </Button>
                 </DropdownTrigger>
-                <DropdownMenu aria-label="Static Actions">
+                <DropdownMenu aria-label="Sign out button">
                   {/* Causes an awful error if rendered conditionally */}
                   {/* <DropdownItem key="admin" href="/admin">
                     Admin
                   </DropdownItem> */}
-                  <DropdownItem key="signOut" onPress={() => signOut()}>
+                  <DropdownItem
+                    className="text-center "
+                    key="signOut"
+                    onPress={() => signOut()}
+                  >
                     Sign Out
                   </DropdownItem>
                 </DropdownMenu>

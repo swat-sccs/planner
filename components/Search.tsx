@@ -165,8 +165,14 @@ export default function Search(props: any) {
         size={"lg"}
         className="text-[16px]"
         endContent={
-          <div className="bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-5 rounded-e-xl ">
-            <SearchIcon className="align-middle mt-auto mb-auto flex" />
+          <div
+            className="bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-5 rounded-e-xl "
+            style={{ color: "white" }}
+          >
+            <SearchIcon
+              color="inherit"
+              className="align-middle mt-auto mb-auto flex  "
+            />
           </div>
         }
         defaultValue={searchParams.get("query")?.toString()}
@@ -186,9 +192,8 @@ export default function Search(props: any) {
             "dark:bg-default/60",
             "backdrop-blur-xl",
             "backdrop-saturate-200",
-            "hover:bg-light_foreground/10",
             "dark:hover:bg-default/70",
-            "group-data-[focus=true]:bg-default-200/50",
+
             "dark:group-data-[focus=true]:bg-default/60",
             "!cursor-text",
           ],

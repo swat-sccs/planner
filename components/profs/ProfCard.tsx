@@ -72,10 +72,40 @@ export default function ProfCard(props: any) {
 
         <CardBody className="pt-0 pl-6 ">
           <div className="flex justify-between flex-row gap-3">
-            {props.prof.avgRating == null ? null : props.prof.avgRating >=
-              1.5 ? (
+            {props.prof?.avgRating != null && props.prof.avgRating > 4 ? (
               <div
                 className={`flex 0 bg-green-500 w-16 h-16 items-center justify-center rounded-md`}
+              >
+                <div className="font-black text-3xl">
+                  {props.prof.avgRating.toFixed(1)}
+                </div>
+              </div>
+            ) : null}
+            {props.prof?.avgRating != null &&
+            props.prof.avgRating <= 4 &&
+            props.prof.avgRating >= 3 ? (
+              <div
+                className={`flex 0 bg-yellow-500 w-16 h-16 items-center justify-center rounded-md`}
+              >
+                <div className="font-black text-3xl">
+                  {props.prof.avgRating.toFixed(1)}
+                </div>
+              </div>
+            ) : null}
+            {props.prof?.avgRating != null &&
+            props.prof.avgRating < 3 &&
+            props.prof.avgRating >= 2 ? (
+              <div
+                className={`flex 0 bg-orange-500 w-16 h-16 items-center justify-center rounded-md`}
+              >
+                <div className="font-black text-3xl">
+                  {props.prof.avgRating.toFixed(1)}
+                </div>
+              </div>
+            ) : null}
+            {props.prof?.avgRating != null && props.prof.avgRating < 2 ? (
+              <div
+                className={`flex 0 bg-red-500 w-16 h-16 items-center justify-center rounded-md`}
               >
                 <div className="font-black text-3xl">
                   {props.prof.avgRating.toFixed(1)}

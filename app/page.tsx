@@ -91,7 +91,12 @@ async function Home(props: any) {
               <Skeleton className="rounded-lg w-8/12 h-fit align-top justify-start" />
             }
           >
-            <Filters codes={codes} terms={terms} times={uniqueTimes} />
+            <Filters
+              className=""
+              codes={codes}
+              terms={terms}
+              times={uniqueTimes}
+            />
           </Suspense>
         </div>
         <div className="col-span-12 lg:col-span-7">
@@ -100,7 +105,7 @@ async function Home(props: any) {
               <Search codes={codes} terms={terms} times={uniqueTimes} />
             </div>
 
-            <div className="h-[78vh] overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
+            <div className="h-[84vh] overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
               {props.fullCourseList}
             </div>
           </div>

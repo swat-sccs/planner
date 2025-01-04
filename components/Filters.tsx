@@ -54,6 +54,7 @@ export default function Filters(props: any) {
   );
 
   const handleSelectionChange = (e: any) => {
+    console.log(e.target.value);
     setSelectedTerm([e.target.value]);
 
     if (e.target.value) {
@@ -140,18 +141,18 @@ export default function Filters(props: any) {
   const firstLoad = useCallback(async () => {
     let termCookie = cookies.get("termCookie");
     let searchTermCookie = cookies.get("searchTermCookie");
-    setSelectedTerm(searchParams.get("term")?.toString().split(","));
+
     setdotw(searchParams.get("dotw")?.toString().split(","));
     // setSelectedStartTime(searchParams.get("stime")?.toString().split(","));
     if (!termCookie) {
       cookies.set("termCookie", "S2025");
       params.set("term", "S2025");
       replace(`${pathname}?${params.toString()}`);
-      setSelectedTerm(searchParams.get("term")?.toString().split(","));
+      setSelectedTerm(["S2025"]);
     } else {
       params.set("term", termCookie);
-      replace(`${pathname}?${params.toString()}`);
-      setSelectedTerm(searchParams.get("term")?.toString().split(","));
+      await replace(`${pathname}?${params.toString()}`);
+      setSelectedTerm([termCookie]);
     }
   }, []);
 
@@ -162,13 +163,12 @@ export default function Filters(props: any) {
 
   return (
     <>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 w-full">
         <Select
-          className="col-span-3 lg:col-span-2"
+          className=""
           classNames={inputStyle}
           size={"sm"}
-          defaultSelectedKeys={searchParams.get("term")?.toString()}
-          disallowEmptySelection={true}
+          defaultSelectedKeys={["S2025"]}
           label="Select Term"
           selectedKeys={selectedTerm}
           selectionMode={"single"}
@@ -177,7 +177,7 @@ export default function Filters(props: any) {
           {RenderSelectOptions()}
         </Select>
 
-        <Divider />
+        <Divider className="mt-5 w-50" />
         <div className="mt-5 font-semibold">Days of the Week</div>
         <CheckboxGroup value={dotw} onValueChange={handleDOTWChange}>
           {days.map((day: any) => (
@@ -191,7 +191,7 @@ export default function Filters(props: any) {
         <CheckboxGroup
           value={selectedStartTime}
           onValueChange={handleSTimeChange}
-          className="h-[20vh] overflow-y-scroll"
+          className="h-[32vh] overflow-y-scroll "
         >
           {props.times.startTimes.map((startTime: any) => {
             const time = startTime.slice(0, 2) + ":" + startTime.slice(2);

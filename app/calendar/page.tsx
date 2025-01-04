@@ -120,11 +120,11 @@ export default async function CalendarPage() {
 
   //let times = await getUniqueStartEndTimes();
   return (
-    <div className="grid grid-cols-10 grid-rows-2 sm:grid-rows-1 p-3 lg:p-4">
-      <div className="sm:h-[75vh] col-span-10 md:col-span-7 font-sans font-normal flex-col">
+    <div className="grid grid-cols-12 grid-rows-2 sm:grid-rows-1 p-3 lg:p-4 gap-5">
+      <div className="sm:h-[83vh] col-span-12 md:col-span-9 font-sans font-normal flex-col sm:px-5">
         <Calendar events={events} startTime={startTime} endTime={endTime} />
       </div>
-      <div className="sm:h-[62vh] col-span-10 sm:col-span-3 sm:ml-[5vw]">
+      <div className="sm:h-[83vh] col-span-12 md:col-span-3 ">
         <CreatePlan initialPlan={planCourses} coursePlans={coursePlans} />
       </div>
     </div>
