@@ -12,7 +12,7 @@ import { Select, SelectItem } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useCookies } from "next-client-cookies";
 
@@ -20,6 +20,10 @@ import { setPlanCookie } from "../app/actions/actions";
 import { generateColorFromName } from "../components/primitives";
 import { useDebouncedCallback } from "use-debounce";
 import { setPlanName } from "../app/actions/setPlanName";
+import {
+  updateSelectedCoursePlan,
+  getSelectedCoursePlan,
+} from "../app/actions/userActions";
 import {
   Popover,
   PopoverTrigger,
@@ -57,15 +61,16 @@ export default function CreatePlan(props: any) {
   const fetcher = (url: any) => fetch(url).then((r) => r.json());
 
   const fetchNewData = async (b: any) => {
-    const coursePlans: CoursePlan[] = await getCoursePlans();
-    setCoursePlans(coursePlans);
-    genreatePlanList(coursePlans);
+    const theCoursePlans: CoursePlan[] = await getCoursePlans();
+    setCoursePlans(theCoursePlans);
+    genreatePlanList(theCoursePlans);
 
-    if (b && coursePlans.length > 0) {
-      console.log("deleted generating new list");
-      setSelectedCoursePlan([coursePlans[0].id]);
-      setPlanCookie(String(coursePlans[0].id));
-      genreatePlanList(coursePlans);
+    if (b && coursePlans.length > 1) {
+      updateSelectedCoursePlan(String(coursePlans[0].id));
+      //setPlanCookie(String(coursePlans[0].id));
+      //setSelectedCoursePlan([theCoursePlans[0].id]);
+      let thing = { target: { value: String(theCoursePlans[0].id) } };
+      handleSelectionChange(thing);
     }
   };
 
@@ -81,11 +86,15 @@ export default function CreatePlan(props: any) {
         .post("/api/createplan", {
           planName: coursePlanName,
         })
-        .then(function (response: any) {
+        .then(async function (response: any) {
           setCoursePlanName("");
-          setSelectedCoursePlan([response.data.id]);
-          setPlanCookie(response.data.id);
+          updateSelectedCoursePlan(String(response.data.id));
+          //setPlanCookie(response.data.id);
           fetchNewData(false);
+          let thing = { target: { value: String(response.data.id) } };
+          handleSelectionChange(thing);
+          //setSelectedCoursePlan([response.data.id]);
+
           //console.log(response);
         })
         .catch(function (error) {
@@ -111,15 +120,17 @@ export default function CreatePlan(props: any) {
     router.refresh();
   }
   async function deletePlan() {
-    if (cookies.get("plan")) {
+    let theSelectedCoursePlan = await getSelectedCoursePlan();
+    if (theSelectedCoursePlan && coursePlans.length > 0) {
       axios
         .delete("/api/createplan", {
           data: {
-            planId: cookies.get("plan"),
+            planId: theSelectedCoursePlan,
           },
         })
         .then(function (response) {
           setSelectedCoursePlan([]);
+          updateSelectedCoursePlan("-1");
           setCourses([]);
           fetchNewData(true);
           //setPlanCookie("-55");
@@ -132,25 +143,36 @@ export default function CreatePlan(props: any) {
   }
 
   const handleSelectionChange = (e: any) => {
-    //console.log(e.target.value);
     setSelectedCoursePlan([e.target.value]);
     //cookies.set("plan", e.target.value);
-    setPlanCookie(e.target.value);
+    //setPlanCookie(e.target.value);
+    updateSelectedCoursePlan(e.target.value);
   };
 
-  useEffect(() => {
+  async function getSelectedCoursePlanServer() {
+    let planNum = await getSelectedCoursePlan();
+
+    if (planNum == "-1" || coursePlans.length == 0) {
+      setSelectedCoursePlan([]);
+    } else {
+      setSelectedCoursePlan([planNum]);
+    }
+  }
+
+  const firstLoad = useCallback(() => {
     updateLocalPlan();
     genreatePlanList(props.coursePlans);
-  }, [props.initialPlan, props.coursePlans, cookies.get("selectedCourses")]);
+  }, [props.coursePlans, coursePlans, courses]);
 
   useEffect(() => {
-    setSelectedCoursePlan([cookies.get("plan")]);
+    firstLoad();
+    getSelectedCoursePlanServer();
     if (props.initialPlan && props.initialPlan.length > 0) {
       if (props.initialPlan.courses && props.initalPlan.courses.length > 0) {
         setCourses(props.initialPlan.courses);
       }
     }
-  }, [props.initialPlan, cookies.get("plan")]);
+  }, [props.initialPlan]);
 
   const CoursesList = () => {
     const output: any = [];
@@ -195,16 +217,13 @@ export default function CreatePlan(props: any) {
   };
 
   const scrollToPlan = () => {
-    console.log("A");
     if (scrollRef.current) {
-      console.log("B");
       scrollRef.current.scrollIntoView({ behavior: "smooth", inline: "start" });
       setIsScrolled(true);
     }
   };
 
   const scrollToTop = () => {
-    console.log("C");
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -212,7 +231,7 @@ export default function CreatePlan(props: any) {
     setIsScrolled(false);
   };
 
-  const genreatePlanList = (plans: any) => {
+  const genreatePlanList = async (plans: any) => {
     let output: any = [];
     output.push();
 
@@ -254,7 +273,7 @@ export default function CreatePlan(props: any) {
                 aria-label="Create new plan! Name required."
                 startContent={<AddIcon />}
                 size="md"
-                onClick={() => createPlan()}
+                onPress={() => createPlan()}
               ></Button>
             </div>
             {alert ? (
@@ -340,7 +359,7 @@ export default function CreatePlan(props: any) {
                   aria-label="Save new plan name"
                   isIconOnly
                   size="md"
-                  onClick={() => setEdit(false)}
+                  onPress={() => setEdit(false)}
                   startContent={<SaveIcon />}
                 />
               ) : (
@@ -348,7 +367,7 @@ export default function CreatePlan(props: any) {
                   aria-label="Edit name of course plan"
                   isIconOnly
                   size="md"
-                  onClick={() => {
+                  onPress={() => {
                     setEdit(true),
                       setEditable(
                         coursePlans?.find(

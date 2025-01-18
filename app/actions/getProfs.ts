@@ -118,6 +118,17 @@ export async function getProfs() {
   return AllProfs;
 }
 
+export async function getProfsByUid(theUid: string) {
+  let profs: Faculty[] = [];
+  let theProf = await prisma.faculty.findUnique({
+    where: {
+      uid: theUid,
+    },
+  });
+
+  return theProf;
+}
+
 export async function getYears() {
   let years: any = [];
   let AllCourses = await prisma.course.findMany();
