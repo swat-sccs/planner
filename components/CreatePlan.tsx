@@ -272,7 +272,7 @@ export default function CreatePlan({
     <>
       <Card
         isBlurred
-        className={`w-[23%] h-[83vh] z-20 absolute ${auth ? "hidden" : null}`}
+        className={`w-[92%] lg:w-[23%] h-[83vh] z-20 absolute  ${auth ? "hidden" : null}`}
       >
         <CardBody className="h-full flex flex-col justify-center space-y-10">
           <div className="text-center text-3xl ">
@@ -439,7 +439,7 @@ export default function CreatePlan({
         </div>
 
         <div
-          className="flex flex-col h-[45vh] overflow-y-scroll gap-3 scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
+          className="flex flex-col h-auto mb-20 md:mb-0 md:h-[53vh] overflow-y-scroll gap-3 scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
           id="scrollMe"
           ref={scrollRef}
           aria-label="List of Courses in plan"

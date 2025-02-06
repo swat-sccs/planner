@@ -53,7 +53,7 @@ export default function CoursePlanContext(props: any) {
     <>
       {props.courseList ? (
         <div className="col-span-12 lg:col-span-7">
-          <div className="h-[84vh] overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
+          <div className="h-[86vh] overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
             <Suspense
               fallback={
                 <div className="grid gap-3">
@@ -78,7 +78,7 @@ export default function CoursePlanContext(props: any) {
         </div>
       ) : (
         <div className="col-span-12 lg:col-span-9">
-          <div className="sm:h-[83vh] col-span-12 md:col-span-9 font-sans font-normal flex-col sm:px-5">
+          <div className="h-[100%] sm:h-[83vh] col-span-12 md:col-span-9 font-sans font-normal flex-col sm:px-5">
             <Calendar
               events={events}
               startTime={props.startTime}
