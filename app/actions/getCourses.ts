@@ -5,6 +5,8 @@ import prisma from "../../lib/prisma";
 import { Prisma } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { getPlanCookie, setSelectedCookie } from "./actions";
+import { getSelectedCoursePlan } from "./userActions";
+import { generateColorFromName } from "../../components/primitives";
 
 export async function getUniqueCodes() {
   const codes = await prisma.sectionAttribute.findMany();
@@ -62,20 +64,29 @@ export async function setPlanCookie(plan: string) {
   (await cookies()).set("plan", plan);
 }
 
-export async function getPlanCourses1() {
-  const planCookie: any = await getPlanCookie();
+export async function getPlanCourses() {
+  const selectedCoursePlan = await getSelectedCoursePlan();
   const session = await auth();
 
-  if (planCookie) {
+  if (selectedCoursePlan) {
     return await prisma.coursePlan.findUnique({
       where: {
         User: {
           uuid: session?.user.id,
         },
-        id: parseInt(planCookie),
+        id: parseInt(selectedCoursePlan),
       },
       include: {
-        courses: true,
+        courses: {
+          include: {
+            instructor: true,
+            facultyMeet: {
+              include: {
+                meetingTimes: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -83,11 +94,12 @@ export async function getPlanCourses1() {
 }
 
 export async function removeCourseFromDBPlan(course: any) {
-  const id: any = await getPlanCookie();
+  const selectedCoursePlan: any = await getSelectedCoursePlan();
+
   //let DOTW: Array<String> = dotw.split(",");
   const updatedCourse = await prisma.coursePlan.update({
     where: {
-      id: parseInt(id),
+      id: parseInt(selectedCoursePlan),
     },
     data: {
       courses: {
@@ -97,7 +109,8 @@ export async function removeCourseFromDBPlan(course: any) {
       },
     },
   });
-  getCourseIds();
+  // getCourseIds();
+  return updatedCourse;
 }
 
 export async function getCourseIds() {
@@ -132,20 +145,24 @@ export async function getCourseIds() {
 }
 
 export async function updateDBPlan(course: any) {
-  const id: any = await getPlanCookie();
+  const id = await getSelectedCoursePlan();
+  // const id: any = await getPlanCookie();
   //let DOTW: Array<String> = dotw.split(",");
-  const updatedCourse = await prisma.coursePlan.update({
-    where: {
-      id: parseInt(id),
-    },
-    data: {
-      courses: {
-        connect: {
-          id: course.id,
+  if (id) {
+    console.log("UPDATING");
+    const updatedCourse = await prisma.coursePlan.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        courses: {
+          connect: {
+            id: course.id,
+          },
         },
       },
-    },
-  });
+    });
+  }
 }
 
 export async function getInitialCoursePlans() {
@@ -205,7 +222,16 @@ export async function getCoursePlans() {
         },
       },
       include: {
-        courses: true,
+        courses: {
+          include: {
+            instructor: true,
+            facultyMeet: {
+              include: {
+                meetingTimes: true,
+              },
+            },
+          },
+        },
       },
     });
   } else {
@@ -338,4 +364,68 @@ export async function getCourses(
       ],
     },
   });
+}
+
+export async function getEvents(courses: any) {
+  let output: any = [];
+  //let courses: any = await getPlanCourses();
+
+  if (courses) {
+    for (let course of courses.courses) {
+      const color = generateColorFromName(course.subject);
+
+      const num: string = course.courseReferenceNumber;
+      const meetingTimes = await prisma.meetingTime.findFirst({
+        where: {
+          courseReferenceNumber: num,
+        },
+      });
+
+      output.push({
+        classNames: "font-sans",
+        textColor: "white",
+        title: course?.courseTitle,
+        daColor: color,
+        subject: course?.subject,
+        courseNumber: course?.courseNumber,
+        instructor: course?.instructor.displayName,
+        room:
+          course?.facultyMeet.meetingTimes.building +
+          " " +
+          course?.facultyMeet.meetingTimes.room,
+        color: "rgba(0,0,0,0)",
+
+        borderWidth: "0px",
+        daysOfWeek: [
+          meetingTimes?.sunday && "0",
+          meetingTimes?.monday && "1",
+          meetingTimes?.tuesday && "2",
+          meetingTimes?.wednesday && "3",
+          meetingTimes?.thursday && "4",
+          meetingTimes?.friday && "5",
+          meetingTimes?.saturday && "6",
+        ],
+
+        startTime:
+          meetingTimes?.beginTime.slice(0, 2) +
+          ":" +
+          meetingTimes?.beginTime.slice(2),
+        endTime:
+          meetingTimes?.endTime.slice(0, 2) +
+          ":" +
+          meetingTimes?.endTime.slice(2),
+      });
+    }
+  }
+  let endTime = "17:00";
+  let startTime = "09:00";
+
+  for (const event of output) {
+    if (event.startTime < startTime && event.startTime != ":")
+      startTime = event.startTime;
+    if (event.endTime > endTime && event.endTime != ":")
+      endTime = event.endTime;
+  }
+
+  return output;
 }

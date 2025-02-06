@@ -5,7 +5,12 @@ import { useCallback, useEffect, useState } from "react";
 
 import CourseCard from "./CourseCard";
 import React from "react";
-import { getCourses, getCourseIds } from "../app/actions/getCourses";
+import {
+  getCourses,
+  getCourseIds,
+  updateDBPlan,
+  getPlanCourses,
+} from "../app/actions/getCourses";
 import { useInView } from "react-intersection-observer";
 import { Skeleton } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
@@ -23,12 +28,18 @@ export function FullCourseList({
   term,
   dotw,
   stime,
+  selectedCourses,
+  updatePlan,
+  auth,
 }: {
   init: Course[];
   query: string;
   term: string;
   dotw: Array<string>;
   stime: Array<string>;
+  selectedCourses: Course[] | null;
+  updatePlan: any;
+  auth: any;
 }) {
   const router = useRouter();
 
@@ -36,8 +47,8 @@ export function FullCourseList({
   const [take, setTake] = useState(20);
   const [isDone, setIsDone] = useState(false);
 
-  const [selectedCourses, setSelectedCourses]: any = useState([]);
-
+  //const [selectedCourses, setSelectedCourses]: any = useState([]);
+  const [selectedCourseIDS, setSelectedCourseIDS]: any = useState([]);
   const [courses, setCourses] = useState<Course[]>(init);
   const { ref, inView } = useInView();
 
@@ -52,7 +63,7 @@ export function FullCourseList({
     const apiCourses = await getCourses(take, query, term, dotw, stime);
     if (
       inView &&
-      (apiCourses.length == 0 || apiCourses.length == courses.length)
+      (apiCourses.length == 0 || apiCourses.length == courses?.length)
     ) {
       console.log("setting isDone true");
       setIsDone(true);
@@ -65,16 +76,28 @@ export function FullCourseList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, term, dotw, stime, inView]);
 
-  async function loadCourseIds() {
-    console.log("LOADING IDS...");
-    //const coursesInPlan = await getCourseIds();
-    // let daCookie: any = await getSelectedCoursesCookie();
+  async function loadCourseIds(course?: any) {
+    if (selectedCourses) {
+      if (course && !selectedCourses?.some((e) => e.id == course.id)) {
+        const theCourses = Array.from(selectedCourses);
+        theCourses.push(course);
+        updatePlan(theCourses);
+        selectedCourses = theCourses;
 
-    //setSelectedCourses(daCookie.split(","));
-    const ids = await getCourseIds();
-    setSelectedCourses(ids);
-    //console.log(daCookie.split(","));
-    //setSelectedCourses(daCookie.split(","));
+        updateDBPlan(course).catch((thing) => {
+          //something went wrong then get current db state and update with that
+          const planCourses: any = getPlanCourses();
+          if (planCourses) {
+            updatePlan(planCourses?.courses);
+          }
+        });
+      }
+      let ids: any = [];
+      for (let course of selectedCourses) {
+        ids.push(course.id);
+      }
+      setSelectedCourseIDS(ids);
+    }
   }
 
   useEffect(() => {
@@ -88,25 +111,22 @@ export function FullCourseList({
     setIsDone(false);
     loadMoreCourses();
     loadCourseIds();
-  }, [query, term, dotw, stime, loadMoreCourses, getCourseIds]);
+  }, [query, term, dotw, stime, loadMoreCourses]);
 
   return (
     <>
       <div className="flex flex-col gap-3">
-        {courses?.map((course: any) =>
-          selectedCourses?.includes(course.id) ? (
-            <div key={course.id}>
-              <CourseCardAdded
-                course={course}
-                onClick={() => loadCourseIds()}
-              />
-            </div>
-          ) : (
-            <div key={course.id} onClick={() => loadCourseIds()}>
-              <CourseCard course={course} />
-            </div>
-          )
-        )}
+        {courses?.map((course: any) => (
+          <div key={course.id} onClick={() => loadCourseIds(course)}>
+            <CourseCard
+              courses={courses}
+              course={course}
+              added={auth ? selectedCourseIDS?.includes(course.id) : false}
+              updatePlan={(newCourses: Course[]) => updatePlan(newCourses)}
+            />
+          </div>
+        ))}
+
         <div ref={ref}>
           {isDone ? (
             <></>

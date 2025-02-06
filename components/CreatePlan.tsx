@@ -1,5 +1,12 @@
 "use client";
-import { Card, Divider, Input, Skeleton, CardHeader } from "@nextui-org/react";
+import {
+  Card,
+  Divider,
+  Input,
+  Skeleton,
+  CardHeader,
+  CardBody,
+} from "@nextui-org/react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -12,7 +19,8 @@ import { Select, SelectItem } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { signIn } from "next-auth/react";
 
 import { useCookies } from "next-client-cookies";
 
@@ -34,11 +42,28 @@ import {
 import {
   getCourseIds,
   getCoursePlans,
-  getPlanCourses1,
+  getPlanCourses,
   removeCourseFromDBPlan,
 } from "app/actions/getCourses";
 import { Course, CoursePlan } from "@prisma/client";
-export default function CreatePlan(props: any) {
+
+interface CreatePlanProps {
+  updatePlan: any;
+  courses: Course[];
+  initialPlan: any;
+  coursePlans: any;
+  lastSelectedCoursePlan: any;
+  auth: any;
+}
+
+export default function CreatePlan({
+  updatePlan,
+  courses,
+  initialPlan,
+  coursePlans,
+  lastSelectedCoursePlan,
+  auth,
+}: CreatePlanProps) {
   const cookies = useCookies();
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -51,26 +76,28 @@ export default function CreatePlan(props: any) {
   const [editable, setEditable]: any = useState("");
   const [deleteIsOpen, setDeleteIsOpen] = useState(false);
   const [edit, setEdit]: any = useState(false);
-  const [courses, setCourses] = useState<Course[]>();
-  const [coursePlans, setCoursePlans] = useState<CoursePlan[]>(
-    props.coursePlans
-  );
+  //const [courses, setCourses] = useState<Course[]>();
+  //const [coursePlans, setCoursePlans] = useState<CoursePlan[]>(
+  //  props.coursePlans
+  //);
   const [planItems, setPlanItems] = useState([]);
   const [selectedCoursePlan, setSelectedCoursePlan]: any = useState([]);
   const [isScrolled, setIsScrolled] = useState(false);
   const fetcher = (url: any) => fetch(url).then((r) => r.json());
 
   const fetchNewData = async (b: any) => {
-    const theCoursePlans: CoursePlan[] = await getCoursePlans();
-    setCoursePlans(theCoursePlans);
-    genreatePlanList(theCoursePlans);
+    if (auth) {
+      const theCoursePlans: CoursePlan[] = await getCoursePlans();
+      updatePlan(theCoursePlans);
+      generatePlanList(theCoursePlans);
 
-    if (b && coursePlans.length > 1) {
-      updateSelectedCoursePlan(String(coursePlans[0].id));
-      //setPlanCookie(String(coursePlans[0].id));
-      //setSelectedCoursePlan([theCoursePlans[0].id]);
-      let thing = { target: { value: String(theCoursePlans[0].id) } };
-      handleSelectionChange(thing);
+      if (b && coursePlans?.length > 1) {
+        updateSelectedCoursePlan(String(coursePlans[0].id));
+        //setPlanCookie(String(coursePlans[0].id));
+        //setSelectedCoursePlan([theCoursePlans[0].id]);
+        let thing = { target: { value: String(theCoursePlans[0].id) } };
+        handleSelectionChange(thing);
+      }
     }
   };
 
@@ -104,21 +131,29 @@ export default function CreatePlan(props: any) {
       setAlert("A name is required to create a course plan.");
     }
   }
-  async function updateLocalPlan() {
-    const planCourses: any = await getPlanCourses1();
+
+  async function refreshFromDB() {
+    const planCourses: any = await getPlanCourses();
     if (planCourses) {
-      setCourses(planCourses?.courses);
+      updatePlan(planCourses?.courses);
     }
+  }
+
+  async function removeCourseFromPlan(plan: any, course: any) {
+    const newArray = courses.filter((obj) => obj.id !== course.id); // Remove Course from plan List
+    updatePlan(newArray); //Updates the frontend stuff fast
+    //Asyncronusly update the db while immediately updating the frontend
+    removeCourseFromDBPlan(course).catch((things: any) => {
+      console.log(things);
+      refreshFromDB(); //manual db fetch to bring frontend back in sync with backend
+    });
+
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-    //router.refresh();
+    router.refresh(); //currently refreshing the dom, wonder if there is a more efficent way to re render the course listings
   }
-  async function removeCourseFromPlan(plan: any, course: any) {
-    await removeCourseFromDBPlan(course);
-    await updateLocalPlan();
-    router.refresh();
-  }
+
   async function deletePlan() {
     let theSelectedCoursePlan = await getSelectedCoursePlan();
     if (theSelectedCoursePlan && coursePlans.length > 0) {
@@ -131,7 +166,7 @@ export default function CreatePlan(props: any) {
         .then(function (response) {
           setSelectedCoursePlan([]);
           updateSelectedCoursePlan("-1");
-          setCourses([]);
+          updatePlan([]);
           fetchNewData(true);
           //setPlanCookie("-55");
           //console.log(response);
@@ -142,37 +177,30 @@ export default function CreatePlan(props: any) {
     }
   }
 
-  const handleSelectionChange = (e: any) => {
+  const handleSelectionChange = async (e: any) => {
+    await updateSelectedCoursePlan(e.target.value);
     setSelectedCoursePlan([e.target.value]);
-    //cookies.set("plan", e.target.value);
-    //setPlanCookie(e.target.value);
-    updateSelectedCoursePlan(e.target.value);
+    refreshFromDB();
   };
 
-  async function getSelectedCoursePlanServer() {
-    let planNum = await getSelectedCoursePlan();
-
-    if (planNum == "-1" || coursePlans.length == 0) {
-      setSelectedCoursePlan([]);
-    } else {
-      setSelectedCoursePlan([planNum]);
-    }
-  }
-
   const firstLoad = useCallback(() => {
-    updateLocalPlan();
-    genreatePlanList(props.coursePlans);
-  }, [props.coursePlans, coursePlans, courses]);
-
-  useEffect(() => {
-    firstLoad();
-    getSelectedCoursePlanServer();
-    if (props.initialPlan && props.initialPlan.length > 0) {
-      if (props.initialPlan.courses && props.initalPlan.courses.length > 0) {
-        setCourses(props.initialPlan.courses);
+    if (coursePlans.length > 0) {
+      for (let plan of coursePlans) {
+        if (plan.id == parseInt(lastSelectedCoursePlan)) {
+          updatePlan(plan.courses);
+          setSelectedCoursePlan([lastSelectedCoursePlan]);
+        }
       }
     }
-  }, [props.initialPlan]);
+    // updateLocalPlan();
+    generatePlanList(coursePlans);
+  }, [coursePlans, coursePlans, courses]);
+
+  useEffect(() => {
+    if (auth) {
+      firstLoad();
+    }
+  }, [initialPlan]);
 
   const CoursesList = () => {
     const output: any = [];
@@ -231,7 +259,7 @@ export default function CreatePlan(props: any) {
     setIsScrolled(false);
   };
 
-  const genreatePlanList = async (plans: any) => {
+  const generatePlanList = async (plans: any) => {
     let output: any = [];
     output.push();
 
@@ -242,6 +270,32 @@ export default function CreatePlan(props: any) {
 
   return (
     <>
+      <Card
+        isBlurred
+        className={`w-[23%] h-[83vh] z-20 absolute ${auth ? "hidden" : null}`}
+      >
+        <CardBody className="h-full flex flex-col justify-center space-y-10">
+          <div className="text-center text-3xl ">
+            <h1>Save Your Plans</h1>
+            <h1>
+              With a <strong>Free </strong>
+            </h1>
+            <h1>
+              <strong className="bg-gradient-to-b to-blue-950 from-orange-600 bg-clip-text text-transparent">
+                SCCS
+              </strong>{" "}
+              Account
+            </h1>
+          </div>
+
+          <div className=" text-center">
+            <Button onPress={() => signIn("keycloak", { callbackUrl: "/" })}>
+              <div className="text-xl">Get Started</div>
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
+
       <Button
         className="rounded-full fixed md:hidden bottom-5 right-5 z-20 w-12 h-12 shadow-md"
         color="secondary"
@@ -301,6 +355,7 @@ export default function CreatePlan(props: any) {
                   selectionMode="single"
                   size="lg"
                   onChange={handleSelectionChange}
+                  disallowEmptySelection
                   items={planItems}
                 >
                   {

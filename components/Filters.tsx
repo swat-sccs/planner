@@ -30,7 +30,6 @@ import {
 import {
   getCourseIds,
   getCoursePlans,
-  getPlanCourses1,
   removeCourseFromDBPlan,
 } from "app/actions/getCourses";
 import { Course, CoursePlan } from "@prisma/client";

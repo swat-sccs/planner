@@ -15,7 +15,11 @@ import { generateColorFromName } from "../components/primitives";
 import { Error } from "@mui/icons-material";
 import { getPlanCookie, setSelectedCookie } from "app/actions/actions";
 import { useEffect, useState } from "react";
-import { getCourseIds, updateDBPlan } from "app/actions/getCourses";
+import {
+  getCourseIds,
+  getPlanCourses,
+  updateDBPlan,
+} from "app/actions/getCourses";
 import { useRouter } from "next/navigation";
 import moment from "moment";
 
@@ -28,14 +32,21 @@ export const card = tv({
 
 const { base, role } = card();
 
+/*
 async function updatePlan(course: any) {
-  await updateDBPlan(course);
-  setSelectedCookie(course); //Not actually read anywhere but used to refresh the course list
-
+  //updateDBPlan(course);
   //console.log("updating");
 }
+  */
 
 export default function CourseCard(props: any) {
+  /*
+  async function updateCourses(course: any) {
+    let theCourses = Array.from(props.courses);
+    theCourses.push(course);
+    props.updatePlan(theCourses);
+  }
+    */
   const color = generateColorFromName(props.course.subject);
 
   const color_mappings: { [key: string]: string } = {
@@ -87,7 +98,8 @@ export default function CourseCard(props: any) {
   );
 
   return (
-    <div onClick={() => updatePlan(props.course)}>
+    //onClick={() => updateCourses(props.course)}
+    <div>
       <Card key={props.course.id} isHoverable className={base()} shadow="sm">
         <div className={`absolute top-0 left-0 h-full z-50 w-2 ${color}`} />
         <CardHeader className="pl-6">
@@ -220,6 +232,14 @@ export default function CourseCard(props: any) {
               )}
             </div>
           </div>
+          {props.added ? (
+            <div className="w-full h-5 text-green-400 justify-end justify-items-end align-middles opacity-70">
+              <div className="">
+                Added to Plan
+                <CheckCircleOutlineIcon fontSize="small" />
+              </div>
+            </div>
+          ) : null}
         </CardBody>
       </Card>
     </div>

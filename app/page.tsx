@@ -9,14 +9,19 @@ import Filters from "../components/Filters";
 import CreatePlan from "../components/CreatePlan";
 import {
   getInitialCourses,
-  getPlanCourses1,
+  getPlanCourses,
   getTerms,
   getUniqueStartEndTimes,
   getUniqueCodes,
   getCoursePlans,
+  getEvents,
 } from "../app/actions/getCourses";
+
+import { getSelectedCoursePlan } from "./actions/userActions";
 import { redirect } from "next/navigation";
 import { CoursePlan } from "@prisma/client";
+import CoursePlanContext from "../components/wrappers/CoursePlanContext";
+import { auth } from "@/lib/auth";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -30,6 +35,7 @@ export default async function Page(props: {
   const cookieStore = await cookies();
   const planID = await cookieStore.get("plan");
   const pagePref = cookieStore.get("pagePref");
+  const session = await auth();
 
   if (pagePref && pagePref.value != "/") {
     redirect(pagePref.value);
@@ -41,10 +47,40 @@ export default async function Page(props: {
   const dotw = searchParams?.dotw || [];
   const stime = searchParams?.stime || [];
   const homePageProps: any = {};
-  const initalCourses = await getInitialCourses(query, term, dotw, stime);
-  const planCourses: any = await getPlanCourses1();
-  const coursePlans: any = await getCoursePlans();
 
+  let initalCourses;
+  let planCourses;
+  let coursePlans;
+  let lastSelectedCoursePlan;
+
+  if (session?.user) {
+    initalCourses = await getInitialCourses(query, term, dotw, stime);
+    planCourses = await getPlanCourses();
+    coursePlans = await getCoursePlans();
+    lastSelectedCoursePlan = await getSelectedCoursePlan();
+  }
+  homePageProps["courseWrapper"] = (
+    <Suspense
+      fallback={
+        <Skeleton className="rounded-lg w-8/12 h-fit align-top justify-start" />
+      }
+    >
+      <CoursePlanContext
+        auth={session?.user}
+        initialCourses={initalCourses}
+        dotw={dotw}
+        query={query}
+        stime={stime}
+        term={term}
+        initalPlanCourses={planCourses}
+        coursePlans={coursePlans}
+        lastSelectedCoursePlan={lastSelectedCoursePlan}
+        courseList={true}
+      />
+    </Suspense>
+  );
+
+  /*
   homePageProps["fullCourseList"] = (
     <Suspense
       fallback={
@@ -64,7 +100,8 @@ export default async function Page(props: {
       />
     </Suspense>
   );
-
+  */
+  /*
   homePageProps["createPlan"] = (
     <Suspense
       fallback={
@@ -74,6 +111,7 @@ export default async function Page(props: {
       <CreatePlan initialPlan={planCourses} coursePlans={coursePlans} />
     </Suspense>
   );
+  */
 
   return <Home {...homePageProps} />; // return with no events
 }
@@ -99,18 +137,11 @@ async function Home(props: any) {
             />
           </Suspense>
         </div>
-        <div className="col-span-12 lg:col-span-7">
-          <div className="flex flex-col gap-3 h-full">
-            <div className="sm:hidden w-[95%]">
-              <Search codes={codes} terms={terms} times={uniqueTimes} />
-            </div>
 
-            <div className="h-[84vh] overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
-              {props.fullCourseList}
-            </div>
-          </div>
+        <div className="col-span-12 sm:hidden w-[95%]">
+          <Search codes={codes} terms={terms} times={uniqueTimes} />
         </div>
-        <div className="col-span-12 lg:col-span-3 ">{props.createPlan}</div>
+        {props.courseWrapper}
       </div>
     </>
   );
