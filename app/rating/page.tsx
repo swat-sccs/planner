@@ -193,7 +193,7 @@ export default function RatingPage() {
 
   return (
     <>
-      <div className="overflow-auto pt-5 sm:pt-0 sm:h-[83vh] h-[80vh]  scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
+      <div className="overflow-clip pt-5 sm:pt-0 sm:h-[83vh] h-[80vh] scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
         <div className="absolute top-30 right-20 bg-transparent w-2/12 z-50 ">
           <Alert
             isVisible={submitSuccess}

@@ -49,6 +49,7 @@ import { Course, CoursePlan } from "@prisma/client";
 
 interface CreatePlanProps {
   updatePlan: any;
+
   courses: Course[];
   initialPlan: any;
   coursePlans: any;
@@ -58,6 +59,7 @@ interface CreatePlanProps {
 
 export default function CreatePlan({
   updatePlan,
+
   courses,
   initialPlan,
   coursePlans,
@@ -188,6 +190,7 @@ export default function CreatePlan({
       for (let plan of coursePlans) {
         if (plan.id == parseInt(lastSelectedCoursePlan)) {
           updatePlan(plan.courses);
+          //updateCalEvents(plan.courses);
           setSelectedCoursePlan([lastSelectedCoursePlan]);
         }
       }

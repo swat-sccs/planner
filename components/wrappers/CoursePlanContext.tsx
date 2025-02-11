@@ -38,13 +38,25 @@ export default function CoursePlanContext(props: any) {
     }
   }, [props.coursePlans, courses, props.initalPlanCourses]);
 
+  const updateCalEvents = useCallback(
+    async (newCourses: Course[]) => {
+      let formatCourses = { courses: newCourses };
+      console.log("hi", formatCourses);
+      let theEvents: Event[] = await getEvents(formatCourses);
+      setEvents(theEvents);
+      //router.refresh();
+    },
+    [events]
+  );
+  /*
   async function updateCalEvents(newCourses: Course[]) {
     let formatCourses = { courses: newCourses };
-    console.log(formatCourses);
+    console.log("hi", formatCourses);
     let theEvents: Event[] = await getEvents(formatCourses);
     setEvents(theEvents);
     router.refresh();
   }
+    */
   useEffect(() => {
     firstLoad();
   }, [props.initialPlan]);

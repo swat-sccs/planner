@@ -85,7 +85,7 @@ export default function ProfCard(props: any) {
             props.prof.avgRating <= 4 &&
             props.prof.avgRating >= 3 ? (
               <div
-                className={`flex 0 bg-yellow-500 w-16 h-16 items-center justify-center rounded-md`}
+                className={`flex 0 bg-green-500 w-16 h-16 items-center justify-center rounded-md`}
               >
                 <div className="font-black text-3xl">
                   {props.prof.avgRating.toFixed(1)}
