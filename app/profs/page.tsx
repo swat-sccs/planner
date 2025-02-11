@@ -49,7 +49,7 @@ export default function ProfPage() {
 
   return (
     <>
-      <div className="gap-3 flex-col grid lg:grid-cols-3 lg:grid-cols1 mt-5 px-3">
+      <div className="gap-3 flex-col grid lg:grid-cols-3 lg:grid-cols1 mt-5 px-3 overflow-scroll h-[85vh]">
         {profs?.map((prof: any) => <ProfCard key={prof.id} prof={prof} />)}
       </div>
     </>

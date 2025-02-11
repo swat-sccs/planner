@@ -40,9 +40,9 @@ export default function Page({
   return (
     <div className="px-2 mt-4">
       <div className="text-xl mb-5 font-bold">{profInfo?.displayName}</div>
-      <div className="gap-3 flex-col grid lg:grid-cols-2 lg:grid-cols1 mt-5 px-3">
+      <div className="gap-3 flex-col grid lg:grid-cols-2  mt-5 px-3 overflow-y-scroll max-h-[80vh]">
         {ratings?.map((rating: Rating) => (
-          <Card key={rating.id} className="p-2 dark:bg-light_foreground">
+          <Card key={rating.id} className="p-2 dark:bg-light_foreground ">
             <CardHeader className="font-semibold">
               {rating.courseSubject} {rating.courseNumber}
             </CardHeader>

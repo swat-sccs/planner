@@ -61,15 +61,26 @@ export function FullCourseList({
     setTake((take) => take + NUMBER_OF_USERS_TO_FETCH);
 
     const apiCourses = await getCourses(take, query, term, dotw, stime);
+
+    if (inView) {
+      if (apiCourses.length == 0 || apiCourses.length == courses?.length) {
+        setIsDone(true);
+      } else {
+        setIsDone(false);
+      }
+    }
+    /*
     if (
       inView &&
       (apiCourses.length == 0 || apiCourses.length == courses?.length)
     ) {
       console.log("setting isDone true");
+      console.log(apiCourses.length);
+      console.log(courses?.length);
       setIsDone(true);
     } else {
       setIsDone(false);
-    }
+    }*/
     setCourses(apiCourses);
 
     // Prevent an infinite loop. TODO: better solution.
@@ -127,11 +138,14 @@ export function FullCourseList({
           </div>
         ))}
 
-        <div ref={ref}>
+        <div>
           {isDone ? (
             <></>
           ) : (
-            <Skeleton className="rounded-md w-[98%] h-48 align-top justify-start" />
+            <Skeleton
+              ref={ref}
+              className="rounded-md w-[98%] h-48 align-top justify-start"
+            />
           )}
         </div>
       </div>
