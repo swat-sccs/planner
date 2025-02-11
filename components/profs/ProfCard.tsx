@@ -39,7 +39,12 @@ export default function ProfCard(props: any) {
         router.push(`/profratings/${props.prof.uid}`);
       }}
     >
-      <Card key={props.prof.id} isHoverable shadow="sm">
+      <Card
+        key={props.prof.id}
+        isHoverable
+        shadow="sm"
+        className="dark:bg-light_foreground"
+      >
         <CardHeader className="pl-6">
           <div className="flex items-center flex-row justify-between w-full">
             <div className="flex flex-col">

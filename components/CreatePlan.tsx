@@ -59,7 +59,6 @@ interface CreatePlanProps {
 
 export default function CreatePlan({
   updatePlan,
-
   courses,
   initialPlan,
   coursePlans,
@@ -442,7 +441,7 @@ export default function CreatePlan({
         </div>
 
         <div
-          className="flex flex-col h-auto mb-20 md:mb-0 md:h-[53vh] overflow-y-scroll gap-3 scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
+          className="flex flex-col h-auto mb-20 md:mb-0 md:h-[50vh] overflow-y-scroll gap-3 scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
           id="scrollMe"
           ref={scrollRef}
           aria-label="List of Courses in plan"

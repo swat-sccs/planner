@@ -1,12 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-//scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent
 
-body {
+* {
   scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb);
-  scrollbar-track-color: transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 /* override fullcalendar white shadow and border; add filters */
 .fc-timegrid-event-harness-inset .fc-timegrid-event {

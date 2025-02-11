@@ -33,6 +33,7 @@ import { Alert } from "@nextui-org/alert";
 
 import axios from "axios";
 import { getProfs, getUniqueProfs, getYears } from "../../app/actions/getProfs";
+import { CardActions } from "@mui/material";
 
 const labels: { [index: string]: string } = {
   1: "Awful",
@@ -193,7 +194,7 @@ export default function RatingPage() {
 
   return (
     <>
-      <div className="overflow-clip pt-5 sm:pt-0 sm:h-[83vh] h-[80vh] scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
+      <div className=" pt-5 sm:pt-0 sm:h-[83vh] h-[80vh] scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
         <div className="absolute top-30 right-20 bg-transparent w-2/12 z-50 ">
           <Alert
             isVisible={submitSuccess}
@@ -210,13 +211,14 @@ export default function RatingPage() {
           />{" "}
         </div>
 
-        <Card className="bg-light_foreground mx-10 justify-center items-center sm:w-3/6 flex ml-auto mr-auto w-5/6">
+        <Card className="scrollbar bg-light_foreground mx-10 justify-center items-center sm:w-3/6 flex ml-auto mr-auto w-5/6 h-[85vh]">
           <CardHeader className="">
             <h1 className=" text-center ml-auto mr-auto col-span-3 row-start-1 row-span-1 text-2xl mb-2 mt-2">
               Leave a Rating
             </h1>
           </CardHeader>
-          <CardBody className="flex gap-5 px-4 lg:px-20 w-full">
+
+          <CardBody className="gap-5 px-4 lg:px-20 w-full overflow-y-scroll ">
             <Autocomplete
               isRequired
               aria-label="Select Professor"
@@ -255,7 +257,6 @@ export default function RatingPage() {
                 </AutocompleteItem>
               )}
             </Autocomplete>
-
             <Autocomplete
               isRequired
               aria-label="Select Class"
@@ -290,7 +291,6 @@ export default function RatingPage() {
                   ))
                 : null}
             </Autocomplete>
-
             <h2>Select Semester</h2>
             <div className="grid-rows-subgrid columns-1 sm:columns-2">
               <Select
@@ -320,7 +320,6 @@ export default function RatingPage() {
               </Select>
             </div>
             <Divider className="mt-5" orientation="horizontal" />
-
             <div className="mt-5">Rate Your Professor</div>
             <div className="grid grid-cols-2">
               <Rating
@@ -349,7 +348,6 @@ export default function RatingPage() {
                 </div>
               )}
             </div>
-
             <div>How difficult was this professor?</div>
             <div className="grid grid-cols-2 mb-5">
               <Rating
@@ -378,7 +376,6 @@ export default function RatingPage() {
                 </div>
               )}
             </div>
-
             <div>Would you take this professor again?</div>
             <Checkbox
               className="ml-5"
@@ -387,7 +384,6 @@ export default function RatingPage() {
             >
               Yes! <div className="text-tiny">(leave blank for no)</div>
             </Checkbox>
-
             <div>Did you mark this class as CR/NC?</div>
             <Checkbox
               className="ml-5"
@@ -396,7 +392,6 @@ export default function RatingPage() {
             >
               Yes! <div className="text-tiny">(leave blank for no)</div>
             </Checkbox>
-
             <div>Select grade recieved</div>
             <Select
               selectionMode="single"
@@ -410,7 +405,6 @@ export default function RatingPage() {
                 <SelectItem key={grade.key}>{grade.label}</SelectItem>
               ))}
             </Select>
-
             <Textarea
               value={review}
               size="lg"
@@ -423,16 +417,11 @@ export default function RatingPage() {
               onValueChange={setReview}
             />
           </CardBody>
-
-          <Button
-            onPress={onOpen}
-            color="primary"
-            className="mb-10 mt-10"
-            size="lg"
-          >
-            Submit
-          </Button>
-
+          <CardActions className="ml-auto">
+            <Button onPress={onOpen} color="primary" size="lg">
+              Submit
+            </Button>
+          </CardActions>
           <Modal
             isOpen={isOpen}
             onOpenChange={onOpenChange}

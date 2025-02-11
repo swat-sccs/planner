@@ -42,7 +42,7 @@ export default function Page({
       <div className="text-xl mb-5 font-bold">{profInfo?.displayName}</div>
       <div className="gap-3 flex-col grid lg:grid-cols-2 lg:grid-cols1 mt-5 px-3">
         {ratings?.map((rating: Rating) => (
-          <Card key={rating.id} className="p-2">
+          <Card key={rating.id} className="p-2 dark:bg-light_foreground">
             <CardHeader className="font-semibold">
               {rating.courseSubject} {rating.courseNumber}
             </CardHeader>
