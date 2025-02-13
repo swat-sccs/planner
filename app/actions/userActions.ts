@@ -26,8 +26,8 @@ export async function updateSelectedCoursePlan(plan: string) {
   return "Error: User not found";
 }
 
-export async function getSelectedCoursePlan() {
-  const session = await auth();
+export async function getSelectedCoursePlan(session: any) {
+  //const session = await auth();
   const user = await prisma.user.findUnique({
     where: {
       uuid: session?.user?.id,

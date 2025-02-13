@@ -99,14 +99,6 @@ export const Navbar = (props: any) => {
               <div>
                 <Logo className="h-9 lg:h-12" />
               </div>
-              {/* OLD Navbar Header
-               <span className={title({ size: "sm", color: "logo" })}>
-                SCCS&nbsp;
-              </span>
-              <span className={title({ size: "xs" }) + " text-white"}>
-                Course Planner&nbsp;
-              </span>
-              */}
             </Link>
           </NavbarBrand>
 
@@ -126,6 +118,21 @@ export const Navbar = (props: any) => {
                 </Link>
               </NavbarItem>
             ))}
+            {session?.user.role == "admin" ? (
+              <NavbarMenuItem isActive={pathname === "/admin"} key={"/admin"}>
+                <Link
+                  key={"/admin"}
+                  color={pathname === "/admin" ? "secondary" : "foreground"}
+                  className="text-lg dark"
+                  onPress={() => {
+                    cookies.set("pagePref", "/admin");
+                  }}
+                  href={"/admin"}
+                >
+                  Admin
+                </Link>
+              </NavbarMenuItem>
+            ) : null}
           </NavbarContent>
         </NavbarContent>
         {pathname === "/" ? (
@@ -189,7 +196,7 @@ export const Navbar = (props: any) => {
 
         {/* Mobile?*/}
 
-        <NavbarContent className="flex lg:hidden" justify="end">
+        <NavbarContent className="flex sm:hidden" justify="end">
           <ThemeSwitch />
 
           <NavbarMenuToggle
@@ -199,19 +206,37 @@ export const Navbar = (props: any) => {
         <NavbarMenu className="lg:flex">
           <div className="mx-4 mt-5 flex flex-col  text-center text-6xl">
             {siteConfig.navItems.map((item, index) => (
-              <div key={`${item}-${index}`}>
-                <NavbarMenuItem
-                  key={`${item}-${index}`}
-                  className=" h-[15vh]"
-                  onClick={() => {
+              <NavbarMenuItem key={`${item}-${index}`}>
+                <Link
+                  key={item.href}
+                  color={pathname === item.href ? "secondary" : "foreground"}
+                  className="text-lg dark w-full"
+                  onPress={() => {
                     cookies.set("pagePref", item.href);
-                    router.push(item.href);
                   }}
+                  href={item.href}
+                  size="lg"
                 >
                   <div className="text-4xl">{item.label}</div>
-                </NavbarMenuItem>
-              </div>
+                </Link>
+              </NavbarMenuItem>
             ))}
+            {session?.user.role == "admin" ? (
+              <NavbarMenuItem isActive={pathname === "/admin"} key={"/admin"}>
+                <Link
+                  key={"/admin"}
+                  color={pathname === "/admin" ? "secondary" : "foreground"}
+                  className="text-lg dark w-full"
+                  onPress={() => {
+                    cookies.set("pagePref", "/admin");
+                  }}
+                  href={"/admin"}
+                  size="lg"
+                >
+                  <div className="text-4xl">Admin</div>
+                </Link>
+              </NavbarMenuItem>
+            ) : null}
           </div>
           <NavbarItem className="justify-center text-center">
             {status === "authenticated" ? (

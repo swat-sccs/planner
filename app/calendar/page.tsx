@@ -1,10 +1,3 @@
-// a plugin!
-
-import CreatePlan from "../../components/CreatePlan";
-import Calendar from "../../components/Calendar";
-import prisma from "../../lib/prisma";
-import { getPlanCookie } from "../actions/actions";
-import { generateColorFromName } from "../../components/primitives";
 import {
   getCoursePlans,
   getEvents,
@@ -13,8 +6,6 @@ import {
 import CoursePlanContext from "@/components/wrappers/CoursePlanContext";
 import { getSelectedCoursePlan } from "app/actions/userActions";
 import { auth } from "@/lib/auth";
-import { useCallback, useEffect, useState } from "react";
-import { Course } from "@prisma/client";
 
 interface Event {
   classNames: string;
@@ -46,7 +37,7 @@ export default async function CalendarPage(props: any) {
     planCourses = await getPlanCourses();
     theEvents = await getEvents(planCourses);
     coursePlans = await getCoursePlans();
-    lastSelectedCoursePlan = await getSelectedCoursePlan();
+    lastSelectedCoursePlan = await getSelectedCoursePlan(session);
   }
   /*
   const refreshEvents = useCallback(async () => {

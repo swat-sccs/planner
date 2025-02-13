@@ -65,8 +65,8 @@ export async function setPlanCookie(plan: string) {
 }
 
 export async function getPlanCourses() {
-  const selectedCoursePlan = await getSelectedCoursePlan();
   const session = await auth();
+  const selectedCoursePlan = await getSelectedCoursePlan(session);
 
   if (selectedCoursePlan) {
     return await prisma.coursePlan.findUnique({
@@ -94,7 +94,8 @@ export async function getPlanCourses() {
 }
 
 export async function removeCourseFromDBPlan(course: any) {
-  const selectedCoursePlan: any = await getSelectedCoursePlan();
+  const session = await auth();
+  const selectedCoursePlan: any = await getSelectedCoursePlan(session);
 
   //let DOTW: Array<String> = dotw.split(",");
   const updatedCourse = await prisma.coursePlan.update({
@@ -145,7 +146,8 @@ export async function getCourseIds() {
 }
 
 export async function updateDBPlan(course: any) {
-  const id = await getSelectedCoursePlan();
+  const session = await auth();
+  const id = await getSelectedCoursePlan(session);
   // const id: any = await getPlanCookie();
   //let DOTW: Array<String> = dotw.split(",");
   if (id) {

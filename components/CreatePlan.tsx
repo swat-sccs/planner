@@ -156,7 +156,7 @@ export default function CreatePlan({
   }
 
   async function deletePlan() {
-    let theSelectedCoursePlan = await getSelectedCoursePlan();
+    let theSelectedCoursePlan = await getSelectedCoursePlan(session);
     if (theSelectedCoursePlan && coursePlans.length > 0) {
       axios
         .delete("/api/createplan", {

@@ -57,7 +57,7 @@ export default async function Page(props: {
     initalCourses = await getInitialCourses(query, term, dotw, stime);
     planCourses = await getPlanCourses();
     coursePlans = await getCoursePlans();
-    lastSelectedCoursePlan = await getSelectedCoursePlan();
+    lastSelectedCoursePlan = await getSelectedCoursePlan(session);
   }
   homePageProps["courseWrapper"] = (
     <Suspense
