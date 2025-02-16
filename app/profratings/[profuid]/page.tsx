@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   CardBody,
+  CardFooter,
   CardHeader,
   Chip,
   Divider,
@@ -43,8 +44,15 @@ export default function Page({
       <div className="gap-3 flex-col grid lg:grid-cols-2  mt-5 px-3 overflow-y-scroll max-h-[80vh]">
         {ratings?.map((rating: Rating) => (
           <Card key={rating.id} className="p-2 dark:bg-light_foreground ">
-            <CardHeader className="font-semibold">
-              {rating.courseSubject} {rating.courseNumber}
+            <CardHeader className="font-semibold w-full">
+              <div className="grid grid-cols-2 w-full ">
+                <div>
+                  {" "}
+                  {rating.courseSubject} {rating.courseNumber}
+                </div>
+
+                <div className="justify-self-end">{rating.grade}</div>
+              </div>
             </CardHeader>
 
             <CardBody>
@@ -79,6 +87,11 @@ export default function Page({
               />
               <div className="mt-10">{rating.review}</div>
             </CardBody>
+            <CardFooter>
+              <div>
+                {rating.termTaken} {rating.yearTaken}
+              </div>
+            </CardFooter>
           </Card>
         ))}
       </div>

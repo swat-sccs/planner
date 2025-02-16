@@ -96,6 +96,7 @@ export default function RatingPage() {
   const [grade, setGrade] = React.useState<string>("");
   const [term, setTerm] = React.useState<string>("");
   const [year, setYear] = React.useState<string>("");
+  const [selectedYearKeys, setSelectedYearKeys] = useState<string>("");
   const [yearOptions, setYearOptions] = React.useState<Array<string>>([]);
 
   const [review, setReview] = React.useState("");
@@ -134,11 +135,16 @@ export default function RatingPage() {
   const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setGrade(e.target.value);
   };
-  const handleTermChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setTerm(e.target.value);
-  };
+
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setYear(e.target.value);
+    setSelectedYearKeys(e.target.value);
+    if (Array.from(e.target.value)[0] == "F") {
+      setTerm("Fall");
+    }
+    if (Array.from(e.target.value)[0] == "S") {
+      setTerm("Spring");
+    }
+    setYear(e.target.value.replace("S", "").replace("F", ""));
   };
 
   async function submitReview() {
@@ -149,6 +155,7 @@ export default function RatingPage() {
       !term ||
       !selectedClass ||
       !selectedProf ||
+      !grade ||
       rating == 0 ||
       diffValue == 0
     ) {
@@ -173,6 +180,7 @@ export default function RatingPage() {
           setDiffValue(0);
           setTakeAgain(false);
           setForCredit(false);
+          setSelectedYearKeys("");
           setGrade("");
           setSelectedClass([]);
           setSelectedProf(1);
@@ -296,25 +304,14 @@ export default function RatingPage() {
               <Select
                 selectionMode="single"
                 isRequired
-                selectedKeys={[term]}
-                placeholder="Select Term"
-                className="max-w-sm"
-                onChange={handleTermChange}
-              >
-                <SelectItem key={"Spring"}>Spring</SelectItem>
-                <SelectItem key={"Fall"}>Fall</SelectItem>
-              </Select>
-              <Select
-                selectionMode="single"
-                isRequired
-                selectedKeys={[year]}
-                placeholder="Select Year"
+                selectedKeys={[selectedYearKeys]}
                 className="max-w-sm mt-5 sm:mt-0"
+                label="Semester"
                 onChange={handleYearChange}
               >
                 {yearOptions.map((year) => (
-                  <SelectItem key={year.replace("F", "").replace("S", "")}>
-                    {year.replace("F", "").replace("S", "")}
+                  <SelectItem key={year}>
+                    {year.replace("F", "Fall ").replace("S", "Spring ")}
                   </SelectItem>
                 ))}
               </Select>
@@ -394,12 +391,12 @@ export default function RatingPage() {
             </Checkbox>
             <div>Select grade recieved</div>
             <Select
-              selectionMode="single"
               isRequired
+              selectionMode="single"
               selectedKeys={[grade]}
-              placeholder="SelectGrade"
               className="max-w-sm"
               onChange={handleSelectionChange}
+              label="Grade"
             >
               {gradeOptions.map((grade) => (
                 <SelectItem key={grade.key}>{grade.label}</SelectItem>
@@ -455,7 +452,7 @@ export default function RatingPage() {
                     <p>
                       While reviews submitted through this site are completly
                       anonymous we collect user identifiable information for the
-                      saftey and continued usage of this platform. We do reserve
+                      safety and continued usage of this platform. We do reserve
                       the right to remove reviews that are not in good spirit.
                     </p>
                   </ModalBody>
