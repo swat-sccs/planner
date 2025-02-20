@@ -27,9 +27,11 @@ export default function Page({
   const [profInfo, setProfInfo] = useState<Faculty | null>();
 
   const getData = useCallback(async () => {
-    const slug = (await params).profuid;
+    const slug = decodeURIComponent((await params).profuid);
+    console.log(slug);
     const theratings = await getRatings(slug);
     const theProfInfo = await getProfsByUid(slug);
+    console.log(theratings);
     setRatings(theratings);
     setProfInfo(theProfInfo);
   }, []);
