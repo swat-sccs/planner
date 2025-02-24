@@ -42,7 +42,7 @@ export default function Search(props: any) {
       params.delete("query");
     }
     replace(`${pathname}?${params.toString()}`);
-  }, 100);
+  }, 250);
 
   const firstLoad = useCallback(async () => {
     if ((props.page = "home")) {
