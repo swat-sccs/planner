@@ -76,9 +76,10 @@ export const courseColors = [
 
 export function generateColorFromName(name: string) {
   let hash = 0;
-
-  for (let i = 0; i < name.length; i++) {
-    hash += name.charCodeAt(i) * i;
+  if (name) {
+    for (let i = 0; i < name.length; i++) {
+      hash += name.charCodeAt(i) * i;
+    }
   }
 
   return courseColors[hash % courseColors.length];

@@ -89,11 +89,13 @@ export default function CreatePlan({
   const fetchNewData = async (b: any) => {
     if (auth) {
       const theCoursePlans: CoursePlan[] = await getCoursePlans();
-      updatePlan(theCoursePlans);
+      const courses: any = await getPlanCourses();
+      updatePlan(courses);
       generatePlanList(theCoursePlans);
 
       if (b && coursePlans?.length > 1) {
         updateSelectedCoursePlan(String(coursePlans[0].id));
+        //updatePlan(courses);
         //setPlanCookie(String(coursePlans[0].id));
         //setSelectedCoursePlan([theCoursePlans[0].id]);
         let thing = { target: { value: String(theCoursePlans[0].id) } };
@@ -110,6 +112,7 @@ export default function CreatePlan({
   async function createPlan() {
     if (coursePlanName) {
       setAlert(undefined);
+      courses = [];
       await axios
         .post("/api/createplan", {
           planName: coursePlanName,
@@ -124,6 +127,7 @@ export default function CreatePlan({
           //setSelectedCoursePlan([response.data.id]);
 
           //console.log(response);
+          router.refresh(); //currently refreshing the dom, wonder if there is a more efficent way to re render the course listings
         })
         .catch(function (error) {
           console.log(error);
@@ -145,7 +149,6 @@ export default function CreatePlan({
     updatePlan(newArray); //Updates the frontend stuff fast
     //Asyncronusly update the db while immediately updating the frontend
     removeCourseFromDBPlan(course).catch((things: any) => {
-      console.log(things);
       refreshFromDB(); //manual db fetch to bring frontend back in sync with backend
     });
 
@@ -171,6 +174,7 @@ export default function CreatePlan({
           fetchNewData(true);
           //setPlanCookie("-55");
           //console.log(response);
+          router.refresh(); //currently refreshing the dom, wonder if there is a more efficent way to re render the course listings
         })
         .catch(function (error) {
           console.log(error);
@@ -182,6 +186,7 @@ export default function CreatePlan({
     await updateSelectedCoursePlan(e.target.value);
     setSelectedCoursePlan([e.target.value]);
     refreshFromDB();
+    router.refresh(); //currently refreshing the dom, wonder if there is a more efficent way to re render the course listings
   };
 
   const firstLoad = useCallback(() => {
@@ -205,13 +210,11 @@ export default function CreatePlan({
   }, [initialPlan]);
 
   const CoursesList = () => {
-    const output: any = [];
-
-    if (courses && courses != undefined) {
+    if (courses) {
       return courses.map((course: any) => (
         <Card
-          aria-label={course.courseTitle}
-          key={course.id}
+          aria-label={course?.courseTitle}
+          key={course?.id}
           className={
             "bg-light_foreground min-h-16 max-h-16 rounded-sm scroll-none drop-shadow-lg transition-colors"
           }
@@ -220,19 +223,19 @@ export default function CreatePlan({
           // onClick={() => removeCourseFromPlan(selectedCoursePlan, course)}
         >
           <div
-            className={`absolute top-0 left-0 h-full w-2 rounded-full ${generateColorFromName(course.subject)}`}
+            className={`absolute top-0 left-0 h-full w-2 rounded-full ${generateColorFromName(course?.subject)}`}
           />
 
           <CardHeader className="justify-between">
             <div className="ml-2 lg:text-base truncate text-bold">
-              {course.subject} {""} {course.courseNumber}
+              {course?.subject} {""} {course?.courseNumber}
               <div className="text-tiny ">
-                {course.courseTitle.replace(/&amp;/g, "&")}
+                {course?.courseTitle?.replace(/&amp;/g, "&")}
               </div>
             </div>
 
             <Button
-              aria-label={"Remove " + course.courseTitle + " from plan"}
+              aria-label={"Remove " + course?.courseTitle + " from plan"}
               isIconOnly
               startContent={<HighlightOffIcon />}
               size={"sm"}
@@ -446,7 +449,7 @@ export default function CreatePlan({
           ref={scrollRef}
           aria-label="List of Courses in plan"
         >
-          <CoursesList />
+          {courses?.length > 0 ? <CoursesList /> : null}
         </div>
       </div>
     </>

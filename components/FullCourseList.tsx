@@ -1,5 +1,5 @@
 "use client";
-import { Course, Prisma } from "@prisma/client";
+import { Course } from "@prisma/client";
 
 import { useCallback, useEffect, useState } from "react";
 
@@ -59,7 +59,7 @@ export function FullCourseList({
 
     setCursor((cursor) => cursor + NUMBER_OF_USERS_TO_FETCH);
     setTake((take) => take + NUMBER_OF_USERS_TO_FETCH);
-
+    //console.log(take, query, term);
     const apiCourses = await getCourses(take, query, term, dotw, stime);
 
     if (inView) {
@@ -69,6 +69,7 @@ export function FullCourseList({
         setIsDone(false);
       }
     }
+
     /*
     if (
       inView &&
@@ -119,7 +120,7 @@ export function FullCourseList({
   }, [inView, loadMoreCourses]);
 
   useEffect(() => {
-    setIsDone(false);
+    //setIsDone(false);
     loadMoreCourses();
     loadCourseIds();
   }, [query, term, dotw, stime, loadMoreCourses]);

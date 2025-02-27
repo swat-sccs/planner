@@ -14,12 +14,10 @@ import {
   getUniqueStartEndTimes,
   getUniqueCodes,
   getCoursePlans,
-  getEvents,
 } from "../app/actions/getCourses";
 
 import { getSelectedCoursePlan } from "./actions/userActions";
 import { redirect } from "next/navigation";
-import { CoursePlan } from "@prisma/client";
 import CoursePlanContext from "../components/wrappers/CoursePlanContext";
 import { auth } from "@/lib/auth";
 
@@ -139,7 +137,7 @@ async function Home(props: any) {
         </div>
 
         <div className="col-span-12 sm:hidden w-[95%]">
-          <Search codes={codes} terms={terms} times={uniqueTimes} />
+          <Search />
         </div>
         {props.courseWrapper}
       </div>

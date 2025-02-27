@@ -23,29 +23,27 @@ export default function Search(props: any) {
     [searchParams]
   );
 
-  const handleSearch = useDebouncedCallback((term: string) => {
-    const filtered_term = term.replace(/[^a-zA-Z0-9 ]+/gi, "");
-    const include_colons = term.replace(/[^a-zA-Z0-9: ]+/gi, "");
-    const term_list = include_colons.split(" ");
+  const handleSearch = useDebouncedCallback(
+    (term: string) => {
+      const filtered_term = term.replace(/[^a-zA-Z0-9 ]+/gi, "");
+      const include_colons = term.replace(/[^a-zA-Z0-9: ]+/gi, "");
+      const term_list = include_colons.split(" ");
 
-    for (let i = 0; i < term_list.length; i++) {
-      if (/\w+:/.test(term_list[i])) {
-        console.log(term_list[i]);
+      if (term) {
+        //decodeURIComponent;
+        params.set("query", filtered_term);
+        cookies.set("searchTermCookie", filtered_term);
+      } else {
+        params.delete("query");
       }
-    }
-
-    if (term) {
-      decodeURIComponent;
-      params.set("query", filtered_term);
-      cookies.set("searchTermCookie", filtered_term);
-    } else {
-      params.delete("query");
-    }
-    replace(`${pathname}?${params.toString()}`);
-  }, 250);
+      replace(`${pathname}?${params.toString()}`);
+    },
+    200,
+    { maxWait: 400 }
+  );
 
   const firstLoad = useCallback(async () => {
-    if ((props.page = "home")) {
+    if (pathname == "/") {
       let termCookie = cookies.get("termCookie");
       if (!termCookie) {
         cookies.set("termCookie", "S2025");
@@ -71,10 +69,7 @@ export default function Search(props: any) {
         size={"lg"}
         className="text-[16px]"
         endContent={
-          <div
-            className="bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-5 rounded-e-xl "
-            style={{ color: "white" }}
-          >
+          <div className="bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-5 rounded-e-xl ">
             <SearchIcon
               color="inherit"
               className="align-middle mt-auto mb-auto flex  "
@@ -104,96 +99,8 @@ export default function Search(props: any) {
             "!cursor-text",
           ],
         }}
-        onChange={(e) => {
-          handleSearch(e.target.value);
-        }}
+        onChange={(e) => handleSearch(e.target.value)}
       />
-
-      {/*
-      <Select
-        className="col-span-3 lg:col-span-2"
-        classNames={inputStyle}
-        size={"sm"}
-        defaultSelectedKeys={searchParams.get("term")?.toString()}
-        disallowEmptySelection={true}
-        label="Select Term"
-        selectedKeys={selectedTerm}
-        selectionMode={"single"}
-        onChange={handleSelectionChange}
-      >
-        {RenderSelectOptions()}
-      </Select>
-      <Select
-        className="col-span-3 lg:col-span-2"
-        classNames={inputStyle}
-        label="Day of the Week"
-        selectedKeys={selectedDOTW}
-        size={"sm"}
-        selectionMode={"multiple"}
-        //defaultSelectedKeys={searchParams.get("dotw")?.toString()}
-        onSelectionChange={handleDOTWChange}
-      >
-        <SelectItem key={"sunday"} value="sunday">
-          Sunday
-        </SelectItem>
-        <SelectItem key={"monday"} value={"monday"}>
-          Monday
-        </SelectItem>
-        <SelectItem key={"tuesday"} value={"tuesday"}>
-          Tuesday
-        </SelectItem>
-        <SelectItem key={"wednesday"} value={"wednesday"}>
-          Wednesday
-        </SelectItem>
-        <SelectItem key={"thursday"} value={"thursday"}>
-          Thursday
-        </SelectItem>
-        <SelectItem key={"friday"} value={"monfridayday"}>
-          Friday
-        </SelectItem>
-        <SelectItem key={"saturday"} value={"saturday"}>
-          Saturday
-        </SelectItem>
-      </Select>
-
-      <Select
-        className="col-span-3 lg:col-span-2 "
-        label="Start Time"
-        selectedKeys={selectedStartTime}
-        size={"sm"}
-        selectionMode={"multiple"}
-        onSelectionChange={handleSTimeChange}
-        classNames={inputStyle}
-      >
-        {props.times.startTimes.map((startTime: any) => {
-          const time = startTime.slice(0, 2) + ":" + startTime.slice(2);
-          const daTime = moment(time, "HH:mm").format("hh:mm A");
-
-          return (
-            <SelectItem key={startTime} value={startTime}>
-              {daTime}
-            </SelectItem>
-          );
-        })}
-      </Select>
-      {/*
-      <Select
-        label="Division"
-        className="max-w-xs"
-        selectedKeys={selectedCodes}
-        selectionMode={"multiple"}
-        //defaultSelectedKeys={searchParams.get("dotw")?.toString()}
-        onSelectionChange={handleCodeChange}
-      >
-        {props.codes.map((code: any) => {
-          return (
-            <SelectItem key={code} value={code}>
-              {code.toUpperCase()}
-            </SelectItem>
-          );
-        })}
-      </Select>
-       */}
     </div>
   );
 }

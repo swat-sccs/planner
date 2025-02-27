@@ -25,7 +25,9 @@ interface Event {
 
 export default function CoursePlanContext(props: any) {
   const router = useRouter();
-  const [courses, setCourses] = useState<any>(props.initalPlanCourses?.courses);
+  const [courses, setCourses] = useState<Course[]>(
+    props.initalPlanCourses?.courses
+  );
   const [events, setEvents] = useState<Event[]>(props.calEvents);
 
   const firstLoad = useCallback(() => {
@@ -41,7 +43,6 @@ export default function CoursePlanContext(props: any) {
   const updateCalEvents = useCallback(
     async (newCourses: Course[]) => {
       let formatCourses = { courses: newCourses };
-      console.log("hi", formatCourses);
       let theEvents: Event[] = await getEvents(formatCourses);
       setEvents(theEvents);
       //router.refresh();
@@ -105,7 +106,11 @@ export default function CoursePlanContext(props: any) {
           auth={props.auth}
           updatePlan={(newCourses: any) => {
             setCourses(newCourses);
-            updateCalEvents(newCourses);
+            console.log(newCourses);
+            if (!props.courseList) {
+              updateCalEvents(newCourses);
+            }
+
             //props.refreshEvents();
           }}
           courses={courses}
