@@ -135,7 +135,7 @@ export const Navbar = (props: any) => {
             ) : null}
           </NavbarContent>
         </NavbarContent>
-        {pathname === "/" ? (
+        {pathname === "/" || pathname === "/profs" ? (
           <NavbarContent className="lg:basis-full lg:flex hidden lg:w-full">
             <Search />
           </NavbarContent>

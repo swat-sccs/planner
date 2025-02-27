@@ -14,6 +14,9 @@ export default function Search(props: any) {
   const searchParams = useSearchParams();
   const cookies = useCookies();
   const [selectedTerm, setSelectedTerm]: any = useState([]);
+  const [selectedProf, setSelectedProf]: any = useState([]);
+  const [defaultVal, setDefaultVal]: any = useState("");
+
   const [search, setSearch]: any = useState();
   const pathname = usePathname();
   const { replace } = useRouter();
@@ -30,16 +33,29 @@ export default function Search(props: any) {
 
     if (term) {
       //decodeURIComponent;
-      params.set("query", filtered_term);
-      cookies.set("searchTermCookie", filtered_term);
+      if (pathname === "/") {
+        params.set("query", filtered_term);
+        cookies.set("searchTermCookie", filtered_term);
+      }
+      if (pathname === "/profs") {
+        params.set("prof", filtered_term);
+        cookies.set("profCookie", filtered_term);
+      }
     } else {
-      params.delete("query");
+      if (pathname === "/") {
+        params.delete("query");
+        cookies.set("searchTermCookie", "");
+      }
+      if (pathname === "/profs") {
+        params.delete("prof");
+        cookies.set("profCookie", "");
+      }
     }
     replace(`${pathname}?${params.toString()}`);
-  }, 800);
+  }, 700);
 
   const firstLoad = useCallback(async () => {
-    if (pathname == "/") {
+    if (pathname === "/") {
       let termCookie = cookies.get("termCookie");
       if (!termCookie) {
         cookies.set("termCookie", "S2025");
@@ -47,12 +63,35 @@ export default function Search(props: any) {
         replace(`${pathname}?${params.toString()}`);
         setSelectedTerm(searchParams.get("term")?.toString().split(","));
       } else {
+        let searchTermCookie = cookies.get("searchTermCookie");
+        if (searchTermCookie) {
+          params.set("query", searchTermCookie);
+        }
         params.set("term", termCookie);
         replace(`${pathname}?${params.toString()}`);
         setSelectedTerm(searchParams.get("term")?.toString().split(","));
+        setSearch(searchTermCookie);
       }
     }
-  }, []);
+    if (pathname === "/profs") {
+      if (searchParams.get("query")?.toString()) {
+        params.delete("query");
+      }
+      let profCookie = cookies.get("profCookie");
+      if (!profCookie) {
+        cookies.set("profCookie", "");
+        setSearch("");
+        //params.set("prof", "S2025");
+        //replace(`${pathname}?${params.toString()}`);
+        //setSelectedProf(searchParams.get("prof")?.toString().split(","));
+      } else {
+        params.set("prof", profCookie);
+        replace(`${pathname}?${params.toString()}`);
+        setSelectedProf(searchParams.get("prof")?.toString().split(","));
+        setSearch(profCookie);
+      }
+    }
+  }, [pathname]);
 
   useEffect(() => {
     // Update the document title using the browser API
@@ -72,8 +111,9 @@ export default function Search(props: any) {
             />
           </div>
         }
-        defaultValue={searchParams.get("query")?.toString()}
-        placeholder="Search"
+        placeholder={"Search"}
+        //placeholder="Search"
+        onValueChange={setSearch}
         value={search}
         classNames={{
           label: "text-black/50 dark:text-white/90",

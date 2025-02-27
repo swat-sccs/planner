@@ -68,6 +68,61 @@ export async function getUniqueProfsWithRatings() {
   return profs;
 }
 
+export async function searchProfs(query: any) {
+  console.log(query);
+  let profs: Faculty[] = [];
+  let AllProfs = await prisma.faculty.findMany({
+    ...(query
+      ? {
+          orderBy: [
+            {
+              _relevance: {
+                fields: ["displayName"],
+                search: query.trim().split(" ").join(" & "),
+                sort: "desc",
+              },
+            },
+          ],
+        }
+      : ""),
+
+    include: {
+      courses: true,
+    },
+    where: {
+      AND: {
+        NOT: {
+          avgRating: null,
+        },
+        ...(query
+          ? {
+              displayName: {
+                search: query.trim().split(" ").join(" | "),
+                mode: "insensitive",
+              },
+            }
+          : ""),
+      },
+    },
+  });
+
+  for (let prof of AllProfs) {
+    let uniqueNames = returnProfNameList(profs);
+    if (!uniqueNames.includes(prof.displayName)) {
+      let RatingCount = await prisma.rating.findMany({
+        where: {
+          profUid: prof.uid,
+        },
+      });
+      let myProf: any = prof;
+      myProf.numRatings = RatingCount.length;
+      profs.push(myProf);
+    }
+  }
+
+  return profs;
+}
+
 export async function getNumRatings(uid: any) {
   let ratings: any = [];
 

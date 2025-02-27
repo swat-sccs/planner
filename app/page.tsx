@@ -26,6 +26,7 @@ export default async function Page(props: {
     query?: string;
     page?: string;
     term?: string;
+    prof?: string;
     dotw?: Array<string>;
     stime?: Array<string>;
   }>;
@@ -44,6 +45,7 @@ export default async function Page(props: {
   const term = searchParams?.term || "";
   const dotw = searchParams?.dotw || [];
   const stime = searchParams?.stime || [];
+  const profQuery = searchParams?.prof || "";
   const homePageProps: any = {};
 
   let initalCourses;

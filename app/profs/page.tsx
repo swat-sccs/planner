@@ -26,26 +26,32 @@ import ProfCard from "../../components/profs/ProfCard";
 import {
   getProfs,
   getUniqueProfsWithRatings,
+  searchProfs,
 } from "../../app/actions/getProfs";
 import { Faculty } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
-export default function ProfPage() {
+export default function ProfPage(props: any) {
   const router = useRouter();
   const [profs, setProfs] = useState<Faculty[]>();
+  const [profQuery, setProfQuery] = useState("");
 
-  const loadProfs = useCallback(async () => {
-    const apiProfs = await getUniqueProfsWithRatings();
+  async function loadProfs() {
+    const searchParams = await props.searchParams;
 
+    //const apiProfs = await getUniqueProfsWithRatings();
+    console.log(searchParams.prof);
+    const apiProfs = await searchProfs(searchParams?.prof);
+    console.log(apiProfs);
     setProfs(apiProfs);
 
     // Prevent an infinite loop. TODO: better solution.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }
 
   useEffect(() => {
     loadProfs();
-  }, [loadProfs]);
+  }, [props.searchParams]);
 
   return (
     <>
