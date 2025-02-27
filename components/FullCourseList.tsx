@@ -127,7 +127,7 @@ export function FullCourseList({
 
   return (
     <>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 ">
         {courses?.map((course: any) => (
           <div key={course.id} onClick={() => loadCourseIds(course)}>
             <CourseCard

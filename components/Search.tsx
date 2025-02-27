@@ -23,24 +23,20 @@ export default function Search(props: any) {
     [searchParams]
   );
 
-  const handleSearch = useDebouncedCallback(
-    (term: string) => {
-      const filtered_term = term.replace(/[^a-zA-Z0-9 ]+/gi, "");
-      const include_colons = term.replace(/[^a-zA-Z0-9: ]+/gi, "");
-      const term_list = include_colons.split(" ");
+  const handleSearch = useDebouncedCallback((term: string) => {
+    const filtered_term = term.replace(/[^a-zA-Z0-9 ]+/gi, "");
+    const include_colons = term.replace(/[^a-zA-Z0-9: ]+/gi, "");
+    const term_list = include_colons.split(" ");
 
-      if (term) {
-        //decodeURIComponent;
-        params.set("query", filtered_term);
-        cookies.set("searchTermCookie", filtered_term);
-      } else {
-        params.delete("query");
-      }
-      replace(`${pathname}?${params.toString()}`);
-    },
-    200,
-    { maxWait: 400 }
-  );
+    if (term) {
+      //decodeURIComponent;
+      params.set("query", filtered_term);
+      cookies.set("searchTermCookie", filtered_term);
+    } else {
+      params.delete("query");
+    }
+    replace(`${pathname}?${params.toString()}`);
+  }, 800);
 
   const firstLoad = useCallback(async () => {
     if (pathname == "/") {

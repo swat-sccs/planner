@@ -120,7 +120,7 @@ async function Home(props: any) {
 
   return (
     <>
-      <div className="grid grid-cols-12 p-3 lg:p-4 h-full gap-5">
+      <div className="grid grid-cols-12 p-3 lg:p-4 lg:py-0 h-full lg:h-[88.8vh] gap-5">
         <div className=" lg:col-span-2 lg:flex hidden">
           <Suspense
             fallback={
@@ -136,7 +136,7 @@ async function Home(props: any) {
           </Suspense>
         </div>
 
-        <div className="col-span-12 sm:hidden w-[95%]">
+        <div className="col-span-12  lg:hidden w-[98%]">
           <Search />
         </div>
         {props.courseWrapper}

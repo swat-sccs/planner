@@ -190,7 +190,7 @@ export default function Filters(props: any) {
         <CheckboxGroup
           value={selectedStartTime}
           onValueChange={handleSTimeChange}
-          className="h-[32vh] overflow-y-scroll "
+          className="lg:max-h-72 overflow-y-scroll "
         >
           {props.times.startTimes.map((startTime: any) => {
             const time = startTime.slice(0, 2) + ":" + startTime.slice(2);

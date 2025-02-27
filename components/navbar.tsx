@@ -196,7 +196,7 @@ export const Navbar = (props: any) => {
 
         {/* Mobile?*/}
 
-        <NavbarContent className="flex sm:hidden" justify="end">
+        <NavbarContent className="flex lg:hidden" justify="end">
           <ThemeSwitch />
 
           <NavbarMenuToggle
