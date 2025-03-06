@@ -17,7 +17,7 @@ export const siteConfig = {
       href: "/profs",
     },
     {
-      label: "Leave a Rating",
+      label: "Rate",
       href: "/rating",
     },
   ],

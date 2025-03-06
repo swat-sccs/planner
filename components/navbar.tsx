@@ -118,6 +118,7 @@ export const Navbar = (props: any) => {
                 </Link>
               </NavbarItem>
             ))}
+            {/* 
             {session?.user.role == "admin" ? (
               <NavbarMenuItem isActive={pathname === "/admin"} key={"/admin"}>
                 <Link
@@ -133,6 +134,7 @@ export const Navbar = (props: any) => {
                 </Link>
               </NavbarMenuItem>
             ) : null}
+             */}
           </NavbarContent>
         </NavbarContent>
         {pathname === "/" || pathname === "/profs" ? (
@@ -167,9 +169,25 @@ export const Navbar = (props: any) => {
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Sign out button">
                   {/* Causes an awful error if rendered conditionally */}
-                  {/* <DropdownItem key="admin" href="/admin">
-                    Admin
-                  </DropdownItem> */}
+                  {/* I dont see an error anymore so trying again*/}
+
+                  {session.user?.role == "admin" ? (
+                    <DropdownItem
+                      className="text-center "
+                      key="admin"
+                      href="/admin"
+                    >
+                      Admin
+                    </DropdownItem>
+                  ) : null}
+
+                  <DropdownItem
+                    className="text-center "
+                    key="myRatings"
+                    onPress={() => router.push("/myratings")}
+                  >
+                    My Ratings
+                  </DropdownItem>
                   <DropdownItem
                     className="text-center "
                     key="signOut"
@@ -221,6 +239,8 @@ export const Navbar = (props: any) => {
                 </Link>
               </NavbarMenuItem>
             ))}
+
+            {/* 
             {session?.user.role == "admin" ? (
               <NavbarMenuItem isActive={pathname === "/admin"} key={"/admin"}>
                 <Link
@@ -237,6 +257,7 @@ export const Navbar = (props: any) => {
                 </Link>
               </NavbarMenuItem>
             ) : null}
+             */}
           </div>
           <NavbarItem className="justify-center text-center">
             {status === "authenticated" ? (
@@ -249,9 +270,22 @@ export const Navbar = (props: any) => {
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Signout dropdown">
                   {/* Causes an awful error if rendered conditionally */}
-                  {/* <DropdownItem key="admin" href="/admin">
-                    Admin
-                  </DropdownItem> */}
+                  {session.user?.role == "admin" ? (
+                    <DropdownItem
+                      className="text-center "
+                      key="admin"
+                      href="/admin"
+                    >
+                      Admin
+                    </DropdownItem>
+                  ) : null}
+                  <DropdownItem
+                    className="text-center "
+                    key="myRatings"
+                    onPress={() => router.push("/myratings")}
+                  >
+                    My Ratings
+                  </DropdownItem>
                   <DropdownItem
                     key="signOut"
                     onPress={() => signOut()}

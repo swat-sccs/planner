@@ -26,7 +26,6 @@ export async function getUniqueProfs() {
 
   for (let prof of AllProfs) {
     let uniqueNames = returnProfNameList(profs);
-    console.log(uniqueNames);
     if (!uniqueNames.includes(prof.displayName)) {
       profs.push(prof);
     }
@@ -69,7 +68,6 @@ export async function getUniqueProfsWithRatings() {
 }
 
 export async function searchProfs(query: any) {
-  console.log(query);
   let profs: Faculty[] = [];
   let AllProfs = await prisma.faculty.findMany({
     ...(query
@@ -194,5 +192,5 @@ export async function getYears() {
     }
   }
 
-  return years;
+  return years.sort();
 }

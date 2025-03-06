@@ -17,3 +17,23 @@ export async function getRatings(profUid: any) {
 
   return ratings;
 }
+
+export async function getUserRatings() {
+  let ratings;
+  const session = await auth();
+  const user = await prisma.user.findUnique({
+    where: {
+      uuid: session?.user?.id,
+    },
+  });
+
+  if (user) {
+    ratings = await prisma.rating.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+  }
+
+  return ratings;
+}

@@ -53,7 +53,6 @@ export default function Filters(props: any) {
   );
 
   const handleSelectionChange = (e: any) => {
-    console.log(e.target.value);
     setSelectedTerm([e.target.value]);
 
     if (e.target.value) {
@@ -95,7 +94,6 @@ export default function Filters(props: any) {
 
   const handleDOTWChange = (e: any) => {
     setdotw(e);
-    console.log(e);
 
     if (e.length > 0) {
       params.set("dotw", e);

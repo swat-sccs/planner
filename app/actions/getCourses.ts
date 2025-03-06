@@ -250,7 +250,6 @@ export async function getCourses(
   stime: any
 ) {
   const startTime = stime.toString().split(",").filter(Number);
-  console.log(startTime);
 
   return await prisma.course.findMany({
     take: take,

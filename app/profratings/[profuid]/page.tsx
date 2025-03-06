@@ -9,6 +9,8 @@ import {
   Divider,
 } from "@nextui-org/react";
 import Star from "@mui/icons-material/Star";
+import StarRating from "@mui/material/Rating";
+
 import Image from "next/image";
 
 import { useCallback, useEffect, useState } from "react";
@@ -16,7 +18,6 @@ import { useRouter } from "next/navigation";
 import { Faculty, Rating } from "@prisma/client";
 import { getProfs, getNumRatings, getProfsByUid } from "app/actions/getProfs";
 import { getRatings } from "app/actions/getRatings";
-import StarRating from "@mui/material/Rating";
 
 export default function Page({
   params,
@@ -28,10 +29,8 @@ export default function Page({
 
   const getData = useCallback(async () => {
     const slug = decodeURIComponent((await params).profuid);
-    console.log(slug);
     const theratings = await getRatings(slug);
     const theProfInfo = await getProfsByUid(slug);
-    console.log(theratings);
     setRatings(theratings);
     setProfInfo(theProfInfo);
   }, []);

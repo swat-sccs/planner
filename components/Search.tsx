@@ -48,7 +48,7 @@ export default function Search(props: any) {
       }
       if (pathname === "/profs") {
         params.delete("prof");
-        cookies.set("profCookie", "");
+        cookies.remove("profCookie");
       }
     }
     replace(`${pathname}?${params.toString()}`);
@@ -69,7 +69,7 @@ export default function Search(props: any) {
         }
         params.set("term", termCookie);
         replace(`${pathname}?${params.toString()}`);
-        setSelectedTerm(searchParams.get("term")?.toString().split(","));
+        //setSelectedTerm(searchParams.get("term")?.toString().split(","));
         setSearch(searchTermCookie);
       }
     }
@@ -79,7 +79,6 @@ export default function Search(props: any) {
       }
       let profCookie = cookies.get("profCookie");
       if (!profCookie) {
-        cookies.set("profCookie", "");
         setSearch("");
         //params.set("prof", "S2025");
         //replace(`${pathname}?${params.toString()}`);
@@ -87,7 +86,7 @@ export default function Search(props: any) {
       } else {
         params.set("prof", profCookie);
         replace(`${pathname}?${params.toString()}`);
-        setSelectedProf(searchParams.get("prof")?.toString().split(","));
+        //setSelectedProf(searchParams.get("prof")?.toString().split(","));
         setSearch(profCookie);
       }
     }
@@ -96,7 +95,7 @@ export default function Search(props: any) {
   useEffect(() => {
     // Update the document title using the browser API
     firstLoad();
-  }, [firstLoad]);
+  }, [pathname]);
 
   return (
     <div className="w-full">

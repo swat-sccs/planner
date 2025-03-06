@@ -1,3 +1,4 @@
+//edit modal for the my ratings page
 "use client";
 import {
   Card,
@@ -22,17 +23,17 @@ import {
 } from "@nextui-org/react";
 import { useCallback, useEffect, useState } from "react";
 import React from "react";
-import { Faculty, Course } from "@prisma/client";
+import { Faculty, Course, Rating } from "@prisma/client";
 
 import Person from "@mui/icons-material/Person";
 import Class from "@mui/icons-material/Class";
 import Star from "@mui/icons-material/Star";
 
-import Rating from "@mui/material/Rating";
+import MUIRating from "@mui/material/Rating";
 import { Alert } from "@nextui-org/alert";
 
 import axios from "axios";
-import { getProfs, getUniqueProfs, getYears } from "../../app/actions/getProfs";
+import { getProfs, getUniqueProfs, getYears } from "../app/actions/getProfs";
 import { CardActions } from "@mui/material";
 
 const labels: { [index: string]: string } = {
@@ -78,30 +79,46 @@ function getLabelText(value: number) {
   return `${value} Star${value !== 1 ? "s" : ""}, ${labels[value]}`;
 }
 
-export default function RatingPage() {
+export default function EditModal(props: {
+  open: boolean;
+  setIsOpen: Function;
+  editRating: any;
+}) {
   const [selectedProf, setSelectedProf]: any = useState(1);
   const [selectedClass, setSelectedClass]: any = useState();
   const [selectedFullClass, setSelectedFullClass] = useState<Course>();
   const [selectedProfessor, setSelectedProfessor] = useState<Faculty>();
-  const [rating, setRating] = React.useState<number | null>(0);
+  const [rating, setRating] = React.useState<number | any>(
+    props.editRating?.overallRating
+  );
   const [hover, setHover] = React.useState(-1);
-  const [diffValue, setDiffValue] = React.useState<number | null>(0);
-  const [diffHover, setDiffHover] = React.useState(-1);
-  const [takeAgain, setTakeAgain] = React.useState(false);
-  const [forCredit, setForCredit] = React.useState(false);
+  const [diffValue, setDiffValue] = React.useState<number | null | any>(
+    props.editRating.difficulty
+  );
+  const [diffHover, setDiffHover] = React.useState<number | null>(
+    props.editRating.difficulty
+  );
+  const [takeAgain, setTakeAgain] = React.useState<any>(
+    props.editRating?.takeAgain
+  );
+  const [forCredit, setForCredit] = React.useState<any>(
+    props.editRating?.forCredit
+  );
 
   const [submitSuccess, setSubmitSuccess] = React.useState(false);
   const [submitError, setSubmitError] = React.useState(false);
 
-  const [grade, setGrade] = React.useState<string>("");
-  const [term, setTerm] = React.useState<string>("");
+  const [grade, setGrade] = React.useState<string | null | any>(
+    props.editRating?.grade
+  );
+  const [term, setTerm] = React.useState<any>(props.editRating?.termTaken);
   const [year, setYear] = React.useState<string>("");
   const [selectedYearKeys, setSelectedYearKeys] = useState<string>("");
   const [yearOptions, setYearOptions] = React.useState<Array<string>>([]);
 
-  const [review, setReview] = React.useState("");
+  const [review, setReview] = React.useState<any>(props.editRating?.review);
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  //const { isOpen, onOpenChange } = useDisclosure();
 
   const [profs, setProfs] = useState<Faculty[] | null>(null);
 
@@ -119,7 +136,15 @@ export default function RatingPage() {
 
   useEffect(() => {
     getData();
-  }, [getData]);
+    let thing: any = props.editRating?.termTaken
+      ? props.editRating?.termTaken.charAt(0)
+      : null;
+
+    setSelectedYearKeys(thing + props.editRating?.yearTaken);
+
+    //setDiffValue(props.editRating?.difficulty);
+    //setDiffHover(props.editRating?.difficulty);
+  }, [props.editRating]);
 
   async function onProfSelectionChange(key: any) {
     setSelectedProf(key);
@@ -132,49 +157,55 @@ export default function RatingPage() {
     setSelectedClass(key);
   };
   const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    props.editRating.grade = e.target.value;
     setGrade(e.target.value);
   };
 
+  const handleReviewChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    console.log(e);
+    props.editRating.review = e;
+    setReview(e);
+  };
+
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    // console.log(e.target.value);
+    // props.editRating.termTaken;
+    // props.editRating.yearTaken;
+    //console.log(e.target.value.replace("S", "Spring").replace("F", "Fall"));
     setSelectedYearKeys(e.target.value);
     if (Array.from(e.target.value)[0] == "F") {
+      props.editRating.termTaken = "Fall";
+      props.editRating.yearTaken = e.target.value.replace("F", "");
       setTerm("Fall");
     }
     if (Array.from(e.target.value)[0] == "S") {
+      props.editRating.termTaken = "Spring";
+      props.editRating.yearTaken = e.target.value.replace("S", "");
       setTerm("Spring");
     }
     setYear(e.target.value.replace("S", "").replace("F", ""));
   };
 
-  async function submitReview() {
+  async function updateReview() {
     //Reset all vals to defaults... Send to DB!
-
-    if (
-      !year ||
-      !term ||
-      !selectedClass ||
-      !selectedProf ||
-      !grade ||
-      rating == 0 ||
-      diffValue == 0
-    ) {
+    if (!props.editRating) {
       alert("Please fill out all required fields!");
     } else {
       await axios
-        .post("/api/submitReview", {
-          courseID: selectedClass,
-          facultyID: selectedProf,
-          overallRating: rating,
-          difficulty: diffValue,
-          takeAgain: takeAgain,
-          forCredit: forCredit,
-          grade: grade,
-          review: review,
-          termTaken: term,
-          yearTaken: year,
+        .post("/api/updateReview", {
+          id: props.editRating.id,
+          overallRating: props.editRating.overallRating,
+          difficulty: props.editRating.difficulty,
+          takeAgain: props.editRating.takeAgain,
+          forCredit: props.editRating.forCredit,
+          grade: props.editRating.grade,
+          review: props.editRating.review,
+          termTaken: props.editRating.termTaken,
+          yearTaken: props.editRating.yearTaken,
         })
         .then(function (response) {
           // Handle response
+          props.setIsOpen(false);
           setRating(0);
           setDiffValue(0);
           setTakeAgain(false);
@@ -201,103 +232,41 @@ export default function RatingPage() {
 
   return (
     <>
-      <div className=" pt-5 sm:pt-0 sm:h-[83vh] h-[80vh] scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
-        <div className="absolute top-30 right-20 bg-transparent w-2/12 z-50 ">
-          <Alert
-            isVisible={submitSuccess}
-            color={"success"}
-            title={`Success!`}
-            description={"Rating submitted"}
-          />
-          <Alert
-            isVisible={submitError}
-            className="absolute top-30 right-20 bg-transparent border-2 w-1/12 "
-            color={"danger"}
-            title={`Error!`}
-            description={"Error submitted rating. Please try again."}
-          />{" "}
-        </div>
+      <div className="absolute top-30 right-20 bg-transparent w-2/12 z-50 ">
+        <Alert
+          isVisible={submitSuccess}
+          color={"success"}
+          title={`Success!`}
+          description={"Rating updated"}
+        />
+        <Alert
+          isVisible={submitError}
+          className="absolute top-30 right-20 bg-transparent border-2 w-1/12 "
+          color={"danger"}
+          title={`Error!`}
+          description={"Error submitted rating. Please try again."}
+        />{" "}
+      </div>
+      <Modal
+        isOpen={props.open}
+        onOpenChange={() => props.setIsOpen(false)}
+        isDismissable={true}
+        isKeyboardDismissDisabled={true}
+        backdrop={"blur"}
+        size={"xl"}
+        placement={"center"}
+      >
+        <ModalContent className="scrollbar bg-light_foreground flex  h-5/6 overflow-y-scroll">
+          <ModalHeader>
+            <h2 className="text-2xl text-center  ">
+              Edit Rating: {props.editRating?.courseName}
+            </h2>
+          </ModalHeader>
 
-        <Card className="scrollbar bg-light_foreground mx-10 justify-center items-center sm:w-3/6 flex ml-auto mr-auto w-5/6 h-[85vh]">
-          <CardHeader className="">
-            <h1 className=" text-center ml-auto mr-auto col-span-3 row-start-1 row-span-1 text-2xl mb-2 mt-2">
-              Leave a Rating
-            </h1>
-          </CardHeader>
+          <ModalBody className="gap-5 px-4 lg:px-20 overflow-y-scroll">
+            <h2>Professor: {props.editRating?.profDisplayName}</h2>
+            <h2>Course: {props.editRating?.courseName}</h2>
 
-          <CardBody className="gap-5 px-4 lg:px-20 w-full overflow-y-scroll ">
-            <Autocomplete
-              isRequired
-              aria-label="Select Professor"
-              className=" max-w-sm "
-              label="Select Professor"
-              labelPlacement="outside"
-              placeholder="Select Professor"
-              variant={"bordered"}
-              size="lg"
-              startContent={<Person />}
-              selectedKey={selectedProf}
-              onSelectionChange={onProfSelectionChange}
-            >
-              {profs ? (
-                profs.map((prof: Faculty) => (
-                  <AutocompleteItem
-                    onPress={() => setSelectedProfessor(prof)}
-                    key={prof.id}
-                    textValue={prof.displayName}
-                  >
-                    <div className="flex gap-2 items-center">
-                      <div className="flex flex-col">
-                        <span className="text-small">{prof.displayName}</span>
-                        {prof.avgRating ? (
-                          <span className="text-tiny text-default-400">
-                            Rating: {prof.avgRating}
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                  </AutocompleteItem>
-                ))
-              ) : (
-                <AutocompleteItem key={"id"}>
-                  <Skeleton></Skeleton>
-                </AutocompleteItem>
-              )}
-            </Autocomplete>
-            <Autocomplete
-              isRequired
-              aria-label="Select Class"
-              className=" max-w-sm "
-              label="Select Class"
-              labelPlacement="outside"
-              placeholder="Select Class"
-              variant={"bordered"}
-              size="lg"
-              startContent={<Class />}
-              selectedKey={selectedClass}
-              onSelectionChange={onClassSelectionChange}
-            >
-              {classes
-                ? classes.map((thing: any) => (
-                    <AutocompleteItem
-                      aria-label={thing.Subject + " " + thing.courseNumber}
-                      key={thing.id}
-                      textValue={thing.subject + " " + thing.courseNumber}
-                    >
-                      <div className="flex gap-2 items-center">
-                        <div className="flex flex-col">
-                          <span className="text-small">
-                            {thing.subject} {thing.courseNumber}
-                          </span>
-                          <span className="text-tiny text-default-400">
-                            {thing.courseTitle}
-                          </span>
-                        </div>
-                      </div>
-                    </AutocompleteItem>
-                  ))
-                : null}
-            </Autocomplete>
             <h2>Select Semester</h2>
             <div className="grid-rows-subgrid columns-1 sm:columns-2">
               <Select
@@ -318,13 +287,14 @@ export default function RatingPage() {
             <Divider className="mt-5" orientation="horizontal" />
             <div className="mt-5">Rate Your Professor</div>
             <div className="grid grid-cols-2">
-              <Rating
+              <MUIRating
                 className="ml-5"
                 name="rate-prof"
-                value={rating}
+                value={props.editRating.overallRating}
                 precision={1}
                 getLabelText={getLabelText}
                 onChange={(event, newValue) => {
+                  props.editRating.overallRating = newValue;
                   setRating(newValue);
                 }}
                 onChangeActive={(event, newHover) => {
@@ -345,13 +315,14 @@ export default function RatingPage() {
             </div>
             <div>How difficult was this professor?</div>
             <div className="grid grid-cols-2 mb-5">
-              <Rating
+              <MUIRating
                 className="ml-5"
                 name="rate-prof-diff"
-                value={diffValue}
+                value={props.editRating.difficulty}
                 precision={1}
                 getLabelText={getDiffText}
                 onChange={(event, newValue) => {
+                  props.editRating.difficulty = newValue;
                   setDiffValue(newValue);
                 }}
                 onChangeActive={(event, newHover) => {
@@ -373,7 +344,11 @@ export default function RatingPage() {
             <div>Would you take this professor again?</div>
             <Checkbox
               className="ml-5"
-              isSelected={takeAgain}
+              isSelected={
+                props.editRating?.takeAgain
+                  ? props.editRating?.takeAgain
+                  : undefined
+              }
               onValueChange={setTakeAgain}
             >
               Yes! <div className="text-tiny">(leave blank for no)</div>
@@ -381,7 +356,11 @@ export default function RatingPage() {
             <div>Did you mark this class as CR/NC?</div>
             <Checkbox
               className="ml-5"
-              isSelected={forCredit}
+              isSelected={
+                props.editRating?.takeAgain
+                  ? props.editRating?.takeAgain
+                  : undefined
+              }
               onValueChange={setForCredit}
             >
               Yes! <div className="text-tiny">(leave blank for no)</div>
@@ -390,7 +369,7 @@ export default function RatingPage() {
             <Select
               isRequired
               selectionMode="single"
-              selectedKeys={[grade]}
+              selectedKeys={[props.editRating.grade]}
               className="max-w-sm"
               onChange={handleSelectionChange}
               label="Grade"
@@ -400,7 +379,7 @@ export default function RatingPage() {
               ))}
             </Select>
             <Textarea
-              value={review}
+              value={props.editRating.review}
               size="lg"
               className=""
               rows={5}
@@ -408,9 +387,17 @@ export default function RatingPage() {
               disableAutosize
               label="Write a Review"
               placeholder="What did you think of this prof/class?"
-              onValueChange={setReview}
+              onValueChange={(e: any) => handleReviewChange(e)}
             />
-          </CardBody>
+
+            <ModalFooter>
+              <Button onPress={updateReview} color="primary" size="lg">
+                Update Review
+              </Button>
+            </ModalFooter>
+          </ModalBody>
+
+          {/* 
           <CardActions className="ml-auto">
             <Button onPress={onOpen} color="primary" size="lg">
               Submit
@@ -470,8 +457,9 @@ export default function RatingPage() {
               )}
             </ModalContent>
           </Modal>
-        </Card>
-      </div>
+          */}
+        </ModalContent>
+      </Modal>
     </>
   );
 }

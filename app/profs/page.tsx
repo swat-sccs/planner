@@ -40,9 +40,9 @@ export default function ProfPage(props: any) {
     const searchParams = await props.searchParams;
 
     //const apiProfs = await getUniqueProfsWithRatings();
-    console.log(searchParams.prof);
+
     const apiProfs = await searchProfs(searchParams?.prof);
-    console.log(apiProfs);
+
     setProfs(apiProfs);
 
     // Prevent an infinite loop. TODO: better solution.
