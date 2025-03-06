@@ -95,8 +95,9 @@ export async function searchProfs(query: any) {
         ...(query
           ? {
               displayName: {
-                search: query.trim().split(" ").join(" | "),
+                // search: query.trim().split(" ").join(" | "),
                 mode: "insensitive",
+                contains: query.trim().split(" ").join(" | "),
               },
             }
           : ""),

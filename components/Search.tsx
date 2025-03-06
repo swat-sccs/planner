@@ -95,7 +95,7 @@ export default function Search(props: any) {
   useEffect(() => {
     // Update the document title using the browser API
     firstLoad();
-  }, [pathname]);
+  }, [firstLoad]);
 
   return (
     <div className="w-full">
@@ -129,7 +129,6 @@ export default function Search(props: any) {
             "backdrop-blur-xl",
             "backdrop-saturate-200",
             "dark:hover:bg-default/70",
-
             "dark:group-data-[focus=true]:bg-default/60",
             "!cursor-text",
           ],

@@ -12,13 +12,14 @@ import {
   getPlanCourses,
 } from "../app/actions/getCourses";
 import { useInView } from "react-intersection-observer";
-import { Skeleton } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, Skeleton } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import CourseCardAdded from "./CourseCardAdded";
 import {
   getSelectedCoursesCookie,
   setSelectedCookie,
 } from "app/actions/actions";
+import { tv } from "tailwind-variants";
 
 const NUMBER_OF_USERS_TO_FETCH = 10;
 
@@ -125,6 +126,15 @@ export function FullCourseList({
     loadCourseIds();
   }, [query, term, dotw, stime, loadMoreCourses]);
 
+  const card = tv({
+    slots: {
+      base: "hover:cursor-pointer bg-light_foreground min-h-32 max-h-62 w-[98%] rounded-md scroll-none drop-shadow-lg transition-colors",
+      role: "font-bold text-primary ",
+    },
+  });
+
+  const { base, role } = card();
+
   return (
     <>
       <div className="flex flex-col gap-3 ">
@@ -138,6 +148,24 @@ export function FullCourseList({
             />
           </div>
         ))}
+        {courses.length == 0 ? (
+          <Card isHoverable className={base()} shadow="sm">
+            <CardHeader className="pl-6 text-3xl">
+              Oops! Looks like that class does not exist!
+            </CardHeader>
+
+            <CardBody className="pt-0 pl-6 ">
+              Please try refining your search. You can search for any of the
+              following:
+              <ul className="ml-5">
+                <li>Course Name</li>
+                <li>Instructor Name</li>
+                <li>Course Department Code/Number (ex. CPSC 035)</li>
+                <li>Course Tags: (w), SS, NSE</li>
+              </ul>
+            </CardBody>
+          </Card>
+        ) : null}
 
         <div>
           {isDone ? (

@@ -290,7 +290,9 @@ export async function getCourses(
             OR: [
               {
                 courseTitle: {
-                  search: query.trim().split(" ").join(" | "),
+                  contains: query.trim().split(" ").join(" | "),
+
+                  //search: query.trim().split(" ").join(" | "),
                   mode: "insensitive",
                 },
               },
@@ -298,7 +300,8 @@ export async function getCourses(
                 sectionAttributes: {
                   some: {
                     code: {
-                      search: query.trim().split(" ").join(" | "),
+                      contains: query.trim().split(" ").join(" | "),
+                      //search: query.trim().split(" ").join(" | "),
                       mode: "insensitive",
                     },
                   },
@@ -306,12 +309,14 @@ export async function getCourses(
               },
               {
                 subject: {
-                  search: query.trim().split(" ").join(" | "),
+                  contains: query.trim().split(" ").join(" | "),
+                  //search: query.trim().split(" ").join(" | "),
                   mode: "insensitive",
                 },
               },
               {
                 courseNumber: {
+                  //contains: query.trim().split(" ").join(" | "),
                   search: query.trim().split(" ").join(" | "),
                   mode: "insensitive",
                 },
@@ -319,7 +324,8 @@ export async function getCourses(
               {
                 instructor: {
                   displayName: {
-                    search: query.trim().split(" ").join(" | "),
+                    contains: query.trim().split(" ").join(" | "),
+                    //search: query.trim().split(" ").join(" | "),
                     mode: "insensitive",
                   },
                 },
