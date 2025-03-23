@@ -148,7 +148,7 @@ export function FullCourseList({
             />
           </div>
         ))}
-        {courses.length == 0 ? (
+        {courses?.length == 0 ? (
           <Card isHoverable className={base()} shadow="sm">
             <CardHeader className="pl-6 text-3xl">
               Oops! Looks like that class does not exist!
