@@ -57,6 +57,13 @@ services:
         - "traefik.http.routers.planner_pgadmin.tls=true"
         - "traefik.http.routers.planner_pgadmin.tls.certresolver=letsEncrypt"
         - "traefik.http.services.planner_pgadmin.loadbalancer.server.port=8888"
+
+        # For Redirect
+        - "traefik.http.middlewares.scheduleRedirect.headers.accesscontrolallowmethods=GET,OPTIONS,PUT"
+        - "traefik.http.middlewares.scheduleRedirect.headers.accesscontrolallowheaders=*"
+        - "traefik.http.middlewares.scheduleRedirect.headers.accesscontrolalloworiginlist=https://schedule.sccs.swarthmore.edu, https://plan.sccs.swarthmore.edu"
+        - "traefik.http.middlewares.scheduleRedirect.headers.accesscontrolmaxage=100"
+        - "traefik.http.middlewares.scheduleRedirect.headers.addvaryheader=true"
     depends_on:
       - planner-db
     networks:
