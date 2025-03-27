@@ -148,7 +148,11 @@ export default function Search(props: any) {
                         >
                           Reset
                         </Button>
-                        <Button color="primary" onPress={onClose}>
+                        <Button
+                          color="primary"
+                          variant="flat"
+                          onPress={onClose}
+                        >
                           Filter
                         </Button>
                       </DrawerFooter>
