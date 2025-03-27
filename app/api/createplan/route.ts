@@ -3,6 +3,7 @@ import { NextResponse, NextRequest } from "next/server";
 
 import prisma from "../../../lib/prisma";
 import { auth } from "../../../lib/auth";
+import moment from "moment";
 
 export async function POST(request: NextRequest) {
   const data = await request.json();
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
   const plan = await prisma.coursePlan.create({
     data: {
       name: data.planName,
-      year: "F2024",
+      year: "F2025",
       User: {
         connect: {
           id: user?.id,

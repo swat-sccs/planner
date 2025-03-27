@@ -6,6 +6,7 @@ import {
   Skeleton,
   CardHeader,
   CardBody,
+  Chip,
 } from "@nextui-org/react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -233,6 +234,13 @@ export default function CreatePlan({
                 {course?.courseTitle?.replace(/&amp;/g, "&")}
               </div>
             </div>
+            <Chip
+              size="sm"
+              variant="flat"
+              className="ml-auto mr-2 text-blue-300 bg-background"
+            >
+              {course.year}
+            </Chip>
 
             <Button
               aria-label={"Remove " + course?.courseTitle + " from plan"}

@@ -134,12 +134,23 @@ async function Home(props: any) {
               codes={codes}
               terms={terms}
               times={uniqueTimes}
+              mobile={false}
             />
           </Suspense>
         </div>
 
         <div className="col-span-12  lg:hidden w-[98%]">
-          <Search />
+          <Search
+            filters={
+              <Filters
+                className=""
+                codes={codes}
+                terms={terms}
+                times={uniqueTimes}
+                mobile={true}
+              />
+            }
+          />
         </div>
         {props.courseWrapper}
       </div>

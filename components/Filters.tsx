@@ -118,8 +118,22 @@ export default function Filters(props: any) {
     const output = [];
 
     for (let i = 0; i < props.terms?.length; i++) {
-      const sem = props.terms[i].substring(0, 1);
-      const year = props.terms[i].substring(1);
+      let terms = props.terms?.sort((a: any, b: any) => {
+        // Extract the prefix (f or s) and year (e.g., 2025, 2024) from each string
+        const yearA = parseInt(a.slice(1)); // Get year part from 'f2025' or 's2024'
+        const yearB = parseInt(b.slice(1)); // Get year part from 'f2025' or 's2024'
+
+        // Define the sorting order based on the prefix and year
+        if (yearA === yearB) {
+          return a.charAt(0).localeCompare(b.charAt(0)); // Sort by 'f' and 's' if years are the same
+        }
+
+        // Sort by year (higher years come first)
+        return yearB - yearA;
+      });
+
+      const sem = terms[i].substring(0, 1);
+      const year = terms[i].substring(1);
 
       if (sem.toLowerCase() == "s") {
         output.push({ key: props.terms[i], title: "Spring " + year });
@@ -128,11 +142,9 @@ export default function Filters(props: any) {
       }
     }
 
-    return output
-      .sort(function (a: any, b: any) {
-        return b.key - a.key;
-      })
-      .map((term: any) => <SelectItem key={term.key}>{term.title}</SelectItem>);
+    return output.map((term: any) => (
+      <SelectItem key={term.key}>{term.title}</SelectItem>
+    ));
   };
 
   const firstLoad = useCallback(async () => {
@@ -142,10 +154,10 @@ export default function Filters(props: any) {
     setdotw(searchParams.get("dotw")?.toString().split(","));
     // setSelectedStartTime(searchParams.get("stime")?.toString().split(","));
     if (!termCookie) {
-      cookies.set("termCookie", "S2025");
-      params.set("term", "S2025");
+      cookies.set("termCookie", props.terms[0]);
+      //params.set("term", props.terms[0]);
       replace(`${pathname}?${params.toString()}`);
-      setSelectedTerm(["S2025"]);
+      setSelectedTerm([props.terms[0]]);
     } else {
       params.set("term", termCookie);
       await replace(`${pathname}?${params.toString()}`);
@@ -165,10 +177,10 @@ export default function Filters(props: any) {
           className=""
           classNames={inputStyle}
           size={"sm"}
-          defaultSelectedKeys={["S2025"]}
           label="Select Term"
           selectedKeys={selectedTerm}
           selectionMode={"single"}
+          disallowEmptySelection
           onChange={handleSelectionChange}
         >
           {RenderSelectOptions()}
@@ -188,7 +200,7 @@ export default function Filters(props: any) {
         <CheckboxGroup
           value={selectedStartTime}
           onValueChange={handleSTimeChange}
-          className="lg:max-h-72 overflow-y-scroll "
+          className="lg:max-h-72 max-h-[12vh] overflow-y-scroll"
         >
           {props.times.startTimes.map((startTime: any) => {
             const time = startTime.slice(0, 2) + ":" + startTime.slice(2);

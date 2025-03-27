@@ -3,11 +3,18 @@
 import { Input } from "@nextui-org/input";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
-
+import FilterListIcon from "@mui/icons-material/FilterList";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerBody,
+  DrawerFooter,
+} from "@nextui-org/drawer";
 import SearchIcon from "@mui/icons-material/Search";
 import { useCookies } from "next-client-cookies";
+import { Button, Card, useDisclosure } from "@nextui-org/react";
 
 export default function Search(props: any) {
   const router = useRouter();
@@ -25,6 +32,8 @@ export default function Search(props: any) {
     () => new URLSearchParams(searchParams),
     [searchParams]
   );
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const handleSearch = useDebouncedCallback((term: string) => {
     const filtered_term = term.replace(/[^a-zA-Z0-9 ]+/gi, "");
@@ -58,8 +67,8 @@ export default function Search(props: any) {
     if (pathname === "/") {
       let termCookie = cookies.get("termCookie");
       if (!termCookie) {
-        cookies.set("termCookie", "S2025");
-        params.set("term", "S2025");
+        //cookies.set("termCookie", "S2025");
+        //params.set("term", "S2025");
         replace(`${pathname}?${params.toString()}`);
         setSelectedTerm(searchParams.get("term")?.toString().split(","));
       } else {
@@ -92,6 +101,12 @@ export default function Search(props: any) {
     }
   }, [pathname]);
 
+  function resetFilters() {
+    params.delete("dotw");
+    params.delete("stime");
+    replace(`${pathname}?${params.toString()}`);
+  }
+
   useEffect(() => {
     // Update the document title using the browser API
     firstLoad();
@@ -103,12 +118,52 @@ export default function Search(props: any) {
         size={"lg"}
         className="text-[16px]"
         endContent={
-          <div className="bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-5 rounded-e-xl ">
-            <SearchIcon
-              color="inherit"
-              className="align-middle mt-auto mb-auto flex  "
-            />
-          </div>
+          <>
+            <div className="sm:hidden  bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-1  cursor-pointer hover:opacity-85">
+              <FilterListIcon
+                color="inherit"
+                className="align-middle mt-auto mb-auto flex  "
+                onClick={onOpen}
+              />
+
+              <Drawer
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+                placement={"bottom"}
+                hideCloseButton
+                size="3xl"
+              >
+                <DrawerContent>
+                  {(onClose: any) => (
+                    <>
+                      <DrawerHeader className="flex flex-col gap-1">
+                        Filter
+                      </DrawerHeader>
+                      <DrawerBody>{props.filters}</DrawerBody>
+                      <DrawerFooter>
+                        <Button
+                          onPress={resetFilters}
+                          color="danger"
+                          variant="flat"
+                        >
+                          Reset
+                        </Button>
+                        <Button color="primary" onPress={onClose}>
+                          Filter
+                        </Button>
+                      </DrawerFooter>
+                    </>
+                  )}
+                </DrawerContent>
+              </Drawer>
+            </div>
+            <div className="bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-5 rounded-e-xl cursor-pointer hover:opacity-85">
+              <SearchIcon
+                color="inherit"
+                className="align-middle mt-auto mb-auto flex  "
+              />
+            </div>
+          </>
         }
         placeholder={"Search"}
         //placeholder="Search"
