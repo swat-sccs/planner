@@ -140,8 +140,9 @@ async function Home(props: any) {
           </Suspense>
         </div>
 
-        <div className="col-span-12 lg:hidden w-[98%]">
+        <div className="col-span-12 lg:hidden flex w-[98%]">
           <Search
+            mobile={true}
             filters={
               <Filters
                 className=""

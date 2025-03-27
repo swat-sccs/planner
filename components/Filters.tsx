@@ -187,32 +187,73 @@ export default function Filters(props: any) {
         </Select>
 
         <Divider className="mt-5 w-50" />
-        <div className="mt-5 font-semibold">Days of the Week</div>
-        <CheckboxGroup value={dotw} onValueChange={handleDOTWChange}>
-          {days.map((day: any) => (
-            <Checkbox key={day.key} color="primary" value={day.key}>
-              {day.label}
-            </Checkbox>
-          ))}
-        </CheckboxGroup>
+        {props.mobile ? (
+          <div className="grid grid-cols-2">
+            <div>
+              <div className="mt-5 font-semibold mb-2">Days of the Week</div>
+              <CheckboxGroup value={dotw} onValueChange={handleDOTWChange}>
+                {days.map((day: any) => (
+                  <Checkbox key={day.key} color="primary" value={day.key}>
+                    {day.label}
+                  </Checkbox>
+                ))}
+              </CheckboxGroup>
+            </div>
 
-        <div className="mt-5 font-semibold">Start Time</div>
-        <CheckboxGroup
-          value={selectedStartTime}
-          onValueChange={handleSTimeChange}
-          className="lg:max-h-72 max-h-[12vh] overflow-y-scroll"
-        >
-          {props.times.startTimes.map((startTime: any) => {
-            const time = startTime.slice(0, 2) + ":" + startTime.slice(2);
-            const daTime = moment(time, "HH:mm").format("hh:mm A");
+            <div>
+              <div className="mt-5 font-semibold mb-2">Start Time</div>
+              <CheckboxGroup
+                value={selectedStartTime}
+                onValueChange={handleSTimeChange}
+                className="lg:max-h-72 max-h-[23vh] overflow-y-scroll"
+              >
+                {props.times.startTimes.map((startTime: any) => {
+                  const time = startTime.slice(0, 2) + ":" + startTime.slice(2);
+                  const daTime = moment(time, "HH:mm").format("hh:mm A");
 
-            return (
-              <Checkbox color="secondary" key={startTime} value={startTime}>
-                {daTime}
-              </Checkbox>
-            );
-          })}
-        </CheckboxGroup>
+                  return (
+                    <Checkbox
+                      color="secondary"
+                      key={startTime}
+                      value={startTime}
+                    >
+                      {daTime}
+                    </Checkbox>
+                  );
+                })}
+              </CheckboxGroup>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="mt-5 font-semibold">Days of the Week</div>
+            <CheckboxGroup value={dotw} onValueChange={handleDOTWChange}>
+              {days.map((day: any) => (
+                <Checkbox key={day.key} color="primary" value={day.key}>
+                  {day.label}
+                </Checkbox>
+              ))}
+            </CheckboxGroup>
+
+            <div className="mt-5 font-semibold">Start Time</div>
+            <CheckboxGroup
+              value={selectedStartTime}
+              onValueChange={handleSTimeChange}
+              className="lg:max-h-72 max-h-[12vh] overflow-y-scroll"
+            >
+              {props.times.startTimes.map((startTime: any) => {
+                const time = startTime.slice(0, 2) + ":" + startTime.slice(2);
+                const daTime = moment(time, "HH:mm").format("hh:mm A");
+
+                return (
+                  <Checkbox color="secondary" key={startTime} value={startTime}>
+                    {daTime}
+                  </Checkbox>
+                );
+              })}
+            </CheckboxGroup>
+          </>
+        )}
       </div>
     </>
   );

@@ -119,46 +119,44 @@ export default function Search(props: any) {
         className="text-[18px]"
         endContent={
           <>
-            {props.mobile ? (
-              <div className="sm:hidden  bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-1  cursor-pointer hover:opacity-85">
-                <FilterListIcon
-                  color="inherit"
-                  className="align-middle mt-auto mb-auto flex  "
-                  onClick={onOpen}
-                />
+            <div className="lg:hidden flex bg-slate-400 dark:bg-slate-800 w-12 col-span-1  h-12 justify-center -mr-1  cursor-pointer hover:opacity-85">
+              <FilterListIcon
+                color="inherit"
+                className="align-middle mt-auto mb-auto flex  "
+                onClick={onOpen}
+              />
 
-                <Drawer
-                  isOpen={isOpen}
-                  onOpenChange={onOpenChange}
-                  placement={"bottom"}
-                  hideCloseButton
-                  size="3xl"
-                >
-                  <DrawerContent>
-                    {(onClose: any) => (
-                      <>
-                        <DrawerHeader className="flex flex-col gap-1">
+              <Drawer
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+                placement={"bottom"}
+                hideCloseButton
+                size="3xl"
+              >
+                <DrawerContent>
+                  {(onClose: any) => (
+                    <>
+                      <DrawerHeader className="flex flex-col gap-1">
+                        Filter
+                      </DrawerHeader>
+                      <DrawerBody>{props.filters}</DrawerBody>
+                      <DrawerFooter>
+                        <Button
+                          onPress={resetFilters}
+                          color="danger"
+                          variant="flat"
+                        >
+                          Reset
+                        </Button>
+                        <Button color="primary" onPress={onClose}>
                           Filter
-                        </DrawerHeader>
-                        <DrawerBody>{props.filters}</DrawerBody>
-                        <DrawerFooter>
-                          <Button
-                            onPress={resetFilters}
-                            color="danger"
-                            variant="flat"
-                          >
-                            Reset
-                          </Button>
-                          <Button color="primary" onPress={onClose}>
-                            Filter
-                          </Button>
-                        </DrawerFooter>
-                      </>
-                    )}
-                  </DrawerContent>
-                </Drawer>
-              </div>
-            ) : null}
+                        </Button>
+                      </DrawerFooter>
+                    </>
+                  )}
+                </DrawerContent>
+              </Drawer>
+            </div>
 
             <div className="bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-5 rounded-e-xl cursor-pointer hover:opacity-85">
               <SearchIcon
