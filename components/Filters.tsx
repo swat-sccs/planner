@@ -187,8 +187,9 @@ export default function Filters(props: any) {
         </Select>
 
         <Divider className="mt-5 w-50" />
+
         {props.mobile ? (
-          <div className="grid grid-cols-2">
+          <div className="grid grid-cols-2 h-60 overflow-y-clip">
             <div>
               <div className="mt-5 font-semibold mb-2">Days of the Week</div>
               <CheckboxGroup value={dotw} onValueChange={handleDOTWChange}>
@@ -205,7 +206,7 @@ export default function Filters(props: any) {
               <CheckboxGroup
                 value={selectedStartTime}
                 onValueChange={handleSTimeChange}
-                className="lg:max-h-72 max-h-[23vh] overflow-y-scroll"
+                className="lg:max-h-72 overflow-y-scroll h-48"
               >
                 {props.times.startTimes.map((startTime: any) => {
                   const time = startTime.slice(0, 2) + ":" + startTime.slice(2);

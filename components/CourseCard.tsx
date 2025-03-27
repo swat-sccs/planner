@@ -145,12 +145,12 @@ export default function CourseCard(props: any) {
           <div className="flex justify-between flex-row gap-3">
             <div className="gap-4 basis-1/2">
               {props.course.facultyMeet.meetingTimes.room ? (
-                <div className="bg-gray-400 dark:bg-background_layer shadow-md py-1 px-2 lg:py-2 lg:px-3 w-auto max-w-64 rounded-md">
-                  <div className="font-semibold text-sm lg:text-lg text-white">
+                <div className="bg-gray-300 dark:bg-background_layer shadow-md py-1 px-2 lg:py-2 lg:px-3 w-auto max-w-64 rounded-md">
+                  <div className="font-semibold text-sm lg:text-lg text-black dark:text-white">
                     {props.course.facultyMeet.meetingTimes.buildingDescription}{" "}
                     {props.course.facultyMeet.meetingTimes.room}
                   </div>
-                  <div className="text-sm lg:text-base text-white">
+                  <div className="text-sm lg:text-base text-black dark:text-white">
                     {props.course.facultyMeet.meetingTimes ? (
                       <div className="mt-1">
                         <div className="font-normal">
