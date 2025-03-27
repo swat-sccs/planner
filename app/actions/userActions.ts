@@ -39,7 +39,11 @@ export async function getSelectedCoursePlan(session: any) {
         id: user.id,
       },
     });
-    return selectedCoursePlan?.lastSelectedPlan;
+    if (selectedCoursePlan) {
+      return selectedCoursePlan?.lastSelectedPlan;
+    } else {
+      return null;
+    }
   }
   return "";
 }

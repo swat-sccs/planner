@@ -42,6 +42,8 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: example@test.com
       PGADMIN_DEFAULT_PASSWORD: admin
+    env_file:
+      - .env
     networks:
       - internal
     volumes:
