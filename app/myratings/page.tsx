@@ -53,8 +53,6 @@ export default function RatingPage() {
   function showEditModal(rating: Rating) {
     setSelectedRating(rating);
     setIsOpen(true);
-
-    console.log(rating);
   }
 
   useEffect(() => {

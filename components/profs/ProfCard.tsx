@@ -68,7 +68,7 @@ export default function ProfCard(props: any) {
               <div
                 className={`flex 0 bg-green-500 w-16 h-16 items-center justify-center rounded-md`}
               >
-                <div className="font-black text-3xl">
+                <div className="font-black text-white text-3xl">
                   {props.prof.avgRating.toFixed(1)}
                 </div>
               </div>
@@ -79,7 +79,7 @@ export default function ProfCard(props: any) {
               <div
                 className={`flex 0 bg-green-500 w-16 h-16 items-center justify-center rounded-md`}
               >
-                <div className="font-black text-3xl">
+                <div className="font-black text-white  text-3xl">
                   {props.prof.avgRating.toFixed(1)}
                 </div>
               </div>
@@ -90,7 +90,7 @@ export default function ProfCard(props: any) {
               <div
                 className={`flex 0 bg-orange-500 w-16 h-16 items-center justify-center rounded-md`}
               >
-                <div className="font-black text-3xl">
+                <div className="font-black text-white  text-3xl">
                   {props.prof.avgRating.toFixed(1)}
                 </div>
               </div>
@@ -99,7 +99,7 @@ export default function ProfCard(props: any) {
               <div
                 className={`flex 0 bg-red-500 w-16 h-16 items-center justify-center rounded-md`}
               >
-                <div className="font-black text-3xl">
+                <div className="font-black text-white  text-3xl">
                   {props.prof.avgRating.toFixed(1)}
                 </div>
               </div>

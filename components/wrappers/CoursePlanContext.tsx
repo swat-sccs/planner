@@ -33,7 +33,7 @@ export default function CoursePlanContext(props: any) {
   const firstLoad = useCallback(() => {
     if (props.coursePlans?.length > 0) {
       for (let plan of props.coursePlans) {
-        if (props.lastSelectedCoursePlan) {
+        if (props.lastSelectedCoursePlan != null) {
           if (plan.id == parseInt(props.lastSelectedCoursePlan)) {
             setCourses(plan.courses);
           }

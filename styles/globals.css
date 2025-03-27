@@ -36,6 +36,10 @@
   color: white;
 }
 
+.bg-primary {
+  background-color: transparent;
+}
+
 .fc-col-header-cell-cushion:hover {
   color: white;
   font-family: var(--font-sans);

@@ -73,7 +73,7 @@ export default function CourseCard(props: any) {
           className="flex w-6 h-6 lg:w-8 lg:h-8 rounded-md justify-center items-center"
           style={{ backgroundColor: color_mappings[index] }}
         >
-          <p className="font-bold text-sm lg:text-base text-black dark:text-white">
+          <p className="font-bold text-sm lg:text-base  text-white">
             {item[0]}
           </p>
         </div>
@@ -88,7 +88,7 @@ export default function CourseCard(props: any) {
       if (item) {
         return (
           <Chip key={index} size="sm" variant={"bordered"}>
-            {" " + item.code + " "}
+            <div className="">{" " + item.code + " "}</div>
           </Chip>
         );
       }
@@ -145,7 +145,7 @@ export default function CourseCard(props: any) {
           <div className="flex justify-between flex-row gap-3">
             <div className="gap-4 basis-1/2">
               {props.course.facultyMeet.meetingTimes.room ? (
-                <div className="bg-background_layer shadow-md py-1 px-2 lg:py-2 lg:px-3 w-auto max-w-64 rounded-md">
+                <div className="bg-gray-400 dark:bg-background_layer shadow-md py-1 px-2 lg:py-2 lg:px-3 w-auto max-w-64 rounded-md">
                   <div className="font-semibold text-sm lg:text-lg text-white">
                     {props.course.facultyMeet.meetingTimes.buildingDescription}{" "}
                     {props.course.facultyMeet.meetingTimes.room}

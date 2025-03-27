@@ -193,7 +193,7 @@ export default function CreatePlan({
   const firstLoad = useCallback(() => {
     if (coursePlans.length > 0) {
       for (let plan of coursePlans) {
-        if (lastSelectedCoursePlan) {
+        if (lastSelectedCoursePlan != null) {
           if (plan.id == parseInt(lastSelectedCoursePlan)) {
             updatePlan(plan.courses);
             //updateCalEvents(plan.courses);

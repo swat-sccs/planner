@@ -375,9 +375,9 @@ export async function getCourses(
 
 export async function getEvents(courses: any) {
   let output: any = [];
-  //let courses: any = await getPlanCourses();
+  //let courses: any = await getPlan Courses();
 
-  if (courses?.length > 0) {
+  if (courses?.courses.length > 0) {
     for (let course of courses?.courses) {
       const color = generateColorFromName(course.subject);
 
