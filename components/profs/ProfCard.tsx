@@ -1,22 +1,11 @@
 "use client";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardHeader,
-  Chip,
-  Divider,
-} from "@nextui-org/react";
-import { Error } from "@mui/icons-material";
+import { Card, CardBody, CardHeader } from "@nextui-org/react";
+
 import Image from "next/image";
 
-import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Faculty, Rating } from "@prisma/client";
-import { getProfs, getNumRatings } from "app/actions/getProfs";
 
 export default function ProfCard(props: any) {
-  const [ratings, setRatings] = useState<any>([]);
   const router = useRouter();
   const getUniqueSubjects = (courses: any) => {
     let output: any = [];
@@ -29,15 +18,13 @@ export default function ProfCard(props: any) {
     return output?.map((subj: any) => <div key={subj}>{subj}</div>);
   };
 
-  useEffect(() => {
-    // Log the error to an error reporting service
-  }, []);
-
   return (
     <div
       onClick={() => {
         router.push(`/profratings/${props.prof.uid}`);
       }}
+      key={props.prof.id}
+      className="hover:cursor-pointer"
     >
       <Card
         key={props.prof.id}

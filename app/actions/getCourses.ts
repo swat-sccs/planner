@@ -427,12 +427,14 @@ export async function getEvents(courses: any) {
   let endTime = "17:00";
   let startTime = "09:00";
 
+  /*
   for (const event of output) {
     if (event.startTime < startTime && event.startTime != ":")
       startTime = event.startTime;
     if (event.endTime > endTime && event.endTime != ":")
       endTime = event.endTime;
+    console.log(endTime);
   }
-
+*/
   return output;
 }

@@ -20,6 +20,7 @@ import { getSelectedCoursePlan } from "./actions/userActions";
 import { redirect } from "next/navigation";
 import CoursePlanContext from "../components/wrappers/CoursePlanContext";
 import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -139,7 +140,7 @@ async function Home(props: any) {
           </Suspense>
         </div>
 
-        <div className="col-span-12  lg:hidden w-[98%]">
+        <div className="col-span-12 lg:hidden w-[98%]">
           <Search
             filters={
               <Filters

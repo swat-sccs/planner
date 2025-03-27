@@ -7,6 +7,8 @@ import {
 } from "@fullcalendar/core";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // a plugin!
+import listPlugin from "@fullcalendar/list";
+
 import { Card } from "@nextui-org/react";
 import moment from "moment";
 
@@ -14,10 +16,12 @@ export default function Calendar({
   events,
   startTime,
   endTime,
+  initialView,
 }: {
   events: EventSourceInput | undefined;
   startTime: string;
   endTime: string;
+  initialView: string;
 }) {
   function dayHeaderContent(args: DayHeaderContentArg) {
     return moment(args.date).format("ddd");
@@ -26,7 +30,7 @@ export default function Calendar({
   function renderEventContent(eventInfo: EventContentArg) {
     return (
       <Card
-        className={`fc-event-main-frame w-[100%] rounded-md group min-h-0 hover:min-h-28 ease-in-out px-1 z-0 hover:z-10 hover:transition-all duration-700 text-white ${eventInfo.event.extendedProps.daColor}`}
+        className={`h-16 sm:h-16 lg:h-18 fc-event-main-frame w-[100%] rounded-md group min-h-0 hover:min-h-28 ease-in-out px-1 z-0 hover:z-10 hover:transition-all duration-700 text-white ${eventInfo.event.extendedProps.daColor}`}
       >
         <b className="font-sans text-[10px] font-normal">
           {eventInfo.timeText} {"|"} {eventInfo.event.extendedProps.room}
@@ -53,11 +57,21 @@ export default function Calendar({
         editable={false}
         eventContent={renderEventContent}
         events={events}
-        headerToolbar={false}
+        headerToolbar={{
+          start: "", // will normally be on the left. if RTL, will be on the right
+          center: "",
+          end: "timeGridWeek,listWeek", // will normally be on the right. if RTL, will be on the left
+        }}
         height="100%"
-        initialView="timeGridWeek"
-        plugins={[timeGridPlugin]}
+        initialView={initialView}
+        plugins={[timeGridPlugin, listPlugin]}
         slotDuration="01:00:00"
+        slotLabelFormat={{
+          hour: "numeric",
+          minute: "2-digit",
+          omitZeroMinute: true,
+          meridiem: "short",
+        }}
         slotMaxTime={endTime}
         slotMinTime={startTime}
         weekends={false}

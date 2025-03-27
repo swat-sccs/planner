@@ -40,6 +40,15 @@
   color: white;
   font-family: var(--font-sans);
 }
+.fc-theme-standard .fc-list-day-cushion {
+  background-color: #151d2b;
+  font-family: var(--font-sans);
+  border-radius: 0.5rem 0.5rem 0px 0px;
+}
+
+.fc .fc-list-event:hover td {
+  background-color: #151d2b;
+}
 
 .fc-col-header {
   background-color: #151d2b;

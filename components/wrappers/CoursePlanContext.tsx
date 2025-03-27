@@ -91,11 +91,20 @@ export default function CoursePlanContext(props: any) {
         </div>
       ) : (
         <div className="col-span-12 lg:col-span-9">
-          <div className="h-[80%] sm:h-[83vh] col-span-12 md:col-span-9 font-sans font-normal flex-col sm:px-5">
+          <div className="hidden sm:flex h-[90%] sm:h-[83vh] col-span-12 md:col-span-9 font-sans font-normal flex-col sm:px-5">
             <Calendar
               events={events}
               startTime={props.startTime}
               endTime={props.endTime}
+              initialView={"timeGridWeek"}
+            />
+          </div>
+          <div className="flex sm:hidden h-[90%] sm:h-[83vh] col-span-12 md:col-span-9 font-sans font-normal flex-col sm:px-5">
+            <Calendar
+              events={events}
+              startTime={props.startTime}
+              endTime={props.endTime}
+              initialView={"listWeek"}
             />
           </div>
         </div>

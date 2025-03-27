@@ -113,50 +113,53 @@ export default function Search(props: any) {
   }, [firstLoad]);
 
   return (
-    <div className="w-full">
+    <div className="w-full" key={"search"}>
       <Input
         size={"lg"}
-        className="text-[16px]"
+        className="text-[18px]"
         endContent={
           <>
-            <div className="sm:hidden  bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-1  cursor-pointer hover:opacity-85">
-              <FilterListIcon
-                color="inherit"
-                className="align-middle mt-auto mb-auto flex  "
-                onClick={onOpen}
-              />
+            {props.mobile ? (
+              <div className="sm:hidden  bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-1  cursor-pointer hover:opacity-85">
+                <FilterListIcon
+                  color="inherit"
+                  className="align-middle mt-auto mb-auto flex  "
+                  onClick={onOpen}
+                />
 
-              <Drawer
-                isOpen={isOpen}
-                onOpenChange={onOpenChange}
-                placement={"bottom"}
-                hideCloseButton
-                size="3xl"
-              >
-                <DrawerContent>
-                  {(onClose: any) => (
-                    <>
-                      <DrawerHeader className="flex flex-col gap-1">
-                        Filter
-                      </DrawerHeader>
-                      <DrawerBody>{props.filters}</DrawerBody>
-                      <DrawerFooter>
-                        <Button
-                          onPress={resetFilters}
-                          color="danger"
-                          variant="flat"
-                        >
-                          Reset
-                        </Button>
-                        <Button color="primary" onPress={onClose}>
+                <Drawer
+                  isOpen={isOpen}
+                  onOpenChange={onOpenChange}
+                  placement={"bottom"}
+                  hideCloseButton
+                  size="3xl"
+                >
+                  <DrawerContent>
+                    {(onClose: any) => (
+                      <>
+                        <DrawerHeader className="flex flex-col gap-1">
                           Filter
-                        </Button>
-                      </DrawerFooter>
-                    </>
-                  )}
-                </DrawerContent>
-              </Drawer>
-            </div>
+                        </DrawerHeader>
+                        <DrawerBody>{props.filters}</DrawerBody>
+                        <DrawerFooter>
+                          <Button
+                            onPress={resetFilters}
+                            color="danger"
+                            variant="flat"
+                          >
+                            Reset
+                          </Button>
+                          <Button color="primary" onPress={onClose}>
+                            Filter
+                          </Button>
+                        </DrawerFooter>
+                      </>
+                    )}
+                  </DrawerContent>
+                </Drawer>
+              </div>
+            ) : null}
+
             <div className="bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-5 rounded-e-xl cursor-pointer hover:opacity-85">
               <SearchIcon
                 color="inherit"

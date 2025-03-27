@@ -36,6 +36,14 @@ export default async function CalendarPage(props: any) {
   if (session?.user) {
     planCourses = await getPlanCourses();
     theEvents = await getEvents(planCourses);
+
+    for (const event of theEvents) {
+      if (event.startTime < startTime && event.startTime != ":")
+        startTime = event.startTime;
+      if (event.endTime > endTime && event.endTime != ":")
+        endTime = event.endTime;
+      console.log(endTime);
+    }
     coursePlans = await getCoursePlans();
     lastSelectedCoursePlan = await getSelectedCoursePlan(session);
   }
