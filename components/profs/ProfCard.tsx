@@ -30,7 +30,7 @@ export default function ProfCard(props: any) {
         key={props.prof.id}
         isHoverable
         shadow="sm"
-        className="dark:bg-light_foreground"
+        className="dark:bg-light_foreground drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none"
       >
         <CardHeader className="pl-6">
           <div className="flex items-center flex-row justify-between w-full">

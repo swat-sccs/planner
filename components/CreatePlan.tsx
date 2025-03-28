@@ -219,7 +219,7 @@ export default function CreatePlan({
           aria-label={course?.courseTitle}
           key={course?.id}
           className={
-            "bg-light_foreground min-h-16 max-h-16 rounded-sm scroll-none drop-shadow-lg transition-colors"
+            "bg-light_foreground min-h-16 max-h-16 rounded-sm scroll-none drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none"
           }
           shadow="sm"
 
