@@ -19,7 +19,7 @@ import {
   Skeleton,
 } from "@nextui-org/react";
 import { useCallback } from "react";
-
+import { getUserCount, getPlanCount } from "@/actions/userActions";
 import { MoreVert } from "@mui/icons-material";
 import axios from "axios";
 
@@ -32,10 +32,17 @@ export default function AdminPage() {
 
   //let columns: any[] | undefined = [];
   const [columns, setColumns] = useState<any>([]);
+  const [userCount, setUserCount] = useState<Number>(0);
+
+  const [planCount, setPlanCount] = useState<Number>(0);
 
   const getData = useCallback(async () => {
     setIsLoading(true);
     const data = await fetch("/api/getRatings");
+    let usercount = await getUserCount();
+    let plancount = await getPlanCount();
+    setUserCount(usercount);
+    setPlanCount(plancount);
     const ratings = await data.json();
     const the_columns = [];
     setIsLoading(false);
@@ -126,31 +133,36 @@ export default function AdminPage() {
       return isLoading ? (
         <Skeleton className="rounded-md w-[98%] h-48 align-top justify-start mt-10" />
       ) : (
-        <Table
-          isStriped
-          isHeaderSticky
-          className="overflow-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent h-[80vh] p-4"
-          fullWidth
-          aria-label="Rating table with dynamic content(ratings)"
-        >
-          <TableHeader columns={columns}>
-            {(column: any) => (
-              <TableColumn key={column.key}>{column.label}</TableColumn>
-            )}
-          </TableHeader>
-          <TableBody
-            items={filtered_ratings}
-            emptyContent={"No rows to display."}
+        <>
+          <h2>
+            User Count: {String(userCount)} Plan Count: {String(planCount)}
+          </h2>
+          <Table
+            isStriped
+            isHeaderSticky
+            className="overflow-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent h-[80vh] p-4"
+            fullWidth
+            aria-label="Rating table with dynamic content(ratings)"
           >
-            {(item: any) => (
-              <TableRow key={item.id}>
-                {(columnKey) => (
-                  <TableCell>{renderCell(item, columnKey)}</TableCell>
-                )}
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            <TableHeader columns={columns}>
+              {(column: any) => (
+                <TableColumn key={column.key}>{column.label}</TableColumn>
+              )}
+            </TableHeader>
+            <TableBody
+              items={filtered_ratings}
+              emptyContent={"No rows to display."}
+            >
+              {(item: any) => (
+                <TableRow key={item.id}>
+                  {(columnKey) => (
+                    <TableCell>{renderCell(item, columnKey)}</TableCell>
+                  )}
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </>
       );
     }
   }

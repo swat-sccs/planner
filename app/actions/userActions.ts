@@ -47,3 +47,17 @@ export async function getSelectedCoursePlan(session: any) {
   }
   return "";
 }
+
+export async function getUserCount() {
+  const session = await auth();
+  const usercount = await prisma.user.count();
+
+  return usercount;
+}
+
+export async function getPlanCount() {
+  const session = await auth();
+  const planCount = await prisma.coursePlan.count();
+
+  return planCount;
+}
