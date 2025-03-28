@@ -6,6 +6,15 @@
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) transparent;
 }
+
+.fc-theme-standard {
+  --fc-border-color: #31425D !important;
+}
+
+:where(.dark) .fc-theme-standard {
+  --fc-border-color: #fff !important;
+}
+
 /* override fullcalendar white shadow and border; add filters */
 .fc-timegrid-event-harness-inset .fc-timegrid-event {
   border: none !important;
@@ -44,20 +53,31 @@
   color: white;
   font-family: var(--font-sans);
 }
+
 .fc-theme-standard .fc-list-day-cushion {
-  background-color: #151d2b;
+  background-color: #31425D;
   font-family: var(--font-sans);
-  border-radius: 0.5rem 0.5rem 0px 0px;
+  border-radius: 0.5rem 0.5rem 0rem 0rem;
+  border-color: transparent;
+  color: white;
+}
+
+:where(.dark) .fc-theme-standard .fc-list-day-cushion {
+  background-color: #151d2b;
 }
 
 .fc .fc-list-event:hover td {
-  background-color: #151d2b;
+  background-color: transparent !important;
 }
 
 .fc-col-header {
-  background-color: #151d2b;
+  background-color: #31425D;
   font-family: var(--font-sans);
   border-radius: 0.5rem 0.5rem 0px 0px;
+}
+
+:where(.dark) .fc-col-header {
+  background-color: #151d2b;
 }
 
 .fc {
@@ -79,7 +99,13 @@
 .fc-theme-standard td {
   border-radius: 0rem 0rem 0.5rem 0.5rem;
 }
+
 .fc-theme-standard th {
+  z-index: 1000;
+  border-radius: 0.5rem 0.5rem 0rem 0rem;
+}
+
+.fc-theme-standard .fc-list {
   border-radius: 0.5rem 0.5rem 0rem 0rem;
 }
 
