@@ -412,7 +412,7 @@ export default function RatingPage() {
             />
           </CardBody>
           <CardActions className="ml-auto">
-            <Button onPress={onOpen} color="primary" size="lg">
+            <Button onPress={onOpen} color="primary" variant={"flat"} size="lg">
               Submit
             </Button>
           </CardActions>

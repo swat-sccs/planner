@@ -32,6 +32,11 @@ services:
     networks:
       - traefik
       - internal
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-G", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   planner-db:
     hostname: planner-db
@@ -44,6 +49,11 @@ services:
       - 5432:5432
     networks:
       - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname lists --username lists"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   planner-pgadmin:
     image: dpage/pgadmin4

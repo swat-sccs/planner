@@ -175,11 +175,11 @@ export default function Filters(props: any) {
             </div>
 
             <div>
-              <div className="mt-5 font-semibold mb-2">Start Time</div>
+              <div className="mt-5 font-semibold mb-2 ">Start Time</div>
               <CheckboxGroup
                 value={selectedStartTime}
                 onValueChange={handleSTimeChange}
-                className="lg:max-h-72 overflow-y-scroll h-48"
+                className="lg:max-h-72 overflow-y-scroll h-48 scrollbar-thinscrollbar-thumb-accent-500 scrollbar-track-transparent"
               >
                 {props.times.startTimes.map((startTime: any) => {
                   const time = startTime.slice(0, 2) + ":" + startTime.slice(2);
@@ -213,7 +213,7 @@ export default function Filters(props: any) {
             <CheckboxGroup
               value={selectedStartTime}
               onValueChange={handleSTimeChange}
-              className="lg:max-h-72 max-h-[12vh] overflow-y-scroll"
+              className="lg:max-h-72 max-h-[12vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
             >
               {props.times.startTimes.map((startTime: any) => {
                 const time = startTime.slice(0, 2) + ":" + startTime.slice(2);

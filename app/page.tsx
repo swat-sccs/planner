@@ -131,7 +131,7 @@ async function Home(props: any) {
             }
           >
             <Filters
-              className=""
+              className="scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
               codes={codes}
               terms={terms}
               times={uniqueTimes}
@@ -145,7 +145,7 @@ async function Home(props: any) {
             mobile={true}
             filters={
               <Filters
-                className=""
+                className="scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
                 codes={codes}
                 terms={terms}
                 times={uniqueTimes}
