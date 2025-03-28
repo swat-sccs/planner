@@ -195,7 +195,7 @@ export default function CourseCardAdded(props: any) {
             )}
           </div>
         </div>
-        <div className="w-full h-5 text-green-400 justify-end justify-items-end align-middles opacity-70">
+        <div className="w-full h-5 text-green-600 dark:text-green-400 justify-end justify-items-end align-middles opacity-70">
           <div className="">
             Added to Plan
             <CheckCircleOutlineIcon fontSize="small" />

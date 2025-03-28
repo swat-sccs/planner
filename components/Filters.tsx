@@ -1,38 +1,11 @@
 "use client";
-import { Card, Divider, Input, Skeleton, CardHeader } from "@nextui-org/react";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import SaveIcon from "@mui/icons-material/Save";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-
-import axios from "axios";
+import { Divider } from "@nextui-org/react";
 import { Select, SelectItem } from "@nextui-org/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useCookies } from "next-client-cookies";
-
-import { setPlanCookie } from "../app/actions/actions";
-import { generateColorFromName } from "./primitives";
-import { useDebouncedCallback } from "use-debounce";
-import { setPlanName } from "../app/actions/setPlanName";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  Button,
-} from "@nextui-org/react";
-
-import {
-  getCourseIds,
-  getCoursePlans,
-  removeCourseFromDBPlan,
-} from "app/actions/getCourses";
-import { Course, CoursePlan } from "@prisma/client";
 import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
 import moment from "moment";
 

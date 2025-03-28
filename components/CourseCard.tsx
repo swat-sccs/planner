@@ -183,8 +183,8 @@ export default function CourseCard(props: any) {
                   </div>
                 </div>
               ) : (
-                <div className="bg-background_layer shadow-md py-2 px-3 w-auto max-w-64 rounded-md">
-                  <p className="text-sm lg:text-base text-white">
+                <div className="bg-gray-300 dark:bg-background_layer shadow-md py-2 px-3 w-auto max-w-64 rounded-md">
+                  <p className="text-sm lg:text-base text-black dark:text-white">
                     Contact your Professor for additional details.
                   </p>
                 </div>
@@ -233,7 +233,7 @@ export default function CourseCard(props: any) {
             </div>
           </div>
           {props.added ? (
-            <div className="w-full h-5 text-green-400 justify-end justify-items-end align-middles opacity-70">
+            <div className="w-full h-5 text-green-600 dark:text-green-400 justify-end justify-items-end align-middles opacity-70">
               <div className="">
                 Added to Plan
                 <CheckCircleOutlineIcon fontSize="small" />

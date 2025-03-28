@@ -19,20 +19,16 @@ import {
   DropdownItem,
 } from "@nextui-org/dropdown";
 import { Link } from "@nextui-org/link";
-import NextLink from "next/link";
 import Search from "../components/Search";
 
 import { usePathname } from "next/navigation";
 import { useCookies } from "next-client-cookies";
-import { button as buttonStyles } from "@nextui-org/theme";
 import InputIcon from "@mui/icons-material/Input";
-import SearchIcon from "@mui/icons-material/SearchOutlined";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import axios from "axios";
 
 import { siteConfig } from "../config/site";
 import { ThemeSwitch } from "../components/theme-switch";
-import { title } from "../components/primitives";
 import { Button } from "@nextui-org/button";
 import Logo from "../public/logo.svg";
 
@@ -118,7 +114,7 @@ export const Navbar = (props: any) => {
                 </Link>
               </NavbarItem>
             ))}
-            {/* 
+            {/*
             {session?.user.role == "admin" ? (
               <NavbarMenuItem isActive={pathname === "/admin"} key={"/admin"}>
                 <Link
@@ -157,12 +153,12 @@ export const Navbar = (props: any) => {
               >
                 <DropdownTrigger>
                   <Button
-                    variant="flat"
+                    variant="bordered"
                     className="text-primary border-primary"
                     size={"md"}
                   >
-                    <AccountCircleIcon className="fill-primary " />
-                    <div className="text-foreground font-medium ">
+                    <AccountCircleIcon className="text-primary " />
+                    <div className="font-medium ">
                       {session.user?.name || "Account"}
                     </div>
                   </Button>
@@ -203,7 +199,7 @@ export const Navbar = (props: any) => {
                 onPress={() => signIn("keycloak", { callbackUrl: "/" })}
                 className="border-primary"
               >
-                <InputIcon className="fill-white text-primary" /> Log In
+                <InputIcon className="text-primary" /> Log In
               </Button>
             )}
           </NavbarItem>
@@ -240,7 +236,7 @@ export const Navbar = (props: any) => {
               </NavbarMenuItem>
             ))}
 
-            {/* 
+            {/*
             {session?.user.role == "admin" ? (
               <NavbarMenuItem isActive={pathname === "/admin"} key={"/admin"}>
                 <Link
@@ -264,7 +260,7 @@ export const Navbar = (props: any) => {
               <Dropdown>
                 <DropdownTrigger>
                   <Button variant="bordered">
-                    <AccountCircleIcon className="fill-white" />
+                    <AccountCircleIcon className="text-primary" />
                     {session.user?.name || "Account"}
                   </Button>
                 </DropdownTrigger>
@@ -301,7 +297,7 @@ export const Navbar = (props: any) => {
                 variant="bordered"
                 onPress={() => signIn("keycloak", { callbackUrl: "/" })}
               >
-                <InputIcon className="fill-white text-primary" /> Log In
+                <InputIcon className="text-primary" /> Log In
               </Button>
             )}
           </NavbarItem>

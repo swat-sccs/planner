@@ -70,9 +70,9 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({
         })}
       >
         {!isSelected || isSSR ? (
-          <Brightness4Icon className="fill-primary" />
+          <Brightness4Icon className="text-primary" />
         ) : (
-          <BedtimeIcon className="fill-primary" />
+          <BedtimeIcon className="text-primary" />
         )}
       </div>
     </Component>

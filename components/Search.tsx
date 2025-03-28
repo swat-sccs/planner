@@ -14,10 +14,9 @@ import {
 } from "@nextui-org/drawer";
 import SearchIcon from "@mui/icons-material/Search";
 import { useCookies } from "next-client-cookies";
-import { Button, Card, useDisclosure } from "@nextui-org/react";
+import { Button, useDisclosure } from "@nextui-org/react";
 
 export default function Search(props: any) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const cookies = useCookies();
   const [selectedTerm, setSelectedTerm]: any = useState([]);
@@ -119,10 +118,10 @@ export default function Search(props: any) {
         className="text-[18px]"
         endContent={
           <>
-            <div className="lg:hidden flex bg-slate-400 dark:bg-slate-800 w-12 col-span-1  h-12 justify-center -mr-1  cursor-pointer hover:opacity-85">
+            <div className="bg-default/60 lg:hidden flex w-12 col-span-1 h-12 justify-center -mr-1  cursor-pointer hover:opacity-85">
               <FilterListIcon
                 color="inherit"
-                className="align-middle mt-auto mb-auto flex  "
+                className="align-middle mt-auto mb-auto flex text-black dark:text-white"
                 onClick={onOpen}
               />
 
@@ -162,11 +161,8 @@ export default function Search(props: any) {
               </Drawer>
             </div>
 
-            <div className="bg-slate-400 dark:bg-slate-800 w-12 col-span-1 flex h-12 justify-center -mr-5 rounded-e-xl cursor-pointer hover:opacity-85">
-              <SearchIcon
-                color="inherit"
-                className="align-middle mt-auto mb-auto flex  "
-              />
+            <div className="bg-default/60 w-12 col-span-1 flex h-12 justify-center rounded-e-xl cursor-pointer hover:opacity-85">
+              <SearchIcon className="align-middle mt-auto mb-auto flex text-black dark:text-white" />
             </div>
           </>
         }
@@ -181,7 +177,7 @@ export default function Search(props: any) {
             "text-black/90 dark:text-white/90",
             "placeholder:text-foreground dark:placeholder:text-white/60",
           ],
-          innerWrapper: "bg-transparent",
+          innerWrapper: "bg-transparent, pl-4",
           inputWrapper: [
             "shadow-xl",
             "bg-light_foreground",
@@ -191,6 +187,7 @@ export default function Search(props: any) {
             "dark:hover:bg-default/70",
             "dark:group-data-[focus=true]:bg-default/60",
             "!cursor-text",
+            "px-0",
           ],
         }}
         onChange={(e) => handleSearch(e.target.value)}
