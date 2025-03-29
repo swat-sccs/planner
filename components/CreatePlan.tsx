@@ -239,7 +239,7 @@ export default function CreatePlan({
             <Chip
               size="sm"
               variant="flat"
-              className="ml-auto mr-2 text-blue-300 bg-background"
+              className="ml-auto mr-2 text-accent-500 bg-background"
             >
               {course.year}
             </Chip>

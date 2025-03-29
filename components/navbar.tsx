@@ -74,7 +74,7 @@ export const Navbar = (props: any) => {
     <div className="bg-background_navbar h-auto">
       <NextUINavbar
         classNames={{
-          toggleIcon: ["text-white"],
+          toggleIcon: ["text-primary"],
         }}
         className="bg-inherit lg:py-1"
         maxWidth="full"
@@ -197,9 +197,9 @@ export const Navbar = (props: any) => {
               <Button
                 variant="bordered"
                 onPress={() => signIn("keycloak", { callbackUrl: "/" })}
-                className="border-primary"
+                className="border-primary text-primary"
               >
-                <InputIcon className="text-primary" /> Log In
+                <InputIcon /> Log In
               </Button>
             )}
           </NavbarItem>
@@ -224,7 +224,7 @@ export const Navbar = (props: any) => {
                 <Link
                   key={item.href}
                   color={pathname === item.href ? "secondary" : "foreground"}
-                  className="text-lg dark w-full"
+                  className="text-lg w-full"
                   onPress={() => {
                     cookies.set("pagePref", item.href);
                   }}
@@ -259,8 +259,11 @@ export const Navbar = (props: any) => {
             {status === "authenticated" ? (
               <Dropdown>
                 <DropdownTrigger>
-                  <Button variant="bordered">
-                    <AccountCircleIcon className="text-primary" />
+                  <Button
+                    variant="bordered"
+                    className="text-black border-black dark:text-primary dark:border-primary"
+                  >
+                    <AccountCircleIcon />
                     {session.user?.name || "Account"}
                   </Button>
                 </DropdownTrigger>
@@ -295,9 +298,10 @@ export const Navbar = (props: any) => {
               <Button
                 type="button"
                 variant="bordered"
+                className="text-black border-black dark:text-primary dark:border-primary"
                 onPress={() => signIn("keycloak", { callbackUrl: "/" })}
               >
-                <InputIcon className="text-primary" /> Log In
+                <InputIcon /> Log In
               </Button>
             )}
           </NavbarItem>
