@@ -193,5 +193,19 @@ export async function getYears() {
     }
   }
 
-  return years.sort();
+  let terms = years.sort((a: any, b: any) => {
+    // Extract the prefix (f or s) and year (e.g., 2025, 2024) from each string
+    const yearA = parseInt(a.slice(1)); // Get year part from 'f2025' or 's2024'
+    const yearB = parseInt(b.slice(1)); // Get year part from 'f2025' or 's2024'
+
+    // Define the sorting order based on the prefix and year
+    if (yearA === yearB) {
+      return a.charAt(0).localeCompare(b.charAt(0)); // Sort by 'f' and 's' if years are the same
+    }
+
+    // Sort by year (higher years come first)
+    return yearB - yearA;
+  });
+
+  return terms;
 }

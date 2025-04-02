@@ -20,6 +20,10 @@ export const siteConfig = {
       label: "Rate",
       href: "/rating",
     },
+    {
+      label: "Stats",
+      href: "/stats",
+    },
   ],
   navMenuItems: [
     {
