@@ -14,7 +14,14 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { CircularProgress, Select, SelectItem } from "@nextui-org/react";
+import {
+  Card,
+  CardBody,
+  CardFooter,
+  CircularProgress,
+  Select,
+  SelectItem,
+} from "@nextui-org/react";
 import { getYears } from "@/actions/getProfs";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
@@ -48,7 +55,6 @@ export default function StatsPage(props: any) {
   };
 
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log("handling year change", e.target.value);
     setSelectedYearKeys(e.target.value);
     if (Array.from(e.target.value)[0] == "F") {
       setTerm("Fall");
@@ -128,20 +134,30 @@ export default function StatsPage(props: any) {
       </div>
 
       {data.length > 0 ? (
-        <div className="lg:p-10 lg:h-[70vh] justify-items-center px-5 h-[50vh]">
-          <Bar
-            //@ts-ignore //TODO Figure out why ts hates the following line
-            options={options}
-            data={{
-              labels: data.slice(0, number).map((row: any) => row.label),
-              datasets: [
-                {
-                  data: data.slice(0, number).map((row: any) => row.data),
-                  backgroundColor: "rgba(255, 99, 132, 0.5)",
-                },
-              ],
-            }}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-5">
+          <div className="lg:p-10 lg:h-[70vh] justify-items-center px-5  col-span-4">
+            <Bar
+              //@ts-ignore //TODO Figure out why ts hates the following line
+              options={options}
+              data={{
+                labels: data.slice(0, number).map((row: any) => row.label),
+                datasets: [
+                  {
+                    data: data.slice(0, number).map((row: any) => row.data),
+                    backgroundColor: "rgba(255, 99, 132, 0.5)",
+                  },
+                ],
+              }}
+            />
+          </div>
+          <div className="p-5 lg:p-0 h-[45vh] lg:h-[70vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent ">
+            {data.map((thing: any) => (
+              <Card className="mt-2">
+                <CardBody className="overflow-y-clip">{thing.label}</CardBody>
+                <CardFooter>{thing.data}</CardFooter>
+              </Card>
+            ))}
+          </div>
         </div>
       ) : (
         <div className=" w-[95vw] grid justify-items-center ">
