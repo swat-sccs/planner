@@ -150,7 +150,10 @@ export default function StatsPage(props: any) {
           </div>
           <div className="p-5 lg:p-0 h-[45vh] lg:h-[70vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent ">
             {data.map((thing: any) => (
-              <Card className="mt-2" key={thing.id}>
+              <Card
+                className="mt-2 bg-light_foreground shadow-md"
+                key={thing.id}
+              >
                 <CardBody className="overflow-y-clip">{thing.label}</CardBody>
                 <CardFooter>{thing.data}</CardFooter>
               </Card>
