@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  output.sort((a: any, b: any) => b.data - a.data);
+  //output.sort((a: any, b: any) => b.data - a.data);
   let output2 = output.filter((n: any) => n);
 
   return NextResponse.json(output2, { status: 200 });

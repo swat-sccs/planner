@@ -12,7 +12,6 @@ import {
   BarElement,
   Title,
   Tooltip,
-  Legend,
 } from "chart.js";
 import {
   Card,
@@ -76,7 +75,6 @@ export default function StatsPage(props: any) {
     setYearOptions(myYears);
     setSelectedYearKeys(myYears[0]);
     const theData = await axios.get("/api/getCourseStats?year=" + myYears[0]);
-    console.log(theData.data);
     setData(theData.data);
   }, []);
 
@@ -152,7 +150,7 @@ export default function StatsPage(props: any) {
           </div>
           <div className="p-5 lg:p-0 h-[45vh] lg:h-[70vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent ">
             {data.map((thing: any) => (
-              <Card className="mt-2">
+              <Card className="mt-2" key={thing.id}>
                 <CardBody className="overflow-y-clip">{thing.label}</CardBody>
                 <CardFooter>{thing.data}</CardFooter>
               </Card>
