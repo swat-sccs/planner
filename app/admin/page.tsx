@@ -17,11 +17,21 @@ import {
   DropdownMenu,
   DropdownItem,
   Skeleton,
+  DateValue,
 } from "@nextui-org/react";
 import { useCallback } from "react";
 import { getUserCount, getPlanCount } from "@/actions/userActions";
 import { MoreVert } from "@mui/icons-material";
 import axios from "axios";
+import { DatePicker } from "@nextui-org/react";
+import { parseDate, getLocalTimeZone } from "@internationalized/date";
+import { useDateFormatter } from "@react-aria/i18n";
+import {
+  getFirstDayOfSem,
+  getLastDayOfSem,
+  updateFirstDayOfSem,
+  updateLastDayOfSem,
+} from "@/actions/actions";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -35,8 +45,33 @@ export default function AdminPage() {
   const [userCount, setUserCount] = useState<Number>(0);
 
   const [planCount, setPlanCount] = useState<Number>(0);
+  const [first, setFirst] = React.useState<null | undefined | DateValue>();
+  const [last, setLast] = React.useState<null | undefined | DateValue>();
+
+  let formatter = useDateFormatter({ dateStyle: "full" });
+
+  function handleFirstChange(newFirst: any) {
+    console.log(newFirst);
+    setFirst(newFirst);
+
+    updateFirstDayOfSem(
+      new Date(newFirst.month + " " + newFirst.day + " " + newFirst.year)
+    );
+  }
+  function handleLastChange(newLast: any) {
+    setLast(newLast);
+    updateLastDayOfSem(newLast);
+  }
 
   const getData = useCallback(async () => {
+    /*
+    const theFirst: any = await getFirstDayOfSem();
+    const theLast: any = await getLastDayOfSem();
+    console.log(theFirst, theLast);
+    setFirst(theFirst);
+    setLast(theLast);
+    */
+
     setIsLoading(true);
     const data = await fetch("/api/getRatings");
     let usercount = await getUserCount();
@@ -123,20 +158,32 @@ export default function AdminPage() {
     }
   }, []);
 
-  useEffect(() => {
-    // Log the error to an error reporting service
-    getData();
-  }, [getData]);
-
   if (status === "authenticated") {
     if (session.user?.role === "admin") {
       return isLoading ? (
         <Skeleton className="rounded-md w-[98%] h-48 align-top justify-start mt-10" />
       ) : (
         <>
-          <h2>
-            User Count: {String(userCount)} Plan Count: {String(planCount)}
-          </h2>
+          <div className="w-full grid grid-rows-1 grid-cols-1 lg:grid-cols-3">
+            <h2 className="align-middle">
+              User Count: {String(userCount)} Plan Count: {String(planCount)}
+            </h2>
+            {/* 
+            <DatePicker
+              className="max-w-[284px]"
+              label="First Day of Semester"
+              value={first}
+              onChange={handleFirstChange}
+            />
+            <DatePicker
+              className="max-w-[284px]"
+              label="Last Day of Semester"
+              value={last}
+              onChange={handleLastChange}
+            />
+             */}
+          </div>
+
           <Table
             isStriped
             isHeaderSticky

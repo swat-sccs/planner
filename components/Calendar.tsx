@@ -9,22 +9,34 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // a plugin!
 import listPlugin from "@fullcalendar/list";
 
-import { Card } from "@nextui-org/react";
+import { Button, Card } from "@nextui-org/react";
 import moment from "moment";
-
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import axios from "axios";
 export default function Calendar({
   events,
   startTime,
   endTime,
   initialView,
+  lastSelectedCoursePlan,
 }: {
   events: EventSourceInput | undefined;
   startTime: string;
   endTime: string;
   initialView: string;
+  lastSelectedCoursePlan: Number | undefined;
 }) {
   function dayHeaderContent(args: DayHeaderContentArg) {
     return moment(args.date).format("ddd");
+  }
+
+  async function downloadICAL(lastSelectedCoursePlan: Number | undefined) {
+    await axios
+      .get("/api/exportical?id=" + lastSelectedCoursePlan, {})
+      .then(function (response) {
+        console.log(response);
+      });
   }
 
   function renderEventContent(eventInfo: EventContentArg) {
@@ -50,6 +62,14 @@ export default function Calendar({
 
   return (
     <div className="bg-primary dark:bg-transparent w-full h-full rounded-lg">
+      <a download href={`/api/exportical?id= + ${lastSelectedCoursePlan}`}>
+        <Button
+          className="absolute dark:bg-slate-700"
+          //onPress={() => downloadICAL(lastSelectedCoursePlan)}
+        >
+          <CalendarMonthIcon /> Export Calendar
+        </Button>
+      </a>
       <FullCalendar
         expandRows
         allDaySlot={false}

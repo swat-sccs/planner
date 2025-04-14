@@ -458,7 +458,6 @@ export default function RatingPage() {
                       Close
                     </Button>
                     <Button
-                      color="primary"
                       onPress={() => {
                         onClose(), submitReview();
                       }}

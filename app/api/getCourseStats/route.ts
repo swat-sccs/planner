@@ -94,7 +94,6 @@ export async function GET(request: NextRequest) {
 
   output.sort((a: any, b: any) => b.data - a.data); //Sort Greatest to Least
   let output2 = output.filter((n: any) => n); //Get rid of null
-  console.log(output2);
 
   return NextResponse.json(output2, { status: 200 });
 }

@@ -290,9 +290,8 @@ export async function getCourses(
             OR: [
               {
                 courseTitle: {
-                  contains: query.trim().split(" ").join(" | "),
-
-                  //search: query.trim().split(" ").join(" | "),
+                  //contains: query.trim().split(" ").join(" & "),
+                  search: query.trim().split(" ").join(" | "),
                   mode: "insensitive",
                 },
               },
