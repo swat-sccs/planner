@@ -67,7 +67,9 @@ export default function Calendar({
           className="absolute dark:bg-slate-700"
           //onPress={() => downloadICAL(lastSelectedCoursePlan)}
         >
-          <CalendarMonthIcon /> Export Calendar
+          <a download href={`/api/exportical?id= + ${lastSelectedCoursePlan}`}>
+            <CalendarMonthIcon /> Export Calendar
+          </a>
         </Button>
       </a>
       <FullCalendar

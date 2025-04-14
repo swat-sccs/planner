@@ -13,7 +13,11 @@ export async function GET(request: NextRequest) {
     include: {
       plans: {
         include: {
-          courses: true,
+          courses: {
+            where: {
+              year: yearTerm,
+            },
+          },
         },
       },
     },

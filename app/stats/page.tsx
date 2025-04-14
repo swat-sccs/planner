@@ -22,6 +22,7 @@ import {
   SelectItem,
 } from "@nextui-org/react";
 import { getYears } from "@/actions/getProfs";
+import { getCourseStats } from "@/actions/getCourses";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
@@ -74,19 +75,21 @@ export default function StatsPage(props: any) {
     const myYears = await getYears();
     setYearOptions(myYears);
     setSelectedYearKeys(myYears[0]);
-    const theData = await axios.get("/api/getCourseStats?year=" + myYears[0]);
-    setData(theData.data);
+    //const theData = await axios.get("/api/getCourseStats?year=" + myYears[0]);
+    const theData = await getCourseStats(myYears[0]);
+    setData(theData);
   }, []);
 
   const getData = useCallback(async (yearterm: string) => {
-    const theData = await axios.get("/api/getCourseStats?year=" + yearterm);
+    //const theData = await axios.get("/api/getCourseStats?year=" + yearterm);
+    const theData = await getCourseStats(yearterm);
 
-    setData(theData.data);
+    setData(theData);
   }, []);
 
   useEffect(() => {
     firstRun();
-  }, [firstRun]);
+  }, []);
 
   return (
     <div className=" lg:h-[80vh] ">
