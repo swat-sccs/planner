@@ -15,6 +15,7 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 export default function Calendar({
   events,
   startTime,
@@ -30,14 +31,6 @@ export default function Calendar({
 }) {
   function dayHeaderContent(args: DayHeaderContentArg) {
     return moment(args.date).format("ddd");
-  }
-
-  async function downloadICAL(lastSelectedCoursePlan: Number | undefined) {
-    await axios
-      .get("/api/exportical?id=" + lastSelectedCoursePlan, {})
-      .then(function (response) {
-        console.log(response);
-      });
   }
 
   function renderEventContent(eventInfo: EventContentArg) {
@@ -61,14 +54,18 @@ export default function Calendar({
     );
   }
 
+  const router = useRouter();
+
   return (
     <div className="bg-primary dark:bg-transparent w-full h-full rounded-lg">
-      <Link href={`/api/exportical?id= + ${lastSelectedCoursePlan}`} download>
+      {lastSelectedCoursePlan ? (
         <div className=" absolute dark:bg-slate-700 rounded-md shadow-md w-44 h-10  flex items-center justify-center hover:scale-105 transition-all ">
-          <CalendarMonthIcon />
-          <span className="inline-block "> Export Calendar</span>
+          <a download href={`/api/exportical?id= + ${lastSelectedCoursePlan}`}>
+            <CalendarMonthIcon />
+            <span className="inline-block "> Export Calendar</span>
+          </a>
         </div>
-      </Link>
+      ) : null}
 
       <FullCalendar
         expandRows

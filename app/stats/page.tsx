@@ -22,21 +22,27 @@ import {
 } from "@nextui-org/react";
 import { getYears } from "@/actions/getProfs";
 import { getCourseStats } from "@/actions/getCourses";
+import useSWR from "swr";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
+const fetcher = (url: any) => fetch(url).then((r) => r.json());
 
 export default function StatsPage(props: any) {
   const router = useRouter();
-  const [data, setData] = useState<any>([]);
-  const [loading, setLoading] = useState<Boolean>(false);
 
   const [number, setNumber] = useState<number>(5);
   const [term, setTerm] = useState<string>("");
   const [year, setYear] = useState<string>("");
+  const [yearterm, setYearTerm] = useState<string>("");
   const [mobile, setIsMobile] = useState<Boolean>(true);
 
   const [yearOptions, setYearOptions] = useState<Array<string>>([]);
   const [selectedYearKeys, setSelectedYearKeys] = useState<string>("");
+
+  const { data, error, isLoading } = useSWR(
+    "/api/getCourseStats?year=" + selectedYearKeys,
+    fetcher
+  );
 
   let options = {
     responsive: true,
@@ -63,12 +69,12 @@ export default function StatsPage(props: any) {
     if (Array.from(e.target.value)[0] == "S") {
       setTerm("Spring");
     }
+    setYearTerm(e.target.value);
     setYear(e.target.value.replace("S", "").replace("F", ""));
-    getData(e.target.value);
+    //getData(e.target.value);
   };
 
   const firstRun = useCallback(async () => {
-    setLoading(true);
     const isMobile = /Android|Mobile|iPod|Windows Phone/i.test(
       navigator.userAgent
     );
@@ -77,18 +83,10 @@ export default function StatsPage(props: any) {
     const myYears = await getYears();
     setYearOptions(myYears);
     setSelectedYearKeys(myYears[0]);
+    setYearTerm(myYears[0]);
     //const theData = await axios.get("/api/getCourseStats?year=" + myYears[0]);
-    const theData = await getCourseStats(myYears[0]);
-    setData(theData);
-    setLoading(false);
-  }, []);
-
-  const getData = useCallback(async (yearterm: string) => {
-    setLoading(true);
-    //const theData = await axios.get("/api/getCourseStats?year=" + yearterm);
-    const theData = await getCourseStats(yearterm);
-    setData(theData);
-    setLoading(false);
+    //const theData = await getCourseStats(myYears[0]);
+    //setData(theData);
   }, []);
 
   useEffect(() => {
@@ -138,7 +136,7 @@ export default function StatsPage(props: any) {
         </ButtonGroup>
       </div>
 
-      {!loading ? (
+      {!isLoading && data && !error ? (
         <div className="grid grid-cols-1 lg:grid-cols-5">
           <div className="lg:p-10 lg:h-[70vh] justify-items-center px-5  col-span-4">
             <Bar
