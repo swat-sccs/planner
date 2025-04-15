@@ -14,6 +14,7 @@ import moment from "moment";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import axios from "axios";
+import Link from "next/link";
 export default function Calendar({
   events,
   startTime,
@@ -62,16 +63,13 @@ export default function Calendar({
 
   return (
     <div className="bg-primary dark:bg-transparent w-full h-full rounded-lg">
-      <a download href={`/api/exportical?id= + ${lastSelectedCoursePlan}`}>
-        <Button
-          className="absolute dark:bg-slate-700"
-          //onPress={() => downloadICAL(lastSelectedCoursePlan)}
-        >
-          <a download href={`/api/exportical?id= + ${lastSelectedCoursePlan}`}>
-            <CalendarMonthIcon /> Export Calendar
-          </a>
-        </Button>
-      </a>
+      <Link href={`/api/exportical?id= + ${lastSelectedCoursePlan}`} download>
+        <div className=" absolute dark:bg-slate-700 rounded-md shadow-md w-44 h-10  flex items-center justify-center hover:scale-105 transition-all ">
+          <CalendarMonthIcon />
+          <span className="inline-block "> Export Calendar</span>
+        </div>
+      </Link>
+
       <FullCalendar
         expandRows
         allDaySlot={false}

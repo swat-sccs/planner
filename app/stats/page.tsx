@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import axios from "axios";
 import { Bar } from "react-chartjs-2";
 import { Button, ButtonGroup } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
@@ -29,6 +28,8 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 export default function StatsPage(props: any) {
   const router = useRouter();
   const [data, setData] = useState<any>([]);
+  const [loading, setLoading] = useState<Boolean>(false);
+
   const [number, setNumber] = useState<number>(5);
   const [term, setTerm] = useState<string>("");
   const [year, setYear] = useState<string>("");
@@ -67,6 +68,7 @@ export default function StatsPage(props: any) {
   };
 
   const firstRun = useCallback(async () => {
+    setLoading(true);
     const isMobile = /Android|Mobile|iPod|Windows Phone/i.test(
       navigator.userAgent
     );
@@ -78,13 +80,15 @@ export default function StatsPage(props: any) {
     //const theData = await axios.get("/api/getCourseStats?year=" + myYears[0]);
     const theData = await getCourseStats(myYears[0]);
     setData(theData);
+    setLoading(false);
   }, []);
 
   const getData = useCallback(async (yearterm: string) => {
+    setLoading(true);
     //const theData = await axios.get("/api/getCourseStats?year=" + yearterm);
     const theData = await getCourseStats(yearterm);
-
     setData(theData);
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -134,7 +138,7 @@ export default function StatsPage(props: any) {
         </ButtonGroup>
       </div>
 
-      {data.length > 0 ? (
+      {!loading ? (
         <div className="grid grid-cols-1 lg:grid-cols-5">
           <div className="lg:p-10 lg:h-[70vh] justify-items-center px-5  col-span-4">
             <Bar
