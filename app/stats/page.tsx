@@ -23,6 +23,7 @@ import {
 import { getYears } from "@/actions/getProfs";
 import { getCourseStats } from "@/actions/getCourses";
 import useSWR from "swr";
+import axios from "axios";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 const fetcher = (url: any) => fetch(url).then((r) => r.json());
@@ -36,14 +37,18 @@ export default function StatsPage(props: any) {
   const [yearterm, setYearTerm] = useState<string>("");
   const [mobile, setIsMobile] = useState<Boolean>(true);
 
+  const [isLoading, setIsLoading] = useState<Boolean>(true);
+  const [data, setData] = useState<any>();
+
   const [yearOptions, setYearOptions] = useState<Array<string>>([]);
   const [selectedYearKeys, setSelectedYearKeys] = useState<string>("");
 
+  /*
   const { data, error, isLoading } = useSWR(
     "/api/getCourseStats?year=" + selectedYearKeys,
     fetcher
   );
-
+*/
   let options = {
     responsive: true,
 
@@ -84,6 +89,20 @@ export default function StatsPage(props: any) {
     setYearOptions(myYears);
     setSelectedYearKeys(myYears[0]);
     setYearTerm(myYears[0]);
+
+    axios.get("/api/getCourseStats?year=" + selectedYearKeys);
+
+    await axios
+      .get("/api/getCourseStats?year=" + selectedYearKeys)
+      .then(function (response) {
+        // Handle response
+        console.log(response);
+        setData(response.data);
+        setIsLoading(false);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
     //const theData = await axios.get("/api/getCourseStats?year=" + myYears[0]);
     //const theData = await getCourseStats(myYears[0]);
     //setData(theData);
@@ -136,7 +155,7 @@ export default function StatsPage(props: any) {
         </ButtonGroup>
       </div>
 
-      {!isLoading && data && !error ? (
+      {!isLoading && data ? (
         <div className="grid grid-cols-1 lg:grid-cols-5">
           <div className="lg:p-10 lg:h-[70vh] justify-items-center px-5  col-span-4">
             <Bar

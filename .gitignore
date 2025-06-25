@@ -42,3 +42,5 @@ next-env.d.ts
 public/sw*
 public/swe-worker*
 /pgadmin-data
+
+certificates

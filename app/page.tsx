@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { Skeleton } from "@nextui-org/skeleton";
 
 import { cookies } from "next/headers";
@@ -20,7 +20,6 @@ import { getSelectedCoursePlan } from "./actions/userActions";
 import { redirect } from "next/navigation";
 import CoursePlanContext from "../components/wrappers/CoursePlanContext";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -80,39 +79,6 @@ export default async function Page(props: {
       />
     </Suspense>
   );
-
-  /*
-  homePageProps["fullCourseList"] = (
-    <Suspense
-      fallback={
-        <div className="grid gap-3">
-          <Skeleton className="rounded-md w-[98%] h-48 align-top justify-start" />
-          <Skeleton className="rounded-md w-[98%] h-48 align-top justify-start" />
-          <Skeleton className="rounded-md w-[98%] h-48 align-top justify-start" />
-        </div>
-      }
-    >
-      <FullCourseList
-        init={initalCourses}
-        dotw={dotw}
-        query={query}
-        stime={stime}
-        term={term}
-      />
-    </Suspense>
-  );
-  */
-  /*
-  homePageProps["createPlan"] = (
-    <Suspense
-      fallback={
-        <Skeleton className="rounded-lg w-8/12 h-fit align-top justify-start" />
-      }
-    >
-      <CreatePlan initialPlan={planCourses} coursePlans={coursePlans} />
-    </Suspense>
-  );
-  */
 
   return <Home {...homePageProps} />; // return with no events
 }

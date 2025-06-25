@@ -2,7 +2,7 @@
 import { Course } from "@prisma/client";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import CreatePlan from "../CreatePlan";
-import { Card, Skeleton } from "@nextui-org/react";
+import { Skeleton } from "@nextui-org/react";
 import { FullCourseList } from "../FullCourseList";
 import Calendar from "../Calendar";
 import { getEvents } from "app/actions/getCourses";
@@ -51,15 +51,7 @@ export default function CoursePlanContext(props: any) {
     },
     [events]
   );
-  /*
-  async function updateCalEvents(newCourses: Course[]) {
-    let formatCourses = { courses: newCourses };
-    console.log("hi", formatCourses);
-    let theEvents: Event[] = await getEvents(formatCourses);
-    setEvents(theEvents);
-    router.refresh();
-  }
-    */
+
   useEffect(() => {
     firstLoad();
   }, [props.initialPlan]);
@@ -122,8 +114,6 @@ export default function CoursePlanContext(props: any) {
             if (!props.courseList) {
               updateCalEvents(newCourses);
             }
-
-            //props.refreshEvents();
           }}
           courses={courses}
           initialPlan={props.initalPlanCourses}
@@ -134,14 +124,3 @@ export default function CoursePlanContext(props: any) {
     </>
   );
 }
-
-/*
-function Panel({ title, children, isActive, onShow }) {
-  return (
-    <section className="panel">
-      <h3>{title}</h3>
-      {isActive ? <p>{children}</p> : <button onClick={onShow}>Show</button>}
-    </section>
-  );
-}
-  */
