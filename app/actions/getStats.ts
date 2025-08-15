@@ -12,6 +12,16 @@ export const getItem = cache(async (year: string) => {
   //const { searchParams } = await new URL(request.url);
   const yearTerm = year || "F2025";
 
+  const distinctCourses = await prisma.course.groupBy({
+    by: ["year", "courseTitle"],
+    where: { year: year },
+    _count: { courseTitle: true },
+    orderBy: {
+      _count: { courseTitle: "desc" },
+    },
+  });
+
+  /*
   const output: any = [];
   const users = await prisma.user.findMany({
     include: {
@@ -31,7 +41,6 @@ export const getItem = cache(async (year: string) => {
     let userCourses = [];
     for (const plan of user.plans) {
       for (const course of plan.courses) {
-        console.log(course);
         userCourses[course.id] = {
           id: course.id,
           name: course.courseTitle,
@@ -63,6 +72,6 @@ export const getItem = cache(async (year: string) => {
 
   output.sort((a: any, b: any) => b.data - a.data); //Sort Greatest to Least
   let output2 = output.filter((n: any) => n); //Get rid of null
-
-  return output2;
+*/
+  return distinctCourses;
 });

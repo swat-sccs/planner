@@ -70,6 +70,22 @@ export default function StatsPage(props: any) {
     }
     setYearTerm(e.target.value);
     setYear(e.target.value.replace("S", "").replace("F", ""));
+
+    setData(null);
+    setIsLoading(true);
+    startTransition(() => {
+      getItem(e.target.value)
+        .then((response: any) => {
+          setData(response);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    });
   };
 
   const firstRun = useCallback(async () => {
@@ -83,7 +99,6 @@ export default function StatsPage(props: any) {
     setYearOptions(myYears);
     setSelectedYearKeys(myYears[0]);
     setYearTerm(myYears[0]);
-
     startTransition(() => {
       getItem(myYears[0])
         .then((response: any) => {
@@ -116,7 +131,7 @@ export default function StatsPage(props: any) {
     firstRun();
   }, []);
 
-  return !isLoading ? (
+  return (
     <>
       <div className=" lg:h-[80vh] ">
         <div className="w-full grid lg:grid-cols-2 grid-cols-1">
@@ -160,17 +175,21 @@ export default function StatsPage(props: any) {
           </ButtonGroup>
         </div>
 
-        {data ? (
+        {!isLoading && data ? (
           <div className="grid grid-cols-1 lg:grid-cols-5">
             <div className="lg:p-10 lg:h-[70vh] justify-items-center px-5  col-span-4">
               <Bar
                 //@ts-ignore //TODO Figure out why ts hates the following line
                 options={options}
                 data={{
-                  labels: data.slice(0, number).map((row: any) => row.label),
+                  labels: data
+                    .slice(0, number)
+                    .map((row: any) => row.courseTitle),
                   datasets: [
                     {
-                      data: data.slice(0, number).map((row: any) => row.data),
+                      data: data
+                        .slice(0, number)
+                        .map((row: any) => row._count.courseTitle),
                       backgroundColor: "rgba(255, 99, 132, 0.5)",
                     },
                   ],
@@ -181,28 +200,26 @@ export default function StatsPage(props: any) {
               {data.map((thing: any) => (
                 <Card
                   className="mt-2 bg-light_foreground shadow-md"
-                  key={thing.id}
+                  key={thing.courseTitle}
                 >
-                  <CardBody className="overflow-y-clip">{thing.label}</CardBody>
-                  <CardFooter>{thing.data}</CardFooter>
+                  <CardBody className="overflow-y-clip">
+                    {thing.courseTitle}
+                  </CardBody>
+                  <CardFooter>{thing._count.courseTitle}</CardFooter>
                 </Card>
               ))}
             </div>
           </div>
         ) : (
-          <div className=" w-[95vw] grid justify-items-center ">
-            Something went wrong. Please refresh the page.
+          <div className=" w-[95vw] grid justify-items-center justify-self-center">
+            <CircularProgress
+              label="Fetching Stats"
+              aria-label="Loading..."
+              size="lg"
+            />
           </div>
         )}
       </div>
     </>
-  ) : (
-    <div className=" w-[95vw] grid justify-items-center justify-self-center">
-      <CircularProgress
-        label="Fetching Stats"
-        aria-label="Loading..."
-        size="lg"
-      />
-    </div>
   );
 }
