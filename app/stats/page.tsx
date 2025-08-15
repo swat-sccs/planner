@@ -1,6 +1,6 @@
 "use client";
 import { cache } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, startTransition } from "react";
 import { Bar } from "react-chartjs-2";
 import { Button, ButtonGroup } from "@nextui-org/button";
 import { useRouter } from "next/navigation";
@@ -83,9 +83,21 @@ export default function StatsPage(props: any) {
     setYearOptions(myYears);
     setSelectedYearKeys(myYears[0]);
     setYearTerm(myYears[0]);
-    let tempData = await getItem(myYears[0]);
-    setData(tempData);
-    setIsLoading(false);
+
+    startTransition(() => {
+      getItem(myYears[0])
+        .then((response: any) => {
+          setData(response);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    });
+
     /*
     await axios
       .get("/api/getCourseStats?year=" + selectedYearKeys)
