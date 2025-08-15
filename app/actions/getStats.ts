@@ -5,21 +5,31 @@ import "server-only";
 import prisma from "../../lib/prisma";
 
 export const preload = async (year: string) => {
-  void getItem(year);
+  void getItem(year, 5);
 };
 
-export const getItem = cache(async (year: string) => {
+export const getItem = cache(async (year: string, amount: number) => {
   //const { searchParams } = await new URL(request.url);
   const yearTerm = year || "F2025";
 
-  const distinctCourses = await prisma.course.groupBy({
-    by: ["year", "courseTitle"],
-    where: { year: year },
-    _count: { courseTitle: true },
-    orderBy: {
-      _count: { courseTitle: "desc" },
+  const popularCourses = await prisma.course.findMany({
+    where: {
+      year: year,
+      CoursePlan: { some: {} }, // course appears in at least one plan
     },
+    select: {
+      id: true,
+      courseTitle: true,
+      _count: {
+        select: { CoursePlan: true }, // ✅ relation counting works here
+      },
+    },
+    orderBy: {
+      CoursePlan: { _count: "desc" }, // ✅ sort by relation count
+    },
+    take: amount,
   });
+  console.log(popularCourses);
 
   /*
   const output: any = [];
@@ -73,5 +83,5 @@ export const getItem = cache(async (year: string) => {
   output.sort((a: any, b: any) => b.data - a.data); //Sort Greatest to Least
   let output2 = output.filter((n: any) => n); //Get rid of null
 */
-  return distinctCourses;
+  return popularCourses;
 });

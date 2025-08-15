@@ -74,7 +74,7 @@ export default function StatsPage(props: any) {
     setData(null);
     setIsLoading(true);
     startTransition(() => {
-      getItem(e.target.value)
+      getItem(e.target.value, number)
         .then((response: any) => {
           setData(response);
           setIsLoading(false);
@@ -88,6 +88,23 @@ export default function StatsPage(props: any) {
     });
   };
 
+  function getNewData(num: number) {
+    console.log(yearterm, num);
+    startTransition(() => {
+      getItem(yearterm, num)
+        .then((response: any) => {
+          setData(response);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          console.error(err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    });
+  }
+
   const firstRun = useCallback(async () => {
     const isMobile = /Android|Mobile|iPod|Windows Phone/i.test(
       navigator.userAgent
@@ -100,7 +117,7 @@ export default function StatsPage(props: any) {
     setSelectedYearKeys(myYears[0]);
     setYearTerm(myYears[0]);
     startTransition(() => {
-      getItem(myYears[0])
+      getItem(myYears[0], number)
         .then((response: any) => {
           setData(response);
           setIsLoading(false);
@@ -154,6 +171,7 @@ export default function StatsPage(props: any) {
             <Button
               onPress={() => {
                 setNumber(5);
+                getNewData(5);
               }}
             >
               5
@@ -161,6 +179,7 @@ export default function StatsPage(props: any) {
             <Button
               onPress={() => {
                 setNumber(10);
+                getNewData(10);
               }}
             >
               10
@@ -168,6 +187,7 @@ export default function StatsPage(props: any) {
             <Button
               onPress={() => {
                 setNumber(20);
+                getNewData(20);
               }}
             >
               20
@@ -189,7 +209,7 @@ export default function StatsPage(props: any) {
                     {
                       data: data
                         .slice(0, number)
-                        .map((row: any) => row._count.courseTitle),
+                        .map((row: any) => row._count.CoursePlan),
                       backgroundColor: "rgba(255, 99, 132, 0.5)",
                     },
                   ],
@@ -200,12 +220,12 @@ export default function StatsPage(props: any) {
               {data.map((thing: any) => (
                 <Card
                   className="mt-2 bg-light_foreground shadow-md"
-                  key={thing.courseTitle}
+                  key={thing.id}
                 >
                   <CardBody className="overflow-y-clip">
                     {thing.courseTitle}
                   </CardBody>
-                  <CardFooter>{thing._count.courseTitle}</CardFooter>
+                  <CardFooter>{thing._count.CoursePlan}</CardFooter>
                 </Card>
               ))}
             </div>
