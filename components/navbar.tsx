@@ -52,7 +52,9 @@ export const Navbar = (props: any) => {
       updateViaCache: "all",
     });
   }
-
+  function run() {
+    console.log("HELLO");
+  }
   useEffect(() => {
     setIsMenuOpen(false); // Close the navigation panel
   }, [pathname]);
@@ -89,8 +91,8 @@ export const Navbar = (props: any) => {
               href="/"
               onPress={() => {
                 cookies.set("pagePref", "/");
+                //console.log(pathname);
               }}
-              //onPress={() => router.push("/")}
             >
               <div>
                 <Logo className="h-9 lg:h-12" />
@@ -104,11 +106,14 @@ export const Navbar = (props: any) => {
                 <Link
                   key={item.href}
                   color={pathname === item.href ? "secondary" : "foreground"}
-                  className="text-lg dark"
+                  className="text-lg dark cursor-pointer"
                   onPress={() => {
                     cookies.set("pagePref", item.href);
+                    if (pathname != item.href) {
+                      router.push(item.href);
+                    }
                   }}
-                  href={item.href}
+                  //href={item.href}
                 >
                   {item.label}
                 </Link>

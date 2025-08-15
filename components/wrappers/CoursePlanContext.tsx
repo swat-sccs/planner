@@ -1,12 +1,14 @@
 "use client";
 import { Course } from "@prisma/client";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import CreatePlan from "../CreatePlan";
 import { Skeleton } from "@nextui-org/react";
 import { FullCourseList } from "../FullCourseList";
 import Calendar from "../Calendar";
 import { getEvents } from "app/actions/getCourses";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCookies } from "next-client-cookies";
+
 interface Event {
   classNames: string;
   textColor: string;
@@ -24,11 +26,16 @@ interface Event {
 }
 
 export default function CoursePlanContext(props: any) {
-  const router = useRouter();
   const [courses, setCourses] = useState<Course[]>(
     props.initalPlanCourses?.courses
   );
   const [events, setEvents] = useState<Event[]>(props.calEvents);
+  const searchParams = useSearchParams();
+
+  const params = useMemo(
+    () => new URLSearchParams(searchParams),
+    [searchParams]
+  );
 
   const firstLoad = useCallback(() => {
     if (props.coursePlans?.length > 0) {

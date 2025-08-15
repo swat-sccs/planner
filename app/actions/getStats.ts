@@ -1,12 +1,16 @@
-import { CoursePlan } from "@prisma/client";
-// api/test.ts
-import { NextResponse, NextRequest } from "next/server";
+"use server";
 
-import prisma from "../../../lib/prisma";
+import { cache } from "react";
+import "server-only";
+import prisma from "../../lib/prisma";
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = await new URL(request.url);
-  const yearTerm = (await searchParams.get("year")) || "F2025";
+export const preload = async (year: string) => {
+  void getItem(year);
+};
+
+export const getItem = cache(async (year: string) => {
+  //const { searchParams } = await new URL(request.url);
+  const yearTerm = year || "F2025";
 
   const output: any = [];
   const users = await prisma.user.findMany({
@@ -60,5 +64,5 @@ export async function GET(request: NextRequest) {
   output.sort((a: any, b: any) => b.data - a.data); //Sort Greatest to Least
   let output2 = output.filter((n: any) => n); //Get rid of null
 
-  return NextResponse.json(output2, { status: 200 });
-}
+  return output2;
+});

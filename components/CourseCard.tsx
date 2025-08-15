@@ -22,10 +22,11 @@ import {
 } from "app/actions/getCourses";
 import { useRouter } from "next/navigation";
 import moment from "moment";
+import { useSession } from "next-auth/react";
 
 export const card = tv({
   slots: {
-    base: "hover:cursor-pointer bg-light_foreground min-h-32 max-h-62 w-[98%] rounded-md scroll-none drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none",
+    base: ` bg-light_foreground min-h-32 max-h-62 w-[98%] rounded-md scroll-none drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none`,
     role: "font-bold text-primary ",
   },
 });
@@ -48,6 +49,7 @@ export default function CourseCard(props: any) {
   }
     */
   const color = generateColorFromName(props.course.subject);
+  const { data: session, status } = useSession();
 
   const color_mappings: { [key: string]: string } = {
     "0": "#4CB944",
@@ -99,8 +101,13 @@ export default function CourseCard(props: any) {
 
   return (
     //onClick={() => updateCourses(props.course)}
-    <div>
-      <Card key={props.course.id} isHoverable className={base()} shadow="sm">
+    <div className={session ? "cursor-pointer" : " cursor-default"}>
+      <Card
+        key={props.course.id}
+        isHoverable={session != null}
+        className={base()}
+        shadow="sm"
+      >
         <div className={`absolute top-0 left-0 h-full z-50 w-2 ${color}`} />
         <CardHeader className="pl-6">
           <div className="flex items-center flex-row justify-between w-full">

@@ -1,5 +1,5 @@
 "use client";
-
+import { cache } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import { Button, ButtonGroup } from "@nextui-org/button";
@@ -22,11 +22,11 @@ import {
 } from "@nextui-org/react";
 import { getYears } from "@/actions/getProfs";
 import { getCourseStats } from "@/actions/getCourses";
-import useSWR from "swr";
+
 import axios from "axios";
+import { preload, getItem } from "@/actions/getStats";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
-const fetcher = (url: any) => fetch(url).then((r) => r.json());
 
 export default function StatsPage(props: any) {
   const router = useRouter();
@@ -43,12 +43,6 @@ export default function StatsPage(props: any) {
   const [yearOptions, setYearOptions] = useState<Array<string>>([]);
   const [selectedYearKeys, setSelectedYearKeys] = useState<string>("");
 
-  /*
-  const { data, error, isLoading } = useSWR(
-    "/api/getCourseStats?year=" + selectedYearKeys,
-    fetcher
-  );
-*/
   let options = {
     responsive: true,
 
@@ -76,7 +70,6 @@ export default function StatsPage(props: any) {
     }
     setYearTerm(e.target.value);
     setYear(e.target.value.replace("S", "").replace("F", ""));
-    //getData(e.target.value);
   };
 
   const firstRun = useCallback(async () => {
@@ -86,109 +79,118 @@ export default function StatsPage(props: any) {
 
     setIsMobile(!isMobile);
     const myYears = await getYears();
+    preload(myYears[0]);
     setYearOptions(myYears);
     setSelectedYearKeys(myYears[0]);
     setYearTerm(myYears[0]);
-
-    axios.get("/api/getCourseStats?year=" + selectedYearKeys);
-
+    let tempData = await getItem(myYears[0]);
+    setData(tempData);
+    setIsLoading(false);
+    /*
     await axios
       .get("/api/getCourseStats?year=" + selectedYearKeys)
       .then(function (response) {
         // Handle response
-        console.log(response);
         setData(response.data);
         setIsLoading(false);
       })
       .catch(function (error) {
         console.log(error);
       });
-    //const theData = await axios.get("/api/getCourseStats?year=" + myYears[0]);
-    //const theData = await getCourseStats(myYears[0]);
-    //setData(theData);
+      */
   }, []);
 
   useEffect(() => {
     firstRun();
   }, []);
 
-  return (
-    <div className=" lg:h-[80vh] ">
-      <div className="w-full grid lg:grid-cols-2 grid-cols-1">
-        <Select
-          selectionMode="single"
-          isRequired
-          disallowEmptySelection
-          selectedKeys={[selectedYearKeys]}
-          className="max-w-sm mt-5 sm:mt-0 lg:px-0 px-5"
-          label="Semester"
-          onChange={handleYearChange}
-        >
-          {yearOptions.map((year) => (
-            <SelectItem key={year}>
-              {year.replace("F", "Fall ").replace("S", "Spring ")}
-            </SelectItem>
-          ))}
-        </Select>
-        <ButtonGroup className="lg:ml-auto mt-5 lg:mt-0 mb-5 lg:mb-0">
-          <Button
-            onPress={() => {
-              setNumber(5);
-            }}
+  return !isLoading ? (
+    <>
+      <div className=" lg:h-[80vh] ">
+        <div className="w-full grid lg:grid-cols-2 grid-cols-1">
+          <Select
+            selectionMode="single"
+            isRequired
+            disallowEmptySelection
+            selectedKeys={[selectedYearKeys]}
+            className="max-w-sm mt-5 sm:mt-0 lg:px-0 px-5"
+            label="Semester"
+            onChange={handleYearChange}
           >
-            5
-          </Button>
-          <Button
-            onPress={() => {
-              setNumber(10);
-            }}
-          >
-            10
-          </Button>
-          <Button
-            onPress={() => {
-              setNumber(20);
-            }}
-          >
-            20
-          </Button>
-        </ButtonGroup>
-      </div>
-
-      {!isLoading && data ? (
-        <div className="grid grid-cols-1 lg:grid-cols-5">
-          <div className="lg:p-10 lg:h-[70vh] justify-items-center px-5  col-span-4">
-            <Bar
-              //@ts-ignore //TODO Figure out why ts hates the following line
-              options={options}
-              data={{
-                labels: data.slice(0, number).map((row: any) => row.label),
-                datasets: [
-                  {
-                    data: data.slice(0, number).map((row: any) => row.data),
-                    backgroundColor: "rgba(255, 99, 132, 0.5)",
-                  },
-                ],
-              }}
-            />
-          </div>
-          <div className="p-5 lg:p-0 h-[45vh] lg:h-[70vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent ">
-            {data.map((thing: any) => (
-              <Card
-                className="mt-2 bg-light_foreground shadow-md"
-                key={thing.id}
-              >
-                <CardBody className="overflow-y-clip">{thing.label}</CardBody>
-                <CardFooter>{thing.data}</CardFooter>
-              </Card>
+            {yearOptions.map((year) => (
+              <SelectItem key={year}>
+                {year.replace("F", "Fall ").replace("S", "Spring ")}
+              </SelectItem>
             ))}
+          </Select>
+          <ButtonGroup className="lg:ml-auto mt-5 lg:mt-0 mb-5 lg:mb-0">
+            <Button
+              onPress={() => {
+                setNumber(5);
+              }}
+            >
+              5
+            </Button>
+            <Button
+              onPress={() => {
+                setNumber(10);
+              }}
+            >
+              10
+            </Button>
+            <Button
+              onPress={() => {
+                setNumber(20);
+              }}
+            >
+              20
+            </Button>
+          </ButtonGroup>
+        </div>
+
+        {data ? (
+          <div className="grid grid-cols-1 lg:grid-cols-5">
+            <div className="lg:p-10 lg:h-[70vh] justify-items-center px-5  col-span-4">
+              <Bar
+                //@ts-ignore //TODO Figure out why ts hates the following line
+                options={options}
+                data={{
+                  labels: data.slice(0, number).map((row: any) => row.label),
+                  datasets: [
+                    {
+                      data: data.slice(0, number).map((row: any) => row.data),
+                      backgroundColor: "rgba(255, 99, 132, 0.5)",
+                    },
+                  ],
+                }}
+              />
+            </div>
+            <div className="p-5 lg:p-0 h-[45vh] lg:h-[70vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent ">
+              {data.map((thing: any) => (
+                <Card
+                  className="mt-2 bg-light_foreground shadow-md"
+                  key={thing.id}
+                >
+                  <CardBody className="overflow-y-clip">{thing.label}</CardBody>
+                  <CardFooter>{thing.data}</CardFooter>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className=" w-[95vw] grid justify-items-center ">
-          <CircularProgress aria-label="Loading..." size="lg" />
-        </div>
-      )}
+        ) : (
+          <div className=" w-[95vw] grid justify-items-center ">
+            Something went wrong. Please refresh the page.
+          </div>
+        )}
+      </div>
+    </>
+  ) : (
+    <div className=" w-[95vw] grid justify-items-center justify-self-center">
+      <CircularProgress
+        label="Fetching Stats"
+        aria-label="Loading..."
+        size="lg"
+      />
     </div>
   );
 }

@@ -20,8 +20,6 @@ export default function Search(props: any) {
   const searchParams = useSearchParams();
   const cookies = useCookies();
   const [selectedTerm, setSelectedTerm]: any = useState([]);
-  const [selectedProf, setSelectedProf]: any = useState([]);
-  const [defaultVal, setDefaultVal]: any = useState("");
 
   const [search, setSearch]: any = useState();
   const pathname = usePathname();
@@ -37,7 +35,6 @@ export default function Search(props: any) {
   const handleSearch = useDebouncedCallback((term: string) => {
     const filtered_term = term.replace(/[^a-zA-Z0-9 ]+/gi, "");
     const include_colons = term.replace(/[^a-zA-Z0-9: ]+/gi, "");
-    const term_list = include_colons.split(" ");
 
     if (term) {
       //decodeURIComponent;
@@ -76,6 +73,7 @@ export default function Search(props: any) {
           params.set("query", searchTermCookie);
         }
         params.set("term", termCookie);
+        await window;
         replace(`${pathname}?${params.toString()}`);
         //setSelectedTerm(searchParams.get("term")?.toString().split(","));
         setSearch(searchTermCookie);
@@ -109,7 +107,7 @@ export default function Search(props: any) {
   useEffect(() => {
     // Update the document title using the browser API
     firstLoad();
-  }, [firstLoad]);
+  }, []);
 
   return (
     <div className="w-full" key={"search"}>
