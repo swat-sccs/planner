@@ -108,18 +108,20 @@ export default function CreatePlan({
 
   function checkCourses() {
     let terms: any = {};
-    for (let course of courses) {
-      if (terms[course.year] != undefined) {
-        terms[course.year] += 1;
-      } else {
-        terms[course.year] = 0;
+    if (courses) {
+      for (let course of courses) {
+        if (terms[course.year] != undefined) {
+          terms[course.year] += 1;
+        } else {
+          terms[course.year] = 0;
+        }
       }
-    }
-    console.log(Object.keys(terms).length);
-    if (Object.keys(terms).length > 1) {
-      setWarning(true);
-    } else {
-      setWarning(false);
+      console.log(Object.keys(terms).length);
+      if (Object.keys(terms).length > 1) {
+        setWarning(true);
+      } else {
+        setWarning(false);
+      }
     }
   }
 
