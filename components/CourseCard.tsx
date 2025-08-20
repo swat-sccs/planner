@@ -49,7 +49,7 @@ export default function CourseCard(props: any) {
   }
     */
   const color = generateColorFromName(props.course.subject);
-  console.log(color);
+
   const { data: session, status } = useSession();
 
   const color_mappings: { [key: string]: string } = {

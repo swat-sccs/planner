@@ -50,7 +50,6 @@ import { Course, CoursePlan } from "@prisma/client";
 
 interface CreatePlanProps {
   updatePlan: any;
-
   courses: Course[];
   initialPlan: any;
   coursePlans: any;
@@ -78,6 +77,8 @@ export default function CreatePlan({
   const [editable, setEditable]: any = useState("");
   const [deleteIsOpen, setDeleteIsOpen] = useState(false);
   const [edit, setEdit]: any = useState(false);
+  const [warning, setWarning] = useState<Boolean>(false);
+
   //const [courses, setCourses] = useState<Course[]>();
   //const [coursePlans, setCoursePlans] = useState<CoursePlan[]>(
   //  props.coursePlans
@@ -104,6 +105,23 @@ export default function CreatePlan({
       }
     }
   };
+
+  function checkCourses() {
+    let terms: any = {};
+    for (let course of courses) {
+      if (terms[course.year] != undefined) {
+        terms[course.year] += 1;
+      } else {
+        terms[course.year] = 0;
+      }
+    }
+    console.log(Object.keys(terms).length);
+    if (Object.keys(terms).length > 1) {
+      setWarning(true);
+    } else {
+      setWarning(false);
+    }
+  }
 
   const handleNameChange = useDebouncedCallback((newName: any, id: string) => {
     setPlanName(newName, id);
@@ -211,6 +229,9 @@ export default function CreatePlan({
       firstLoad();
     }
   }, [initialPlan]);
+  useEffect(() => {
+    checkCourses();
+  }, [courses]);
 
   const CoursesList = () => {
     if (courses) {
@@ -231,18 +252,15 @@ export default function CreatePlan({
 
           <CardHeader className="justify-between">
             <div className="ml-2 lg:text-base truncate text-bold">
-              {course?.subject} {""} {course?.courseNumber}
+              {course?.subject} {""} {course?.courseNumber} -{" "}
+              {course?.year.replace(
+                new Date().getFullYear(),
+                course?.year.slice(3)
+              )}
               <div className="text-tiny ">
                 {course?.courseTitle?.replace(/&amp;/g, "&")}
               </div>
             </div>
-            <Chip
-              size="sm"
-              variant="flat"
-              className="ml-auto mr-2 text-accent-500 bg-background"
-            >
-              {course.year}
-            </Chip>
 
             <Button
               aria-label={"Remove " + course?.courseTitle + " from plan"}
@@ -452,6 +470,11 @@ export default function CreatePlan({
             </div>
           </div>
         </div>
+        {warning && (
+          <div className="text-red-600 text-center">
+            <strong>Warning:</strong> Cross semester courses
+          </div>
+        )}
 
         <div
           className="flex flex-col h-auto mb-20 md:mb-0 md:h-[50vh] overflow-y-scroll gap-3 scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
