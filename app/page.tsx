@@ -33,15 +33,17 @@ export default async function Page(props: {
 }) {
   const cookieStore = await cookies();
   const planID = await cookieStore.get("plan");
-  const pagePref = cookieStore.get("pagePref");
+  const pagePref = await cookieStore.get("pagePref");
   const session = await auth();
 
   if (pagePref && pagePref.value != "/") {
     redirect(pagePref.value);
   }
-
   const searchParams = await props.searchParams;
-  const query = searchParams?.query || "";
+  const query =
+    searchParams?.query ||
+    (await cookieStore.get("searchTermCookie")?.value) ||
+    "";
   const term = searchParams?.term || "";
   const dotw = searchParams?.dotw || [];
   const stime = searchParams?.stime || [];

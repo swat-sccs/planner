@@ -128,7 +128,8 @@ export default function CourseCard(props: any) {
               </h2>
             </div>
             <div className="flex items-center">
-              <div className="relative h-14 w-14 lg:h-20 lg:w-20 pr-2 lg:pr-3 overflow-clip rounded-md">
+              <div className="relative h-14 w-14 lg:h-20 overflow-clip rounded-md">
+                {/*
                 <Image
                   // src={"https://www.swarthmore.edu/sites/default/files/styles/headshot/public/assets/images/user_photos/cmurphy4.jpg.webp"}
                   alt={props.course.instructor.displayName.replace(
@@ -143,6 +144,17 @@ export default function CourseCard(props: any) {
                     "https://cdn.vectorstock.com/i/500p/08/19/gray-photo-placeholder-icon-design-ui-vector-35850819.jpg"
                   }
                 />
+                 */}
+                <Chip
+                  size="md"
+                  variant="flat"
+                  className={`justify-self-end bg-${color}`}
+                >
+                  {props.course.year.replace(
+                    new Date().getFullYear(),
+                    props.course.year.slice(3)
+                  )}
+                </Chip>
               </div>
             </div>
           </div>

@@ -185,16 +185,9 @@ export async function getInitialCourses(
   stime: any
 ) {
   const startTime = stime.toString().split(",").filter(Number);
+  console.log(query);
   return await prisma.course.findMany({
     take: 20,
-    where: {
-      ...(term
-        ? {
-            year: term,
-          }
-        : {}),
-    },
-
     include: {
       sectionAttributes: true,
       facultyMeet: {
@@ -203,6 +196,76 @@ export async function getInitialCourses(
         },
       },
       instructor: true,
+    },
+
+    ...(query != ""
+      ? {
+          orderBy: [
+            {
+              _relevance: {
+                fields: ["courseTitle", "subject", "courseNumber"],
+                search: query.trim().split(" ").join(" & "),
+                sort: "desc",
+              },
+            },
+          ],
+        }
+      : ""),
+    where: {
+      ...(term
+        ? {
+            year: term,
+          }
+        : {}),
+      //year: term,
+
+      ...(query
+        ? {
+            OR: [
+              {
+                courseTitle: {
+                  //contains: query.trim().split(" ").join(" & "),
+                  search: query.trim().split(" ").join(" | "),
+                  mode: "insensitive",
+                },
+              },
+              {
+                sectionAttributes: {
+                  some: {
+                    code: {
+                      contains: query.trim().split(" ").join(" | "),
+                      //search: query.trim().split(" ").join(" | "),
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              },
+              {
+                subject: {
+                  contains: query.trim().split(" ").join(" | "),
+                  //search: query.trim().split(" ").join(" | "),
+                  mode: "insensitive",
+                },
+              },
+              {
+                courseNumber: {
+                  //contains: query.trim().split(" ").join(" | "),
+                  search: query.trim().split(" ").join(" | "),
+                  mode: "insensitive",
+                },
+              },
+              {
+                instructor: {
+                  displayName: {
+                    contains: query.trim().split(" ").join(" | "),
+                    //search: query.trim().split(" ").join(" | "),
+                    mode: "insensitive",
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
     },
   });
 }

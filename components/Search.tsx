@@ -59,7 +59,7 @@ export default function Search(props: any) {
     replace(`${pathname}?${params.toString()}`);
   }, 700);
 
-  const firstLoad = useCallback(async () => {
+  const firstLoad = async () => {
     if (pathname === "/") {
       let termCookie = cookies.get("termCookie");
       if (!termCookie) {
@@ -96,7 +96,7 @@ export default function Search(props: any) {
         setSearch(profCookie);
       }
     }
-  }, [pathname]);
+  };
 
   function resetFilters() {
     params.delete("dotw");

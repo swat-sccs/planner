@@ -37,7 +37,7 @@ export default function CoursePlanContext(props: any) {
     [searchParams]
   );
 
-  const firstLoad = useCallback(() => {
+  const firstLoad = async () => {
     if (props.coursePlans?.length > 0) {
       for (let plan of props.coursePlans) {
         if (props.lastSelectedCoursePlan != null) {
@@ -47,7 +47,7 @@ export default function CoursePlanContext(props: any) {
         }
       }
     }
-  }, [props.coursePlans, courses, props.initalPlanCourses]);
+  };
 
   const updateCalEvents = useCallback(
     async (newCourses: Course[]) => {
@@ -61,7 +61,7 @@ export default function CoursePlanContext(props: any) {
 
   useEffect(() => {
     firstLoad();
-  }, [props.initialPlan]);
+  }, [props.initialPlan, searchParams]);
 
   return (
     <>
