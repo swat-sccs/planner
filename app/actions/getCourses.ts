@@ -185,7 +185,7 @@ export async function getInitialCourses(
   stime: any
 ) {
   const startTime = stime.toString().split(",").filter(Number);
-  console.log(query);
+
   return await prisma.course.findMany({
     take: 20,
     include: {

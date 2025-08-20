@@ -60,6 +60,8 @@ export default async function Page(props: {
     planCourses = await getPlanCourses();
     coursePlans = await getCoursePlans();
     lastSelectedCoursePlan = await getSelectedCoursePlan(session);
+  } else {
+    initalCourses = await getInitialCourses(query, term, dotw, stime);
   }
   homePageProps["courseWrapper"] = (
     <Suspense
