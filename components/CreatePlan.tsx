@@ -471,8 +471,8 @@ export default function CreatePlan({
           </div>
         </div>
         {warning && (
-          <div className="text-red-600 text-center">
-            <strong>Warning:</strong> Cross semester courses
+          <div className="text-red-600 text-center text-sm">
+            <strong>Warning:</strong> Different Semesters Detected
           </div>
         )}
 
