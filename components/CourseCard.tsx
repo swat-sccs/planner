@@ -49,6 +49,7 @@ export default function CourseCard(props: any) {
   }
     */
   const color = generateColorFromName(props.course.subject);
+  console.log(color);
   const { data: session, status } = useSession();
 
   const color_mappings: { [key: string]: string } = {
@@ -148,7 +149,7 @@ export default function CourseCard(props: any) {
                 <Chip
                   size="md"
                   variant="flat"
-                  className={`justify-self-end bg-${color}`}
+                  className={`justify-self-end ${color} text-white `}
                 >
                   {props.course.year.replace(
                     new Date().getFullYear(),
