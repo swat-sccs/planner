@@ -253,10 +253,14 @@ export default function CreatePlan({
           <CardHeader className="justify-between">
             <div className="ml-2 lg:text-base truncate text-bold">
               {course?.subject} {""} {course?.courseNumber} -{" "}
-              {course?.year.replace(
-                new Date().getFullYear(),
-                course?.year.slice(3)
-              )}
+              <div
+                className={warning ? "text-red-500 font-bold inline" : "inline"}
+              >
+                {course?.year.replace(
+                  new Date().getFullYear(),
+                  course?.year.slice(3)
+                )}
+              </div>
               <div className="text-tiny ">
                 {course?.courseTitle?.replace(/&amp;/g, "&")}
               </div>
