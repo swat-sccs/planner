@@ -44,7 +44,8 @@ export default async function Page(props: {
     searchParams?.query ||
     (await cookieStore.get("searchTermCookie")?.value) ||
     "";
-  const term = searchParams?.term || "";
+  const term =
+    searchParams?.term || (await cookieStore.get("termCookie")?.value) || "";
   const dotw = searchParams?.dotw || [];
   const stime = searchParams?.stime || [];
   const profQuery = searchParams?.prof || "";
