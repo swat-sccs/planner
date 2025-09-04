@@ -11,6 +11,16 @@ import ical, {
   ICalWeekday,
 } from "ical-generator";
 
+function getLaborDay() {
+  let targetDate = new Date();
+  let targetYear = targetDate.getFullYear();
+  let firstDateInMonth = new Date(targetYear, 8, 1);
+  let firstWeekdayInMonth = firstDateInMonth.getDay();
+  let firstMondayDate = 1 + ((8 - firstWeekdayInMonth) % 7);
+  console.log(new Date(targetYear, 8, firstMondayDate, 0, 0, 0, 0));
+  return new Date(targetYear, 8, firstMondayDate, 0, 0, 0, 0);
+}
+
 function getRealStart(
   meetingTimes: MeetingTime,
   firstDayOfSem: Date,
@@ -21,18 +31,32 @@ function getRealStart(
 
   if (meetingTimes.sunday) {
     offset = (0 - startDOTW + 7) % 7 || 7;
+    classStart.setDate(classStart.getDate() + offset);
+    return;
   } else if (meetingTimes.monday) {
     offset = (1 - startDOTW + 7) % 7 || 7;
+    classStart.setDate(classStart.getDate() + offset);
+    return;
   } else if (meetingTimes.tuesday) {
     offset = (2 - startDOTW + 7) % 7 || 7;
+    classStart.setDate(classStart.getDate() + offset);
+    return;
   } else if (meetingTimes.wednesday) {
     offset = (3 - startDOTW + 7) % 7 || 7;
+    classStart.setDate(classStart.getDate() + offset);
+    return;
   } else if (meetingTimes.thursday) {
     offset = (4 - startDOTW + 7) % 7 || 7;
+    classStart.setDate(classStart.getDate() + offset);
+    return;
   } else if (meetingTimes.friday) {
     offset = (5 - startDOTW + 7) % 7 || 7;
+    classStart.setDate(classStart.getDate() + offset);
+    return;
   } else if (meetingTimes.saturday) {
     offset = (6 - startDOTW + 7) % 7 || 7;
+    classStart.setDate(classStart.getDate() + offset);
+    return;
   }
 
   classStart.setDate(classStart.getDate() + offset);
@@ -41,9 +65,11 @@ function getRealStart(
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const lastSelectedCoursePlan = searchParams.get("id");
+  const FIRSTDAYOFWEEK = "Aug 31, 2025";
 
-  let firstDayOfSem = new Date("Aug 31, 2025");
-  let lastDayOfSem = new Date("Dec 10, 2025");
+  let targetYear = new Date().getFullYear();
+  let firstDayOfSem = new Date(targetYear, 7, 31, 0, 0, 0, 0);
+  let lastDayOfSem = new Date(targetYear, 11, 10, 0, 0, 0, 0);
 
   // Given an incoming request...
   const newHeaders = new Headers();
@@ -102,7 +128,8 @@ export async function GET(request: NextRequest) {
           }
 
           let classStart = new Date(
-            "Aug 31, 2025 " +
+            FIRSTDAYOFWEEK +
+              " " +
               course.facultyMeet.meetingTimes.beginTime.substring(0, 2) +
               ":" +
               course.facultyMeet.meetingTimes.beginTime.substring(2) +
@@ -116,7 +143,8 @@ export async function GET(request: NextRequest) {
           );
 
           let classEnd = new Date(
-            "Aug 31, 2025 " +
+            FIRSTDAYOFWEEK +
+              " " +
               course.facultyMeet.meetingTimes.endTime.substring(0, 2) +
               ":" +
               course.facultyMeet.meetingTimes.endTime.substring(2) +
@@ -128,6 +156,7 @@ export async function GET(request: NextRequest) {
             firstDayOfSem,
             classEnd
           );
+          const laborDay = getLaborDay();
 
           calendar
             .createEvent({
@@ -144,7 +173,7 @@ export async function GET(request: NextRequest) {
               freq: ICalEventRepeatingFreq.WEEKLY,
               until: lastDayOfSem,
               byDay: repeatArray,
-              exclude: [firstDayOfSem], // exclude these dates
+              exclude: [firstDayOfSem, laborDay], // exclude these dates
             })
             .timezone("America/New_York");
 

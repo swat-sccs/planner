@@ -20,6 +20,26 @@ services:
 
     command: sh -c "npm install --silent && npx prisma migrate dev --name init && npx prisma generate && npm run dev "
 
+  planner-prisma-studio:
+    container_name: planner-prisma-studio
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dev
+    volumes:
+      - .:/usr/src/app
+    environment:
+      NODE_ENV: development
+      DOMAIN: http://127.0.0.1:3000/
+      POSTGRES_DB: planner_db
+    env_file:
+      - .env
+    ports:
+      - 1111:1111
+    networks:
+      - internal
+
+    command: sh -c "npx prisma studio -p 1111 -n 0.0.0.0"
+
   planner-db-dev:
     container_name: planner-db-dev
     image: postgres:16.4-bullseye

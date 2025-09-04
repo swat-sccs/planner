@@ -57,6 +57,7 @@ model Course {
   facultyMeet             MeetingsFaculty    @relation(fields: [facultyMeetId], references: [id])
   sectionAttributes       sectionAttribute[]
   CoursePlan              CoursePlan[]       @relation("CourseToCoursePlan")
+  isShown                 Boolean            @default(true)
 
   @@index([subject, courseNumber], map: "subj_course")
 }

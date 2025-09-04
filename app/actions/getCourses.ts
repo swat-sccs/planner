@@ -215,6 +215,7 @@ export async function getInitialCourses(
       ...(term
         ? {
             year: term,
+            isShown: true,
           }
         : {}),
       //year: term,
@@ -304,6 +305,28 @@ export async function getCoursePlans() {
   }
   return courses;
 }
+export async function getAllCourses(term: any) {
+  return await prisma.course.findMany({
+    include: {
+      sectionAttributes: true,
+      facultyMeet: {
+        include: {
+          meetingTimes: true,
+        },
+      },
+      instructor: true,
+    },
+
+    where: {
+      ...(term
+        ? {
+            year: term,
+            isShown: true,
+          }
+        : {}),
+    },
+  });
+}
 
 export async function getCourses(
   take: any,
@@ -344,6 +367,7 @@ export async function getCourses(
       ...(term
         ? {
             year: term,
+            isShown: true,
           }
         : {}),
       //year: term,
