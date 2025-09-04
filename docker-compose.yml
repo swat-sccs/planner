@@ -38,30 +38,6 @@ services:
       timeout: 5s
       retries: 10
 
-  planner-prisma-studio:
-    container_name: planner-prisma-studio
-    image: registry.sccs.swarthmore.edu/sccs/planner/planner:latest
-    volumes:
-      - .:/usr/src/app
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.network=traefik"
-        - "traefik.http.routers.planner_prisma.entrypoints=https"
-        - "traefik.http.routers.planner_prisma.rule=Host(`plan.sccs.swarthmore.edu`) && PathPrefix(`/prisma`)"
-        - "traefik.http.routers.planner_prisma.tls=true"
-        - "traefik.http.routers.planner_prisma.tls.certresolver=letsEncrypt"
-        - "traefik.http.services.planner_prisma.loadbalancer.server.port=1111"
-    environment:
-      NODE_ENV: production
-    env_file:
-      - .env
-    ports:
-      - 1111:1111
-    networks:
-      - internal
-    command: sh -c "npx prisma studio -p 1111 -n 0.0.0.0"
-
   planner-db:
     hostname: planner-db
     image: postgres:16.4-bullseye
