@@ -40,9 +40,7 @@ services:
 
   planner-prisma-studio:
     container_name: planner-prisma-studio
-    build:
-      context: .
-      dockerfile: ./Dockerfile.dev
+    image: registry.sccs.swarthmore.edu/sccs/planner/planner:latest
     volumes:
       - .:/usr/src/app
     deploy:
