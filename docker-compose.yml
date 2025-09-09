@@ -41,8 +41,6 @@ services:
   planner-prisma-studio:
     container_name: planner-prisma-studio
     image: registry.sccs.swarthmore.edu/sccs/planner/planner:latest
-    volumes:
-      - .:/usr/src/app
     deploy:
       labels:
         - "traefik.enable=true"
