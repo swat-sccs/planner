@@ -49,9 +49,9 @@ services:
         - "traefik.http.routers.planner_prisma.rule=Host(`plan.sccs.swarthmore.edu`) && PathPrefix(`/prisma`)"
         - "traefik.http.routers.planner_prisma.tls=true"
         - "traefik.http.routers.planner_prisma.tls.certresolver=letsEncrypt"
-        - "traefik.http.services.planner_prisma.loadbalancer.server.port=1111"
+        - "traefik.http.services.planner_prisma.loadbalancer.server.port=5555"
         - "traefik.http.middlewares.prisma-stripprefix.stripprefix.prefixes=/prisma"
-        - "traefik.http.middlewares.prisma-auth.basicauth.users=sccs-staff:$2y$05$Cpq.X.MqKD.OS.KdvIBmaeLPBiNqwEhGi.xm7prfzf988WQ.uCmSm"
+        - "traefik.http.middlewares.prisma-auth.basicauth.usersFile=${PRISMA_AUTH_USER}"
         - "traefik.http.routers.planner_prisma.middlewares=prisma-stripprefix,prisma-auth"
     environment:
       NODE_ENV: production
@@ -60,7 +60,7 @@ services:
     networks:
       - internal
       - traefik
-    command: sh -c "npx prisma studio -p 1111 -n 0.0.0.0"
+    command: sh -c "npm install && npx prisma studio --hostname 0.0.0.0"
   planner-db:
     hostname: planner-db
     image: postgres:16.4-bullseye
