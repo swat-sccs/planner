@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardBody,
   Chip,
+  Tooltip,
 } from "@nextui-org/react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -443,43 +444,47 @@ export default function CreatePlan({
                   }}
                 />
               ) : null}
-
-              <Button
-                aria-label="Duplicate the current plan"
-                isIconOnly
-                size="md"
-                onPress={() => duplicatePlan()}
-                startContent={<ContentCopyIcon />}
-              />
-              <Popover
-                placement="bottom"
-                showArrow={true}
-                color={"foreground"}
-                isOpen={deleteIsOpen}
-                onOpenChange={(open) => setDeleteIsOpen(open)}
-              >
-                <PopoverTrigger>
-                  <Button
-                    aria-label="Delete the current plan"
-                    isIconOnly
-                    size="md"
-                    startContent={<DeleteIcon />}
-                  />
-                </PopoverTrigger>
-                <PopoverContent>
-                  <div className="px-1 py-2">
-                    <div
-                      role="button"
-                      onClick={() => {
-                        deletePlan(), setDeleteIsOpen(false);
-                      }}
-                      className="text-small font-bold"
-                    >
-                      Delete Plan?
+              <Tooltip content="Duplicate Plan" showArrow>
+                <Button
+                  aria-label="Duplicate the current plan"
+                  isIconOnly
+                  size="md"
+                  onPress={() => duplicatePlan()}
+                  startContent={<ContentCopyIcon />}
+                />
+              </Tooltip>
+              <Tooltip content="Delete Plan">
+                <Popover
+                  placement="bottom"
+                  showArrow={true}
+                  color={"foreground"}
+                  isOpen={deleteIsOpen}
+                  onOpenChange={(open) => setDeleteIsOpen(open)}
+                >
+                  <PopoverTrigger>
+                    <Button
+                      aria-label="Delete the current plan"
+                      isIconOnly
+                      size="md"
+                      startContent={<DeleteIcon />}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <div className="px-1 py-2">
+                      <div
+                        role="button"
+                        onClick={() => {
+                          deletePlan(), setDeleteIsOpen(false);
+                        }}
+                        className="text-small font-bold"
+                      >
+                        Delete Plan?
+                      </div>
                     </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  </PopoverContent>
+                </Popover>
+              </Tooltip>
+
               {edit ? (
                 <Button
                   aria-label="Save new plan name"
@@ -489,21 +494,23 @@ export default function CreatePlan({
                   startContent={<SaveIcon />}
                 />
               ) : (
-                <Button
-                  aria-label="Edit name of course plan"
-                  isIconOnly
-                  size="md"
-                  onPress={() => {
-                    setEdit(true),
-                      setEditable(
-                        coursePlans?.find(
-                          (plan: any) =>
-                            plan.id === parseInt(selectedCoursePlan)
-                        )?.name
-                      );
-                  }}
-                  startContent={<EditIcon />}
-                />
+                <Tooltip content="Edit Plan Name" showArrow>
+                  <Button
+                    aria-label="Edit name of course plan"
+                    isIconOnly
+                    size="md"
+                    onPress={() => {
+                      setEdit(true),
+                        setEditable(
+                          coursePlans?.find(
+                            (plan: any) =>
+                              plan.id === parseInt(selectedCoursePlan)
+                          )?.name
+                        );
+                    }}
+                    startContent={<EditIcon />}
+                  />
+                </Tooltip>
               )}
             </div>
           </div>
