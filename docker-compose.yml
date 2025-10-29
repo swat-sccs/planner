@@ -51,7 +51,7 @@ services:
         - "traefik.http.routers.planner_prisma.tls.certresolver=letsEncrypt"
         - "traefik.http.services.planner_prisma.loadbalancer.server.port=5555"
         - "traefik.http.middlewares.prisma-stripprefix.stripprefix.prefixes=/prisma"
-        - "traefik.http.middlewares.prisma-auth.basicauth.usersFile=${PRISMA_AUTH_USER}"
+        - "traefik.http.middlewares.prisma-auth.basicauth.users=${PRISMA_AUTH_USER}"
         - "traefik.http.routers.planner_prisma.middlewares=prisma-stripprefix,prisma-auth"
     environment:
       NODE_ENV: production

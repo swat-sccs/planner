@@ -129,7 +129,7 @@ export default function CourseCard(props: any) {
               </h2>
             </div>
             <div className="flex items-center">
-              <div className="relative h-14 w-14 lg:h-20 overflow-clip rounded-md">
+              <div className="relative h-14  lg:h-20 rounded-md">
                 {/*
                 <Image
                   // src={"https://www.swarthmore.edu/sites/default/files/styles/headshot/public/assets/images/user_photos/cmurphy4.jpg.webp"}
@@ -151,10 +151,7 @@ export default function CourseCard(props: any) {
                   variant="flat"
                   className={`justify-self-end ${color} text-white `}
                 >
-                  {props.course.year.replace(
-                    new Date().getFullYear(),
-                    props.course.year.slice(3)
-                  )}
+                  {props.course.year.slice(0, 1) + props.course.year.slice(3)}
                 </Chip>
               </div>
             </div>

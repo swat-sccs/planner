@@ -108,7 +108,7 @@ export default function CreatePlan({
 
   function checkCourses() {
     let terms: any = {};
-    if (courses) {
+    if (courses && courses.length > 0) {
       for (let course of courses) {
         if (terms[course.year] != undefined) {
           terms[course.year] += 1;
@@ -258,10 +258,7 @@ export default function CreatePlan({
               <div
                 className={warning ? "text-red-500 font-bold inline" : "inline"}
               >
-                {course?.year.replace(
-                  new Date().getFullYear(),
-                  course?.year.slice(3)
-                )}
+                {course.year.slice(0, 1) + course.year.slice(3)}
               </div>
               <div className="text-tiny ">
                 {course?.courseTitle?.replace(/&amp;/g, "&")}

@@ -1,2 +1,2 @@
 * * * * * root date >> /var/log/cron.log
-0 * * * * root /app/swatscraper -semester=fall -year=2025 -env=/app/.env >> /var/log/cron.log
+0 * * * * root /app/swatscraper -semester=spring -year=2026 -env=/app/.env >> /var/log/cron.log
