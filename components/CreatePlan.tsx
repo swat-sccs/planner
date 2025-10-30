@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardBody,
   Chip,
+  Tooltip,
 } from "@nextui-org/react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -14,6 +15,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 import axios from "axios";
 import { Select, SelectItem } from "@nextui-org/react";
@@ -92,7 +94,7 @@ export default function CreatePlan({
     if (auth) {
       const theCoursePlans: CoursePlan[] = await getCoursePlans();
       const courses: any = await getPlanCourses();
-      updatePlan(courses);
+      updatePlan(courses?.courses);
       generatePlanList(theCoursePlans);
 
       if (b && coursePlans?.length > 1) {
@@ -196,6 +198,30 @@ export default function CreatePlan({
           //setPlanCookie("-55");
           //console.log(response);
           router.refresh(); //currently refreshing the dom, wonder if there is a more efficent way to re render the course listings
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  }
+
+  async function duplicatePlan() {
+    let theSelectedCoursePlan = await getSelectedCoursePlan(session);
+    if (theSelectedCoursePlan && coursePlans.length > 0) {
+      const currentPlan = coursePlans.find(
+        (plan: any) => plan.id === parseInt(theSelectedCoursePlan)
+      );
+      axios
+        .post("/api/duplicatePlan", {
+          planId: theSelectedCoursePlan,
+          planName: `${currentPlan?.name} (Copy)`,
+        })
+        .then(async function (response: any) {
+          updateSelectedCoursePlan(String(response.data.id));
+          fetchNewData(false);
+          let thing = { target: { value: String(response.data.id) } };
+          handleSelectionChange(thing);
+          router.refresh();
         })
         .catch(function (error) {
           console.log(error);
@@ -415,36 +441,47 @@ export default function CreatePlan({
                   }}
                 />
               ) : null}
-
-              <Popover
-                placement="bottom"
-                showArrow={true}
-                color={"foreground"}
-                isOpen={deleteIsOpen}
-                onOpenChange={(open) => setDeleteIsOpen(open)}
-              >
-                <PopoverTrigger>
-                  <Button
-                    aria-label="Delete the current plan"
-                    isIconOnly
-                    size="md"
-                    startContent={<DeleteIcon />}
-                  />
-                </PopoverTrigger>
-                <PopoverContent>
-                  <div className="px-1 py-2">
-                    <div
-                      role="button"
-                      onClick={() => {
-                        deletePlan(), setDeleteIsOpen(false);
-                      }}
-                      className="text-small font-bold"
-                    >
-                      Delete Plan?
+              <Tooltip content="Duplicate Plan" showArrow>
+                <Button
+                  aria-label="Duplicate the current plan"
+                  isIconOnly
+                  size="md"
+                  onPress={() => duplicatePlan()}
+                  startContent={<ContentCopyIcon />}
+                />
+              </Tooltip>
+              <Tooltip content="Delete Plan">
+                <Popover
+                  placement="bottom"
+                  showArrow={true}
+                  color={"foreground"}
+                  isOpen={deleteIsOpen}
+                  onOpenChange={(open) => setDeleteIsOpen(open)}
+                >
+                  <PopoverTrigger>
+                    <Button
+                      aria-label="Delete the current plan"
+                      isIconOnly
+                      size="md"
+                      startContent={<DeleteIcon />}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <div className="px-1 py-2">
+                      <div
+                        role="button"
+                        onClick={() => {
+                          deletePlan(), setDeleteIsOpen(false);
+                        }}
+                        className="text-small font-bold"
+                      >
+                        Delete Plan?
+                      </div>
                     </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  </PopoverContent>
+                </Popover>
+              </Tooltip>
+
               {edit ? (
                 <Button
                   aria-label="Save new plan name"
@@ -454,21 +491,23 @@ export default function CreatePlan({
                   startContent={<SaveIcon />}
                 />
               ) : (
-                <Button
-                  aria-label="Edit name of course plan"
-                  isIconOnly
-                  size="md"
-                  onPress={() => {
-                    setEdit(true),
-                      setEditable(
-                        coursePlans?.find(
-                          (plan: any) =>
-                            plan.id === parseInt(selectedCoursePlan)
-                        )?.name
-                      );
-                  }}
-                  startContent={<EditIcon />}
-                />
+                <Tooltip content="Edit Plan Name" showArrow>
+                  <Button
+                    aria-label="Edit name of course plan"
+                    isIconOnly
+                    size="md"
+                    onPress={() => {
+                      setEdit(true),
+                        setEditable(
+                          coursePlans?.find(
+                            (plan: any) =>
+                              plan.id === parseInt(selectedCoursePlan)
+                          )?.name
+                        );
+                    }}
+                    startContent={<EditIcon />}
+                  />
+                </Tooltip>
               )}
             </div>
           </div>
