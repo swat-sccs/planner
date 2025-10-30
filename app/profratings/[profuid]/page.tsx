@@ -18,6 +18,8 @@ import { useRouter } from "next/navigation";
 import { Faculty, Rating } from "@prisma/client";
 import { getProfs, getNumRatings, getProfsByUid } from "app/actions/getProfs";
 import { getRatings } from "app/actions/getRatings";
+import RMPBadge from "components/RMPBadge";
+import RatingOverTimeGraph from "components/RatingOverTimeGraph";
 
 export default function Page({
   params,
@@ -42,14 +44,21 @@ export default function Page({
   return (
     <div className="px-2 mt-4">
       <div className="text-xl mb-5 font-bold">{profInfo?.displayName}</div>
+      
+      {/* Rating Over Time Graph */}
+      <div className="mb-5 px-3">
+        <RatingOverTimeGraph ratings={ratings} />
+      </div>
+
       <div className="gap-3 flex-col grid lg:grid-cols-2  mt-5 px-3 overflow-y-scroll max-h-[80vh]">
         {ratings?.map((rating: Rating) => (
           <Card key={rating.id} className="p-2 dark:bg-light_foreground ">
             <CardHeader className="font-semibold w-full">
               <div className="grid grid-cols-2 w-full ">
-                <div>
+                <div className="flex items-center gap-2">
                   {" "}
                   {rating.courseSubject} {rating.courseNumber}
+                  <RMPBadge rating={rating} size="sm" />
                 </div>
 
                 <div className="justify-self-end">{rating.grade}</div>

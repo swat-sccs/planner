@@ -27,6 +27,7 @@ import React from "react";
 import { Faculty, Course } from "@prisma/client";
 
 import EditModal from "../../components/EditModal";
+import RMPBadge from "../../components/RMPBadge";
 
 import Person from "@mui/icons-material/Person";
 import Class from "@mui/icons-material/Class";
@@ -85,9 +86,10 @@ export default function RatingPage() {
                 </div>
 
                 <div className="grid grid-cols-2 w-full justify-between">
-                  <div className="col-span-2 font-semibold text-2xl">
+                  <div className="col-span-2 font-semibold text-2xl flex items-center gap-2">
                     {" "}
                     {rating.profDisplayName}
+                    <RMPBadge rating={rating} />
                   </div>
 
                   <div className="col-span-1">

@@ -118,6 +118,19 @@ services:
     networks:
       - internal
 
+  planner-rmp-cron:
+    image: registry.sccs.swarthmore.edu/sccs/planner-rmp-cron/planner-rmp-cron:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile.rmp-cron
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - planner-db
+    networks:
+      - internal
+
 # (re)define traefik proxy network
 networks:
   internal:

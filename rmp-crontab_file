@@ -1,0 +1,3 @@
+* * * * * root date >> /var/log/rmp-cron.log
+0 * * * * root cd /app && python3 /app/scraper.py >> /var/log/rmp-cron.log 2>&1
+
