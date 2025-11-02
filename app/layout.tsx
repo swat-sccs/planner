@@ -38,6 +38,11 @@ export default function RootLayout({
         <html suppressHydrationWarning lang="en">
           <head>
             <script
+              defer
+              data-domain="plan.sccs.swarthmore.edu"
+              src="https://plausible.sccs.swarthmore.edu/js/script.file-downloads.js"
+            ></script>
+            <script
               type="application/ld+json"
               dangerouslySetInnerHTML={{ __html: JSON.stringify(sccsLD) }}
             />
