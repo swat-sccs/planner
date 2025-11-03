@@ -3,14 +3,22 @@ import {
   Button,
   Card,
   CardBody,
+  CardFooter,
   CardHeader,
   Chip,
   Divider,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
 } from "@nextui-org/react";
 import Image from "next/image";
 import { tv } from "tailwind-variants";
 import axios from "axios";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { generateColorFromName } from "../components/primitives";
 import { Error } from "@mui/icons-material";
 import { getPlanCookie, setSelectedCookie } from "app/actions/actions";
@@ -26,28 +34,16 @@ import { useSession } from "next-auth/react";
 
 export const card = tv({
   slots: {
-    base: ` bg-light_foreground min-h-32 max-h-62 w-[98%] rounded-md scroll-none drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none`,
+    base: ` bg-light_foreground min-h-32 max-h-70 w-[98%] rounded-md scroll-none drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none`,
     role: "font-bold text-primary ",
   },
 });
 
 const { base, role } = card();
 
-/*
-async function updatePlan(course: any) {
-  //updateDBPlan(course);
-  //console.log("updating");
-}
-  */
-
 export default function CourseCard(props: any) {
-  /*
-  async function updateCourses(course: any) {
-    let theCourses = Array.from(props.courses);
-    theCourses.push(course);
-    props.updatePlan(theCourses);
-  }
-    */
+  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
+
   const color = generateColorFromName(props.course.subject);
 
   const { data: session, status } = useSession();
@@ -99,15 +95,17 @@ export default function CourseCard(props: any) {
       return null;
     }
   );
-
   return (
     //onClick={() => updateCourses(props.course)}
     <div className={session ? "cursor-pointer" : " cursor-default"}>
       <Card
+        onPress={onOpen}
         key={props.course.id}
         isHoverable={session != null}
         className={base()}
         shadow="sm"
+        isPressable
+        disableRipple
       >
         <div className={`absolute top-0 left-0 h-full z-50 w-2 ${color}`} />
         <CardHeader className="pl-6">
@@ -220,14 +218,48 @@ export default function CourseCard(props: any) {
                     {props.course.instructor.displayName.replace("&#39;", "'")}
                   </div>
                 </div>
-
-                {props.course.instructor.avgRating == null ? null : (
-                  <div className="flex bg-green-500 w-16 h-16 items-center justify-center rounded-md">
-                    <div className="font-black text-3xl">
-                      {props.course.instructor.avgRating}
+                {props.course.instructor.avgRating != null &&
+                props.course.instructor.avgRating > 4 ? (
+                  <div
+                    className={`flex 0 bg-green-500 w-16 h-16 items-center justify-center rounded-md`}
+                  >
+                    <div className="font-black text-white text-3xl">
+                      {props.course.instructor.avgRating.toFixed(1)}
                     </div>
                   </div>
-                )}
+                ) : null}
+                {props.course.instructor.avgRating != null &&
+                props.course.instructor.avgRating <= 4 &&
+                props.course.instructor.avgRating >= 3 ? (
+                  <div
+                    className={`flex 0 bg-green-500 w-16 h-16 items-center justify-center rounded-md`}
+                  >
+                    <div className="font-black text-white  text-3xl">
+                      {props.course.instructor.avgRating.toFixed(1)}
+                    </div>
+                  </div>
+                ) : null}
+                {props.course.instructor.avgRating != null &&
+                props.course.instructor.avgRating < 3 &&
+                props.course.instructor.avgRating >= 2 ? (
+                  <div
+                    className={`flex 0 bg-orange-500 w-16 h-16 items-center justify-center rounded-md`}
+                  >
+                    <div className="font-black text-white  text-3xl">
+                      {props.course.instructor.avgRating.toFixed(1)}
+                    </div>
+                  </div>
+                ) : null}
+                {props.course.instructor.avgRating != null &&
+                props.course.instructor.avgRating < 2 ? (
+                  <div
+                    className={`flex 0 bg-red-500 w-16 h-16 items-center justify-center rounded-md`}
+                  >
+                    <div className="font-black text-white  text-3xl">
+                      {props.course.instructor.avgRating.toFixed(1)}
+                    </div>
+                  </div>
+                ) : null}
               </div>
               {props.course.seatsAvailable == 0 ? (
                 <div className="flex flex-row pt-2 gap-2 items-center justify-end">
@@ -249,6 +281,8 @@ export default function CourseCard(props: any) {
               )}
             </div>
           </div>
+        </CardBody>
+        <CardFooter>
           {props.added ? (
             <div className="w-full h-5 text-green-600 dark:text-green-400 justify-end justify-items-end align-middles opacity-70">
               <div className="">
@@ -256,9 +290,45 @@ export default function CourseCard(props: any) {
                 <CheckCircleOutlineIcon fontSize="small" />
               </div>
             </div>
-          ) : null}
-        </CardBody>
+          ) : (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                props.loadCourseIds(props.course);
+              }}
+              className="hover:opacity-85 w-[20%] rounded-md  p-1 ml-auto align-middles bg-slate-700 text-white"
+            >
+              <div className="text-center align-middle">
+                <AddCircleOutlineIcon fontSize="small" />
+                Add to Plan
+              </div>
+            </Button>
+          )}
+        </CardFooter>
       </Card>
+
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size="xl"
+        placement="center"
+        onOpenChange={onOpenChange}
+        isDismissable={true}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                {props.course.courseTitle.replace("&amp;", "&")}
+              </ModalHeader>
+              <ModalBody>
+                <p>{props.course.description}</p>
+              </ModalBody>
+              <ModalFooter></ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

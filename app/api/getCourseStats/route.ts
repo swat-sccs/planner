@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
     let userCourses = [];
     for (const plan of user.plans) {
       for (const course of plan.courses) {
-        console.log(course);
         userCourses[course.id] = {
           id: course.id,
           name: course.courseTitle,

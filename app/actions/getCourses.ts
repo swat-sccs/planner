@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { getPlanCookie, setSelectedCookie } from "./actions";
 import { getSelectedCoursePlan } from "./userActions";
 import { generateColorFromName } from "../../components/primitives";
+import { el } from "@fullcalendar/core/internal-common";
 
 export async function getUniqueCodes() {
   const codes = await prisma.sectionAttribute.findMany();
@@ -151,7 +152,6 @@ export async function updateDBPlan(course: any) {
   // const id: any = await getPlanCookie();
   //let DOTW: Array<String> = dotw.split(",");
   if (id) {
-    console.log("UPDATING");
     const updatedCourse = await prisma.coursePlan.update({
       where: {
         id: parseInt(id),
@@ -186,6 +186,13 @@ export async function getInitialCourses(
 ) {
   const startTime = stime.toString().split(",").filter(Number);
 
+  query = query
+    .replace(/[^a-zA-Z0-9 ]+/gi, "")
+    .split(" ")
+    .join(" | ");
+
+  query = "american";
+
   return await prisma.course.findMany({
     take: 20,
     include: {
@@ -204,7 +211,7 @@ export async function getInitialCourses(
             {
               _relevance: {
                 fields: ["courseTitle", "subject", "courseNumber"],
-                search: query.trim().split(" ").join(" & "),
+                search: query,
                 sort: "desc",
               },
             },
@@ -225,8 +232,8 @@ export async function getInitialCourses(
             OR: [
               {
                 courseTitle: {
-                  //contains: query.trim().split(" ").join(" & "),
-                  search: query.trim().split(" ").join(" | "),
+                  //contains: query,
+                  search: query,
                   mode: "insensitive",
                 },
               },
@@ -234,8 +241,8 @@ export async function getInitialCourses(
                 sectionAttributes: {
                   some: {
                     code: {
-                      contains: query.trim().split(" ").join(" | "),
-                      //search: query.trim().split(" ").join(" | "),
+                      contains: query,
+                      //search: query,
                       mode: "insensitive",
                     },
                   },
@@ -243,23 +250,23 @@ export async function getInitialCourses(
               },
               {
                 subject: {
-                  contains: query.trim().split(" ").join(" | "),
-                  //search: query.trim().split(" ").join(" | "),
+                  contains: query,
+                  //search: query,
                   mode: "insensitive",
                 },
               },
               {
                 courseNumber: {
-                  //contains: query.trim().split(" ").join(" | "),
-                  search: query.trim().split(" ").join(" | "),
+                  //contains: query,
+                  search: query,
                   mode: "insensitive",
                 },
               },
               {
                 instructor: {
                   displayName: {
-                    contains: query.trim().split(" ").join(" | "),
-                    //search: query.trim().split(" ").join(" | "),
+                    contains: query,
+                    //search: query,
                     mode: "insensitive",
                   },
                 },
@@ -328,6 +335,23 @@ export async function getAllCourses(term: any) {
   });
 }
 
+async function getCourseDescription(url: string) {
+  try {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return "No description available.";
+    }
+
+    // Depending on what the endpoint returns:
+    const text = await response.text();
+    return text.replace(/<[^>]*>/g, "").trim() || "No description available.";
+  } catch (err) {
+    console.error("Fetch failed:", err);
+    return "No description available.";
+  }
+}
+
 export async function getCourses(
   take: any,
   query: any,
@@ -337,9 +361,38 @@ export async function getCourses(
 ) {
   const startTime = stime.toString().split(",").filter(Number);
 
+  let properties = {
+    dist: "",
+    dep: "",
+    prof: "",
+  };
+
+  if (query.includes(":")) {
+    const regex = /(\w+):(\S+)/g; // global flag to catch all key:value pairs
+    let match;
+
+    while ((match = regex.exec(query)) !== null) {
+      const [, field, value] = match;
+
+      switch (field.toLowerCase()) {
+        case "dist":
+          properties.dist = value;
+          break;
+        case "dep":
+          properties.dep = value;
+          break;
+        case "prof":
+          properties.prof = value;
+          break;
+      }
+    }
+
+    // Remove all key:value tokens from query
+    query = query.replace(regex, "").trim();
+  }
+
   return await prisma.course.findMany({
     take: take,
-
     include: {
       sectionAttributes: true,
       facultyMeet: {
@@ -349,20 +402,6 @@ export async function getCourses(
       },
       instructor: true,
     },
-
-    ...(query
-      ? {
-          orderBy: [
-            {
-              _relevance: {
-                fields: ["courseTitle", "subject", "courseNumber"],
-                search: query.trim().split(" ").join(" & "),
-                sort: "desc",
-              },
-            },
-          ],
-        }
-      : ""),
     where: {
       ...(term
         ? {
@@ -370,55 +409,43 @@ export async function getCourses(
             isShown: true,
           }
         : {}),
-      //year: term,
-
-      ...(query
+      courseTitle: {
+        contains: query,
+        mode: "insensitive",
+      },
+      ...(properties.dist != ""
         ? {
-            OR: [
-              {
-                courseTitle: {
-                  //contains: query.trim().split(" ").join(" & "),
-                  search: query.trim().split(" ").join(" | "),
+            sectionAttributes: {
+              some: {
+                code: {
+                  contains: properties.dist,
                   mode: "insensitive",
                 },
               },
-              {
-                sectionAttributes: {
-                  some: {
-                    code: {
-                      contains: query.trim().split(" ").join(" | "),
-                      //search: query.trim().split(" ").join(" | "),
-                      mode: "insensitive",
-                    },
-                  },
-                },
-              },
-              {
-                subject: {
-                  contains: query.trim().split(" ").join(" | "),
-                  //search: query.trim().split(" ").join(" | "),
-                  mode: "insensitive",
-                },
-              },
-              {
-                courseNumber: {
-                  //contains: query.trim().split(" ").join(" | "),
-                  search: query.trim().split(" ").join(" | "),
-                  mode: "insensitive",
-                },
-              },
-              {
-                instructor: {
-                  displayName: {
-                    contains: query.trim().split(" ").join(" | "),
-                    //search: query.trim().split(" ").join(" | "),
-                    mode: "insensitive",
-                  },
-                },
-              },
-            ],
+            },
           }
         : {}),
+
+      ...(properties.prof != ""
+        ? {
+            instructor: {
+              displayName: {
+                contains: properties.prof,
+                mode: "insensitive",
+              },
+            },
+          }
+        : {}),
+
+      ...(properties.dep != ""
+        ? {
+            subject: {
+              contains: properties.dep,
+              mode: "insensitive",
+            },
+          }
+        : {}),
+
       AND: [
         {
           ...(startTime.length > 0
@@ -457,8 +484,130 @@ export async function getCourses(
       ],
     },
   });
-}
+  /*
+  return await prisma.course.findMany({
+    take: take,
+    include: {
+      sectionAttributes: true,
+      facultyMeet: {
+        include: {
+          meetingTimes: true,
+        },
+      },
+      instructor: true,
+    },
 
+    ...(query
+      ? {
+          orderBy: [
+            {
+              _relevance: {
+                fields: ["courseTitle", "subject", "courseNumber"],
+                search: query,
+                sort: "desc",
+              },
+            },
+          ],
+        }
+      : ""),
+    where: {
+      ...(term
+        ? {
+            year: term,
+            isShown: true,
+          }
+        : {}),
+
+      //year: term,
+
+      ...(query
+        ? {
+            OR: [
+              {
+                courseTitle: {
+                  contains: query,
+                  //search: query,
+                  mode: "insensitive",
+                },
+              },
+              {
+                sectionAttributes: {
+                  some: {
+                    code: {
+                      contains: query,
+                      //search: query,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              },
+              {
+                subject: {
+                  contains: query,
+                  //search: query,
+                  mode: "insensitive",
+                },
+              },
+              {
+                courseNumber: {
+                  contains: query,
+                  //search: query,
+                  mode: "insensitive",
+                },
+              },
+              {
+                instructor: {
+                  displayName: {
+                    contains: query,
+                    //search: query,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            ],
+          }
+        : {}),
+
+      AND: [
+        {
+          ...(startTime.length > 0
+            ? {
+                facultyMeet: {
+                  meetingTimes: {
+                    beginTime: {
+                      in: startTime,
+                    },
+                  },
+                },
+              }
+            : {}),
+        },
+        {
+          ...(dotw.length > 0
+            ? {
+                facultyMeet: {
+                  meetingTimes: {
+                    is: {
+                      monday: dotw.includes("monday") ? true : Prisma.skip,
+                      tuesday: dotw.includes("tuesday") ? true : Prisma.skip,
+                      wednesday: dotw.includes("wednesday")
+                        ? true
+                        : Prisma.skip,
+                      thursday: dotw.includes("thursday") ? true : Prisma.skip,
+                      friday: dotw.includes("friday") ? true : Prisma.skip,
+                      saturday: dotw.includes("saturday") ? true : Prisma.skip,
+                      sunday: dotw.includes("sunday") ? true : Prisma.skip,
+                    },
+                  },
+                },
+              }
+            : {}),
+        },
+      ],
+    },
+  });
+  */
+}
 export async function getEvents(courses: any) {
   let output: any = [];
   //let courses: any = await getPlan Courses();
@@ -547,7 +696,6 @@ export async function getCourseStats(yearTerm: any) {
     let userCourses = [];
     for (const plan of user.plans) {
       for (const course of plan.courses) {
-        console.log(course);
         userCourses[course.id] = {
           id: course.id,
           name: course.courseTitle,

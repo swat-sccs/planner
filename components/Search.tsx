@@ -33,8 +33,9 @@ export default function Search(props: any) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const handleSearch = useDebouncedCallback((term: string) => {
-    const filtered_term = term.replace(/[^a-zA-Z0-9 ]+/gi, "");
-    const include_colons = term.replace(/[^a-zA-Z0-9: ]+/gi, "");
+    //const filtered_term = term.replace(/[^a-zA-Z0-9: ]+/gi, "");
+    //const include_colons = term.replace(/[^a-zA-Z0-9: ]+/gi, "");
+    const filtered_term = term;
 
     if (term) {
       //decodeURIComponent;

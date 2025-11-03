@@ -17,7 +17,7 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network=traefik"
         - "traefik.http.routers.planner.entrypoints=https"
-        - "traefik.http.routers.planner.rule=Host(`plan.sccs.swarthmore.edu`) && !PathPrefix(`/prisma`)"
+        - "traefik.http.routers.planner.rule=Host(`plan.sccs.swarthmore.edu`) && !PathPrefix(`/pgadmin`)"
         - "traefik.http.routers.planner.tls=true"
         - "traefik.http.routers.planner.tls.certresolver=letsEncrypt"
         - "traefik.http.services.planner.loadbalancer.server.port=3000"
@@ -38,29 +38,6 @@ services:
       timeout: 5s
       retries: 10
 
-  planner-prisma-studio:
-    container_name: planner-prisma-studio
-    image: registry.sccs.swarthmore.edu/sccs/planner/planner:latest
-    deploy:
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.network=traefik"
-        - "traefik.http.routers.planner_prisma.entrypoints=https"
-        - "traefik.http.routers.planner_prisma.rule=Host(`plan.sccs.swarthmore.edu`) && PathPrefix(`/prisma`)"
-        - "traefik.http.routers.planner_prisma.tls=true"
-        - "traefik.http.routers.planner_prisma.tls.certresolver=letsEncrypt"
-        - "traefik.http.services.planner_prisma.loadbalancer.server.port=5555"
-        - "traefik.http.middlewares.prisma-stripprefix.stripprefix.prefixes=/prisma"
-        - "traefik.http.middlewares.prisma-auth.basicauth.users=${PRISMA_AUTH_USER}"
-        - "traefik.http.routers.planner_prisma.middlewares=prisma-stripprefix,prisma-auth"
-    environment:
-      NODE_ENV: production
-    env_file:
-      - .env
-    networks:
-      - internal
-      - traefik
-    command: sh -c "npm install && npx prisma studio --hostname 0.0.0.0"
   planner-db:
     hostname: planner-db
     image: postgres:16.4-bullseye

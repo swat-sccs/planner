@@ -139,12 +139,13 @@ export function FullCourseList({
     <>
       <div className="flex flex-col gap-3 ">
         {courses?.map((course: any) => (
-          <div key={course.id} onClick={() => loadCourseIds(course)}>
+          <div key={course.id} /* onClick={() => loadCourseIds(course)} */>
             <CourseCard
               courses={courses}
               course={course}
               added={auth ? selectedCourseIDS?.includes(course.id) : false}
-              updatePlan={(newCourses: Course[]) => updatePlan(newCourses)}
+              loadCourseIds={(course: Course) => loadCourseIds(course)}
+              //not used anymore updatePlan={(newCourses: Course[]) => updatePlan(newCourses)}
             />
           </div>
         ))}
