@@ -186,13 +186,6 @@ export async function getInitialCourses(
 ) {
   const startTime = stime.toString().split(",").filter(Number);
 
-  query = query
-    .replace(/[^a-zA-Z0-9 ]+/gi, "")
-    .split(" ")
-    .join(" | ");
-
-  query = "american";
-
   return await prisma.course.findMany({
     take: 20,
     include: {
@@ -205,19 +198,6 @@ export async function getInitialCourses(
       instructor: true,
     },
 
-    ...(query != ""
-      ? {
-          orderBy: [
-            {
-              _relevance: {
-                fields: ["courseTitle", "subject", "courseNumber"],
-                search: query,
-                sort: "desc",
-              },
-            },
-          ],
-        }
-      : ""),
     where: {
       ...(term
         ? {
@@ -226,54 +206,6 @@ export async function getInitialCourses(
           }
         : {}),
       //year: term,
-
-      ...(query
-        ? {
-            OR: [
-              {
-                courseTitle: {
-                  //contains: query,
-                  search: query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                sectionAttributes: {
-                  some: {
-                    code: {
-                      contains: query,
-                      //search: query,
-                      mode: "insensitive",
-                    },
-                  },
-                },
-              },
-              {
-                subject: {
-                  contains: query,
-                  //search: query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                courseNumber: {
-                  //contains: query,
-                  search: query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                instructor: {
-                  displayName: {
-                    contains: query,
-                    //search: query,
-                    mode: "insensitive",
-                  },
-                },
-              },
-            ],
-          }
-        : {}),
     },
   });
 }
@@ -391,6 +323,8 @@ export async function getCourses(
     query = query.replace(regex, "").trim();
   }
 
+  query = query.split(" ").join(" | ");
+
   return await prisma.course.findMany({
     take: take,
     include: {
@@ -402,6 +336,19 @@ export async function getCourses(
       },
       instructor: true,
     },
+    ...(query
+      ? {
+          orderBy: [
+            {
+              _relevance: {
+                fields: ["courseTitle", "subject", "courseNumber"],
+                search: query,
+                sort: "desc",
+              },
+            },
+          ],
+        }
+      : ""),
     where: {
       ...(term
         ? {
@@ -409,10 +356,12 @@ export async function getCourses(
             isShown: true,
           }
         : {}),
+      /*
       courseTitle: {
         contains: query,
         mode: "insensitive",
-      },
+      },*/
+
       ...(properties.dist != ""
         ? {
             sectionAttributes: {
@@ -443,6 +392,54 @@ export async function getCourses(
               contains: properties.dep,
               mode: "insensitive",
             },
+          }
+        : {}),
+
+      ...(query
+        ? {
+            AND: [
+              {
+                courseTitle: {
+                  contains: query,
+                  //search: query,
+                  mode: "insensitive",
+                },
+              },
+              {
+                sectionAttributes: {
+                  some: {
+                    code: {
+                      contains: query,
+                      //search: query,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              },
+              {
+                subject: {
+                  contains: query,
+                  //search: query,
+                  mode: "insensitive",
+                },
+              },
+              {
+                courseNumber: {
+                  contains: query,
+                  //search: query,
+                  mode: "insensitive",
+                },
+              },
+              {
+                instructor: {
+                  displayName: {
+                    contains: query,
+                    //search: query,
+                    mode: "insensitive",
+                  },
+                },
+              },
+            ],
           }
         : {}),
 

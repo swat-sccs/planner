@@ -296,7 +296,7 @@ export default function CourseCard(props: any) {
                 e.stopPropagation();
                 props.loadCourseIds(props.course);
               }}
-              className="hover:opacity-85 w-[20%] rounded-md  p-1 ml-auto align-middles bg-slate-700 text-white"
+              className="hover:opacity-85 w-[45%] sm:w-[20%] rounded-md  p-1 ml-auto align-middles bg-slate-700 text-white"
             >
               <div className="text-center align-middle">
                 <AddCircleOutlineIcon fontSize="small" />
