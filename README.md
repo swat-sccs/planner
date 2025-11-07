@@ -14,7 +14,11 @@
 <p>Looking to plan your classes? <a href="https://plan.sccs.swarthmore.edu/">Visit the live site!</a></p>
 </div>
 
-<img src="public/screenshot-wide.png"/>
+![Light Mode Image](public/SCCS&#32;Course&#32;Planner&#32;-&#32;Light.jpeg)  |  ![](public/SCCS&#32;Course&#32;Planner-Dark.jpeg)
+:-------------------------:|:-------------------------:
+
+
+
 
 ## 🏁 Getting Started
 
