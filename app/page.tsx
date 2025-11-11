@@ -29,6 +29,8 @@ export default async function Page(props: {
     prof?: string;
     dotw?: Array<string>;
     stime?: Array<string>;
+    excludeDays?: string;
+    excludeTime?: string;
   }>;
 }) {
   const cookieStore = await cookies();
@@ -48,6 +50,8 @@ export default async function Page(props: {
     searchParams?.term || (await cookieStore.get("termCookie")?.value) || "";
   const dotw = searchParams?.dotw || [];
   const stime = searchParams?.stime || [];
+  const excludeDays = searchParams?.excludeDays === "true";
+  const excludeTime = searchParams?.excludeTime === "true";
   const profQuery = searchParams?.prof || "";
   const homePageProps: any = {};
 
@@ -57,12 +61,12 @@ export default async function Page(props: {
   let lastSelectedCoursePlan;
 
   if (session?.user) {
-    initalCourses = await getInitialCourses(query, term, dotw, stime);
+    initalCourses = await getInitialCourses(query, term, dotw, stime, excludeDays, excludeTime);
     planCourses = await getPlanCourses();
     coursePlans = await getCoursePlans();
     lastSelectedCoursePlan = await getSelectedCoursePlan(session);
   } else {
-    initalCourses = await getInitialCourses(query, term, dotw, stime);
+    initalCourses = await getInitialCourses(query, term, dotw, stime, excludeDays, excludeTime);
   }
   homePageProps["courseWrapper"] = (
     <Suspense
@@ -77,6 +81,8 @@ export default async function Page(props: {
         query={query}
         stime={stime}
         term={term}
+        excludeDays={excludeDays}
+        excludeTime={excludeTime}
         initalPlanCourses={planCourses}
         coursePlans={coursePlans}
         lastSelectedCoursePlan={lastSelectedCoursePlan}

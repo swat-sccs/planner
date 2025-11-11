@@ -1,5 +1,5 @@
 "use client";
-import { Divider } from "@nextui-org/react";
+import { Divider, Switch } from "@nextui-org/react";
 import { Select, SelectItem } from "@nextui-org/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePathname } from "next/navigation";
@@ -19,6 +19,8 @@ export default function Filters(props: any) {
   const [dotw, setdotw] = useState<any>([]);
   const [selectedTerm, setSelectedTerm]: any = useState([]);
   const [selectedStartTime, setSelectedStartTime]: any = useState([]);
+  const [excludeDays, setExcludeDays] = useState<boolean>(false);
+  const [excludeTime, setExcludeTime] = useState<boolean>(false);
 
   const params = useMemo(
     () => new URLSearchParams(searchParams),
@@ -87,6 +89,26 @@ export default function Filters(props: any) {
     replace(`${pathname}?${params.toString()}`);
   };
 
+  const handleExcludeDaysChange = (checked: boolean) => {
+    setExcludeDays(checked);
+    if (checked) {
+      params.set("excludeDays", "true");
+    } else {
+      params.delete("excludeDays");
+    }
+    replace(`${pathname}?${params.toString()}`);
+  };
+
+  const handleExcludeTimeChange = (checked: boolean) => {
+    setExcludeTime(checked);
+    if (checked) {
+      params.set("excludeTime", "true");
+    } else {
+      params.delete("excludeTime");
+    }
+    replace(`${pathname}?${params.toString()}`);
+  };
+
   const RenderSelectOptions = () => {
     const output = [];
 
@@ -124,8 +146,17 @@ export default function Filters(props: any) {
     let termCookie = cookies.get("termCookie");
     let searchTermCookie = cookies.get("searchTermCookie");
 
-    setdotw(searchParams.get("dotw")?.toString().split(","));
-    // setSelectedStartTime(searchParams.get("stime")?.toString().split(","));
+    const dotwParam = searchParams.get("dotw");
+    const stimeParam = searchParams.get("stime");
+    setdotw(dotwParam ? dotwParam.split(",").filter(Boolean) : []);
+    setSelectedStartTime(stimeParam ? stimeParam.split(",").filter(Boolean) : []);
+    
+    // Load exclude flags from URL params
+    const excludeDaysParam = searchParams.get("excludeDays");
+    const excludeTimeParam = searchParams.get("excludeTime");
+    setExcludeDays(excludeDaysParam === "true");
+    setExcludeTime(excludeTimeParam === "true");
+    
     if (!termCookie) {
       cookies.set("termCookie", props.terms[0]);
       //params.set("term", props.terms[0]);
@@ -164,7 +195,17 @@ export default function Filters(props: any) {
         {props.mobile ? (
           <div className="grid grid-cols-2 h-60 overflow-y-clip">
             <div>
-              <div className="mt-5 font-semibold mb-2">Days of the Week</div>
+              <div className="mt-5 font-semibold mb-2 flex items-center justify-between gap-2">
+                <span>Days of the Week</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs">Exclude</span>
+                  <Switch
+                    size="sm"
+                    isSelected={excludeDays}
+                    onValueChange={handleExcludeDaysChange}
+                  />
+                </div>
+              </div>
               <CheckboxGroup value={dotw} onValueChange={handleDOTWChange}>
                 {days.map((day: any) => (
                   <Checkbox key={day.key} color="primary" value={day.key}>
@@ -175,7 +216,17 @@ export default function Filters(props: any) {
             </div>
 
             <div>
-              <div className="mt-5 font-semibold mb-2 ">Start Time</div>
+              <div className="mt-5 font-semibold mb-2 flex items-center justify-between gap-2">
+                <span>Start Time</span>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs">Exclude</span>
+                  <Switch
+                    size="sm"
+                    isSelected={excludeTime}
+                    onValueChange={handleExcludeTimeChange}
+                  />
+                </div>
+              </div>
               <CheckboxGroup
                 value={selectedStartTime}
                 onValueChange={handleSTimeChange}
@@ -200,7 +251,17 @@ export default function Filters(props: any) {
           </div>
         ) : (
           <>
-            <div className="mt-5 font-semibold">Days of the Week</div>
+            <div className="mt-5 font-semibold flex items-center justify-between gap-2">
+              <span>Days of the Week</span>
+              <div className="flex items-center gap-1">
+                <span className="text-xs">Exclude</span>
+                <Switch
+                  size="sm"
+                  isSelected={excludeDays}
+                  onValueChange={handleExcludeDaysChange}
+                />
+              </div>
+            </div>
             <CheckboxGroup value={dotw} onValueChange={handleDOTWChange}>
               {days.map((day: any) => (
                 <Checkbox key={day.key} color="primary" value={day.key}>
@@ -209,7 +270,17 @@ export default function Filters(props: any) {
               ))}
             </CheckboxGroup>
 
-            <div className="mt-5 font-semibold">Start Time</div>
+            <div className="mt-5 font-semibold flex items-center justify-between gap-2">
+              <span>Start Time</span>
+              <div className="flex items-center gap-1">
+                <span className="text-xs">Exclude</span>
+                <Switch
+                  size="sm"
+                  isSelected={excludeTime}
+                  onValueChange={handleExcludeTimeChange}
+                />
+              </div>
+            </div>
             <CheckboxGroup
               value={selectedStartTime}
               onValueChange={handleSTimeChange}

@@ -84,6 +84,8 @@ export default function CoursePlanContext(props: any) {
                 query={props.query}
                 stime={props.stime}
                 term={props.term}
+                excludeDays={props.excludeDays}
+                excludeTime={props.excludeTime}
                 selectedCourses={props.auth ? courses : null}
                 updatePlan={(newCourses: Course[]) => setCourses(newCourses)}
               />
