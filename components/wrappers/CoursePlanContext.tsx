@@ -67,7 +67,7 @@ export default function CoursePlanContext(props: any) {
     <>
       {props.courseList ? (
         <div className="col-span-12 lg:col-span-7">
-          <div className="lg:h-[88.8vh] h-[60vh]  overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
+          <div className="lg:h-[88vh] h-[60vh]  overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
             <Suspense
               fallback={
                 <div className="grid gap-3">

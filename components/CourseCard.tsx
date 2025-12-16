@@ -34,7 +34,7 @@ import { useSession } from "next-auth/react";
 
 export const card = tv({
   slots: {
-    base: ` bg-light_foreground min-h-32 max-h-70 w-[98%] rounded-md scroll-none drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none`,
+    base: `bg-light_foreground min-h-32 max-h-70 w-[98%] rounded-md scroll-none drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none`,
     role: "font-bold text-primary ",
   },
 });
@@ -99,13 +99,13 @@ export default function CourseCard(props: any) {
     //onClick={() => updateCourses(props.course)}
     <div className={session ? "cursor-pointer" : " cursor-default"}>
       <Card
+        as="article"
+        isPressable
         onPress={onOpen}
         key={props.course.id}
         isHoverable={session != null}
         className={base()}
         shadow="sm"
-        isPressable
-        disableRipple
       >
         <div className={`absolute top-0 left-0 h-full z-50 w-2 ${color}`} />
         <CardHeader className="pl-6">
