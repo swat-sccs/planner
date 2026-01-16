@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-01-16
+
+**Added:**
+
+**Changed:**
+
+- Remove automated release
+- Change date for ical export for the new semester.
+
+**Fixed:**
+
 ## 1.0.0 (2025-12-16)
 
 **Added:**
