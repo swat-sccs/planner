@@ -3,8 +3,6 @@ import { Faculty, MeetingTime } from "@prisma/client";
 import { NextResponse, NextRequest } from "next/server";
 
 import prisma from "../../../lib/prisma";
-import { auth } from "../../../lib/auth";
-import moment from "moment";
 import ical, {
   ICalCalendarMethod,
   ICalEventRepeatingFreq,
@@ -65,7 +63,7 @@ function getRealStart(
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const lastSelectedCoursePlan = searchParams.get("id");
-  const FIRSTDAYOFWEEK = "Aug 31, 2025";
+  const FIRSTDAYOFWEEK = "Jan 19, 2026";
 
   let targetYear = new Date().getFullYear();
   let firstDayOfSem = new Date(targetYear, 7, 31, 0, 0, 0, 0);
