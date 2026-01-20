@@ -6,6 +6,8 @@
 
 **Changed:**
 
+- Bump gitlab docker in docker version for auto build and deploy
+
 **Fixed:**
 
 - Fix ICal export to more consistently land dates. Currently still manual start and end date which needs to be changed to something more automatic depending on the semester.
