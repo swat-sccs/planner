@@ -1,4 +1,4 @@
-import { Faculty, MeetingTime } from "@prisma/client";
+import { MeetingTime } from "@prisma/client";
 // api/test.ts
 import { NextResponse, NextRequest } from "next/server";
 
@@ -9,65 +9,31 @@ import ical, {
   ICalWeekday,
 } from "ical-generator";
 
-function getLaborDay() {
-  let targetDate = new Date();
-  let targetYear = targetDate.getFullYear();
-  let firstDateInMonth = new Date(targetYear, 8, 1);
-  let firstWeekdayInMonth = firstDateInMonth.getDay();
-  let firstMondayDate = 1 + ((8 - firstWeekdayInMonth) % 7);
-  console.log(new Date(targetYear, 8, firstMondayDate, 0, 0, 0, 0));
-  return new Date(targetYear, 8, firstMondayDate, 0, 0, 0, 0);
-}
-
-function getRealStart(
-  meetingTimes: MeetingTime,
-  firstDayOfSem: Date,
-  classStart: Date
-) {
-  const startDOTW = firstDayOfSem.getDay();
-  let offset = 0;
-
-  if (meetingTimes.sunday) {
-    offset = (0 - startDOTW + 7) % 7 || 7;
-    classStart.setDate(classStart.getDate() + offset);
-    return;
-  } else if (meetingTimes.monday) {
-    offset = (1 - startDOTW + 7) % 7 || 7;
-    classStart.setDate(classStart.getDate() + offset);
-    return;
-  } else if (meetingTimes.tuesday) {
-    offset = (2 - startDOTW + 7) % 7 || 7;
-    classStart.setDate(classStart.getDate() + offset);
-    return;
-  } else if (meetingTimes.wednesday) {
-    offset = (3 - startDOTW + 7) % 7 || 7;
-    classStart.setDate(classStart.getDate() + offset);
-    return;
-  } else if (meetingTimes.thursday) {
-    offset = (4 - startDOTW + 7) % 7 || 7;
-    classStart.setDate(classStart.getDate() + offset);
-    return;
-  } else if (meetingTimes.friday) {
-    offset = (5 - startDOTW + 7) % 7 || 7;
-    classStart.setDate(classStart.getDate() + offset);
-    return;
-  } else if (meetingTimes.saturday) {
-    offset = (6 - startDOTW + 7) % 7 || 7;
-    classStart.setDate(classStart.getDate() + offset);
-    return;
-  }
-
-  classStart.setDate(classStart.getDate() + offset);
+/**
+ * Get the first occurrence day offset from firstDayOfSem (which is a Monday)
+ * Returns the number of days to add to firstDayOfSem to get the first class meeting
+ */
+function getFirstClassOffset(meetingTimes: MeetingTime): number {
+  // First day of semester is Monday
+  // Check days in order starting from Monday
+  if (meetingTimes.monday) return 0;      // Monday = 0 days offset
+  if (meetingTimes.tuesday) return 1;     // Tuesday = 1 day offset
+  if (meetingTimes.wednesday) return 2;   // Wednesday = 2 days offset
+  if (meetingTimes.thursday) return 3;    // Thursday = 3 days offset
+  if (meetingTimes.friday) return 4;      // Friday = 4 days offset
+  if (meetingTimes.saturday) return 5;    // Saturday = 5 days offset
+  if (meetingTimes.sunday) return 6;      // Sunday = 6 days offset
+  
+  return 0; // Default to Monday if no days specified
 }
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const lastSelectedCoursePlan = searchParams.get("id");
-  const FIRSTDAYOFWEEK = "Jan 19, 2026";
 
-  let targetYear = new Date().getFullYear();
-  let firstDayOfSem = new Date(targetYear, 7, 31, 0, 0, 0, 0);
-  let lastDayOfSem = new Date(targetYear, 11, 10, 0, 0, 0, 0);
+  // Spring 2026 semester dates - first day is Monday, January 19, 2026
+  const firstDayOfSem = new Date(2026, 0, 19, 0, 0, 0, 0); // January 19, 2026 (Monday)
+  const lastDayOfSem = new Date(2026, 4, 1, 23, 59, 59, 0); // May 1, 2026 (typical spring semester end)
 
   // Given an incoming request...
   const newHeaders = new Headers();
@@ -91,70 +57,41 @@ export async function GET(request: NextRequest) {
       const calendar = ical({ name: coursePlan?.name });
       // A method is required for outlook to display event as an invitation
       calendar.method(ICalCalendarMethod.REQUEST);
-      let repeatArray = [];
 
       for (const course of coursePlan?.courses) {
         if (
           course.facultyMeet.meetingTimes.beginTime &&
           course.facultyMeet.meetingTimes.endTime
         ) {
-          for (const key in course.facultyMeet.meetingTimes) {
-            if (key == "monday" && course.facultyMeet.meetingTimes.monday) {
-              repeatArray.push(ICalWeekday.MO);
-            }
-            if (key == "tuesday" && course.facultyMeet.meetingTimes.tuesday) {
-              repeatArray.push(ICalWeekday.TU);
-            }
-            if (
-              key == "wednesday" &&
-              course.facultyMeet.meetingTimes.wednesday
-            ) {
-              repeatArray.push(ICalWeekday.WE);
-            }
-            if (key == "thursday" && course.facultyMeet.meetingTimes.thursday) {
-              repeatArray.push(ICalWeekday.TH);
-            }
-            if (key == "friday" && course.facultyMeet.meetingTimes.friday) {
-              repeatArray.push(ICalWeekday.FR);
-            }
-            if (key == "saturday" && course.facultyMeet.meetingTimes.saturday) {
-              repeatArray.push(ICalWeekday.SA);
-            }
-            if (key == "sunday" && course.facultyMeet.meetingTimes.sunday) {
-              repeatArray.push(ICalWeekday.SU);
-            }
-          }
+          const meetingTimes = course.facultyMeet.meetingTimes;
+          const repeatArray: ICalWeekday[] = [];
 
-          let classStart = new Date(
-            FIRSTDAYOFWEEK +
-              " " +
-              course.facultyMeet.meetingTimes.beginTime.substring(0, 2) +
-              ":" +
-              course.facultyMeet.meetingTimes.beginTime.substring(2) +
-              ":00.000"
-          );
+          // Build the repeat days array
+          if (meetingTimes.monday) repeatArray.push(ICalWeekday.MO);
+          if (meetingTimes.tuesday) repeatArray.push(ICalWeekday.TU);
+          if (meetingTimes.wednesday) repeatArray.push(ICalWeekday.WE);
+          if (meetingTimes.thursday) repeatArray.push(ICalWeekday.TH);
+          if (meetingTimes.friday) repeatArray.push(ICalWeekday.FR);
+          if (meetingTimes.saturday) repeatArray.push(ICalWeekday.SA);
+          if (meetingTimes.sunday) repeatArray.push(ICalWeekday.SU);
 
-          getRealStart(
-            course.facultyMeet.meetingTimes,
-            firstDayOfSem,
-            classStart
-          );
+          // Parse the time strings (format: "HHMM" like "0930" or "1445")
+          const beginHour = parseInt(meetingTimes.beginTime.substring(0, 2), 10);
+          const beginMin = parseInt(meetingTimes.beginTime.substring(2), 10);
+          const endHour = parseInt(meetingTimes.endTime.substring(0, 2), 10);
+          const endMin = parseInt(meetingTimes.endTime.substring(2), 10);
 
-          let classEnd = new Date(
-            FIRSTDAYOFWEEK +
-              " " +
-              course.facultyMeet.meetingTimes.endTime.substring(0, 2) +
-              ":" +
-              course.facultyMeet.meetingTimes.endTime.substring(2) +
-              ":00.000"
-          );
+          // Calculate the first occurrence date based on meeting days
+          const dayOffset = getFirstClassOffset(meetingTimes);
+          
+          // Create the start date: first day of semester + offset to first meeting day
+          const classStart = new Date(firstDayOfSem);
+          classStart.setDate(classStart.getDate() + dayOffset);
+          classStart.setHours(beginHour, beginMin, 0, 0);
 
-          getRealStart(
-            course.facultyMeet.meetingTimes,
-            firstDayOfSem,
-            classEnd
-          );
-          const laborDay = getLaborDay();
+          // Create the end date: same day as start, but with end time
+          const classEnd = new Date(classStart);
+          classEnd.setHours(endHour, endMin, 0, 0);
 
           calendar
             .createEvent({
@@ -163,19 +100,16 @@ export async function GET(request: NextRequest) {
               summary: course.courseTitle.replace("&amp;", "&"),
               description: course.subject + " " + course.courseNumber,
               location:
-                course.facultyMeet.meetingTimes.building +
+                meetingTimes.building +
                 " " +
-                course.facultyMeet.meetingTimes.room,
+                meetingTimes.room,
             })
             .repeating({
               freq: ICalEventRepeatingFreq.WEEKLY,
               until: lastDayOfSem,
               byDay: repeatArray,
-              exclude: [firstDayOfSem, laborDay], // exclude these dates
             })
             .timezone("America/New_York");
-
-          repeatArray = [];
         }
       }
 
