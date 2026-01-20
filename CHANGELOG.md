@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-01-19
+
+**Added:**
+
+**Changed:**
+
+**Fixed:**
+
+- Fix ICal export to more consistently land dates. Currently still manual start and end date which needs to be changed to something more automatic depending on the semester.
+
 ## 2026-01-16
 
 **Added:**
