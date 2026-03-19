@@ -13,6 +13,9 @@ services:
     depends_on:
       - planner-db
     deploy:
+      placement:
+        constraints:
+          - node.role == manager  
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=traefik"
