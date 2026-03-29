@@ -13,6 +13,21 @@ services:
     depends_on:
       - planner-db
     deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        max_failure_ratio: 0.25
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
       placement:
         constraints:
           - node.role == manager  
@@ -44,12 +59,15 @@ services:
   planner-db:
     hostname: planner-db
     image: postgres:16.4-bullseye
+    deploy: 
+      placement:
+        constraints:
+          - node.role == manager
+
     volumes:
       - planner-dbdata:/var/lib/postgresql/data
     env_file:
       - .env
-    ports:
-      - 5432:5432
     networks:
       - internal
     healthcheck:
@@ -69,6 +87,10 @@ services:
     environment:
       SCRIPT_NAME: /pgadmin
     deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=traefik"
@@ -87,6 +109,10 @@ services:
 
   planner-cron:
     image: registry.sccs.swarthmore.edu/sccs/planner-cron/planner-cron:latest
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
     build:
       context: .
       dockerfile: ./Dockerfile.cron
