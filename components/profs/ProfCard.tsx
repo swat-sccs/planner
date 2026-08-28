@@ -1,116 +1,106 @@
 "use client";
-import { Card, CardBody, CardHeader } from "@nextui-org/react";
-
-import Image from "next/image";
-
-import { useRouter } from "next/navigation";
+import {
+  Avatar,
+  Card,
+  CardBody,
+  Chip,
+  useDisclosure,
+} from "@nextui-org/react";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
+import ProfessorDetailsModal from "./ProfessorDetailsModal";
 
 export default function ProfCard(props: any) {
-  const router = useRouter();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const getUniqueSubjects = (courses: any) => {
-    let output: any = [];
-    for (let course of courses) {
-      if (!output.includes(course.subject)) {
-        output.push(course.subject);
-      }
-    }
-
-    return output?.map((subj: any) => <div key={subj}>{subj}</div>);
+    return Array.from(
+      new Set(courses?.map((course: any) => course.subject).filter(Boolean))
+    ) as string[];
   };
 
-  return (
-    <div
-      onClick={() => {
-        router.push(`/profratings/${props.prof.uid}`);
-      }}
-      key={props.prof.id}
-      className="hover:cursor-pointer"
-    >
-      <Card
-        key={props.prof.id}
-        isHoverable
-        shadow="sm"
-        className="dark:bg-light_foreground drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none"
-      >
-        <CardHeader className="pl-6">
-          <div className="flex items-center flex-row justify-between w-full">
-            <div className="flex flex-col">
-              <h1 className="font-bold text-md lg:text-2xl text-left">
-                {props.prof.displayName.replace("&#39;", "'")}
-              </h1>
-              <h2 className="flex text-sm lg:text-lg text-left">
-                {props.prof.courses?.length > 0
-                  ? getUniqueSubjects(props.prof.courses)
-                  : null}
-              </h2>
-            </div>
-            <div className="flex items-center">
-              <div className="relative h-14 w-14 lg:h-20 lg:w-20 pr-2 lg:pr-3 overflow-clip rounded-md">
-                <Image
-                  // src={"https://www.swarthmore.edu/sites/default/files/styles/headshot/public/assets/images/user_photos/cmurphy4.jpg.webp"}
-                  alt={props.prof.displayName.replace("&#39;", "'")}
-                  fill
-                  className="object-cover overflow-clip"
-                  sizes="(max-width: 768px) 30vw, (max-width: 1200px) 20vw, 15vw"
-                  loading={"lazy"}
-                  src={
-                    "https://cdn.vectorstock.com/i/500p/08/19/gray-photo-placeholder-icon-design-ui-vector-35850819.jpg"
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        </CardHeader>
+  const subjects = getUniqueSubjects(props.prof.courses);
+  const rating = props.prof.avgRating;
+  const ratingColor =
+    rating >= 4 ? "success" : rating >= 3 ? "warning" : "danger";
+  const displayName = props.prof.displayName.replace("&#39;", "'");
 
-        <CardBody className="pt-0 pl-6 ">
-          <div className="flex justify-between flex-row gap-3">
-            {props.prof?.avgRating != null && props.prof.avgRating > 4 ? (
-              <div
-                className={`flex 0 bg-green-500 w-16 h-16 items-center justify-center rounded-md`}
-              >
-                <div className="font-black text-white text-3xl">
-                  {props.prof.avgRating.toFixed(1)}
+  return (
+    <>
+      <Card
+        as="article"
+        isPressable
+        key={props.prof.id}
+        className="group min-h-48 w-full border border-default-200 bg-content1/80 shadow-sm transition-colors hover:border-primary/30 hover:bg-content2"
+        shadow="none"
+        onPress={onOpen}
+      >
+        <CardBody className="flex flex-col gap-5 p-5 text-left">
+          <div className="flex items-start gap-4">
+            <Avatar
+              className="shrink-0 bg-primary/10 text-primary"
+              classNames={{
+                name: "text-lg font-bold",
+              }}
+              name={displayName}
+              size="lg"
+              showFallback
+            />
+
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="truncate text-lg font-bold tracking-tight text-foreground">
+                    {displayName}
+                  </h2>
+                  <p className="mt-0.5 text-xs font-medium text-default-500">
+                    {props.prof.numRatings}{" "}
+                    {props.prof.numRatings === 1 ? "rating" : "ratings"}
+                  </p>
                 </div>
+                <Chip
+                  color={ratingColor}
+                  size="sm"
+                  startContent={
+                    <StarRoundedIcon className="ml-0.5" fontSize="small" />
+                  }
+                  variant="flat"
+                >
+                  <span className="font-bold">{rating?.toFixed(1)}</span>
+                </Chip>
               </div>
+            </div>
+          </div>
+
+          <div className="flex min-h-7 flex-wrap gap-1.5">
+            {subjects.slice(0, 4).map((subject) => (
+              <Chip key={subject} size="sm" variant="bordered">
+                {subject}
+              </Chip>
+            ))}
+            {subjects.length > 4 ? (
+              <Chip size="sm" variant="flat">
+                +{subjects.length - 4} more
+              </Chip>
             ) : null}
-            {props.prof?.avgRating != null &&
-            props.prof.avgRating <= 4 &&
-            props.prof.avgRating >= 3 ? (
-              <div
-                className={`flex 0 bg-green-500 w-16 h-16 items-center justify-center rounded-md`}
-              >
-                <div className="font-black text-white  text-3xl">
-                  {props.prof.avgRating.toFixed(1)}
-                </div>
-              </div>
-            ) : null}
-            {props.prof?.avgRating != null &&
-            props.prof.avgRating < 3 &&
-            props.prof.avgRating >= 2 ? (
-              <div
-                className={`flex 0 bg-orange-500 w-16 h-16 items-center justify-center rounded-md`}
-              >
-                <div className="font-black text-white  text-3xl">
-                  {props.prof.avgRating.toFixed(1)}
-                </div>
-              </div>
-            ) : null}
-            {props.prof?.avgRating != null && props.prof.avgRating < 2 ? (
-              <div
-                className={`flex 0 bg-red-500 w-16 h-16 items-center justify-center rounded-md`}
-              >
-                <div className="font-black text-white  text-3xl">
-                  {props.prof.avgRating.toFixed(1)}
-                </div>
-              </div>
+            {subjects.length === 0 ? (
+              <span className="text-sm text-default-400">
+                No current courses listed
+              </span>
             ) : null}
           </div>
-          <div className="mt-2">
-            {props.prof.numRatings}{" "}
-            {props.prof.numRatings > 1 ? "Ratings" : "Rating"}
+
+          <div className="mt-auto flex items-center justify-between border-t border-default-100 pt-3 text-xs font-semibold text-default-500">
+            <span>View ratings and courses</span>
+            <ArrowForwardRoundedIcon fontSize="small" />
           </div>
         </CardBody>
       </Card>
-    </div>
+
+      <ProfessorDetailsModal
+        professor={props.prof}
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+      />
+    </>
   );
 }
