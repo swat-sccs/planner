@@ -10,55 +10,49 @@ import { generateColorFromName } from "../../components/primitives";
 import { el } from "@fullcalendar/core/internal-common";
 
 export async function getUniqueCodes() {
-  const codes = await prisma.sectionAttribute.findMany();
-  const daCodes: any = [];
+  return getDistributions();
+}
 
-  for (let i = 0; i < codes.length; i++) {
-    if (!daCodes.includes(codes[i].code)) {
-      daCodes.push(codes[i].code);
-    }
-  }
+export async function getDistributions() {
+  const distributions = await prisma.sectionAttribute.findMany({
+    distinct: ["code"],
+    select: { code: true },
+    where: { code: { not: "" } },
+    orderBy: { code: "asc" },
+  });
 
-  return daCodes;
+  return distributions.map(({ code }) => code);
 }
 
 export async function getUniqueStartEndTimes() {
-  const meetingTimes = await prisma.meetingTime.findMany({
-    where: {
-      beginTime: { not: "" },
-    },
-    orderBy: {
-      beginTime: "asc",
-    },
-  });
-  const startTimes: any = [];
-  const endTimes: any = [];
+  const [startTimes, endTimes] = await Promise.all([
+    prisma.meetingTime.findMany({
+      distinct: ["beginTime"],
+      select: { beginTime: true },
+      where: { beginTime: { not: "" } },
+      orderBy: { beginTime: "asc" },
+    }),
+    prisma.meetingTime.findMany({
+      distinct: ["endTime"],
+      select: { endTime: true },
+      where: { endTime: { not: "" } },
+      orderBy: { endTime: "asc" },
+    }),
+  ]);
 
-  for (let i = 0; i < meetingTimes.length; i++) {
-    if (!startTimes.includes(meetingTimes[i].beginTime)) {
-      startTimes.push(meetingTimes[i].beginTime);
-    }
-    if (!endTimes.includes(meetingTimes[i].endTime)) {
-      endTimes.push(meetingTimes[i].endTime);
-    }
-  }
-
-  const times = { startTimes: startTimes, endTimes: endTimes };
-
-  return times;
+  return {
+    startTimes: startTimes.map(({ beginTime }) => beginTime),
+    endTimes: endTimes.map(({ endTime }) => endTime),
+  };
 }
 
 export async function getTerms() {
-  const courses = await prisma.course.findMany();
-  const output: any = [];
+  const terms = await prisma.course.findMany({
+    distinct: ["year"],
+    select: { year: true },
+  });
 
-  for (let i = 0; i < courses.length; i++) {
-    if (!output.includes(courses[i].year)) {
-      output.push(courses[i].year);
-    }
-  }
-
-  return output;
+  return terms.map(({ year }) => year);
 }
 
 export async function setPlanCookie(plan: string) {
@@ -182,32 +176,10 @@ export async function getInitialCourses(
   query: any,
   term: any,
   dotw: any,
-  stime: any
+  stime: any,
+  distributions: string[] = []
 ) {
-  const startTime = stime.toString().split(",").filter(Number);
-
-  return await prisma.course.findMany({
-    take: 20,
-    include: {
-      sectionAttributes: true,
-      facultyMeet: {
-        include: {
-          meetingTimes: true,
-        },
-      },
-      instructor: true,
-    },
-
-    where: {
-      ...(term
-        ? {
-            year: term,
-            isShown: true,
-          }
-        : {}),
-      //year: term,
-    },
-  });
+  return getCourses(20, query, term, dotw, stime, distributions);
 }
 
 export async function getCoursePlans() {
@@ -289,7 +261,8 @@ export async function getCourses(
   query: any,
   term: any,
   dotw: any,
-  stime: any
+  stime: any,
+  distributions: string[] = []
 ) {
   const startTime = stime.toString().split(",").filter(Number);
 
@@ -323,7 +296,8 @@ export async function getCourses(
     query = query.replace(regex, "").trim();
   }
 
-  query = query.split(" ").join(" | ");
+  const searchText = query.trim();
+  const fullTextQuery = searchText.split(/\s+/).join(" | ");
 
   return await prisma.course.findMany({
     take: take,
@@ -336,13 +310,13 @@ export async function getCourses(
       },
       instructor: true,
     },
-    ...(query
+    ...(fullTextQuery
       ? {
           orderBy: [
             {
               _relevance: {
                 fields: ["courseTitle", "subject", "courseNumber"],
-                search: query,
+                search: fullTextQuery,
                 sort: "desc",
               },
             },
@@ -395,55 +369,37 @@ export async function getCourses(
           }
         : {}),
 
-      ...(query
-        ? {
-            AND: [
+      AND: [
+        ...(searchText
+          ? [
               {
-                courseTitle: {
-                  contains: query,
-                  //search: query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                sectionAttributes: {
-                  some: {
-                    code: {
-                      contains: query,
-                      //search: query,
-                      mode: "insensitive",
+                OR: [
+                  { courseTitle: { contains: searchText, mode: "insensitive" as const } },
+                  { subject: { contains: searchText, mode: "insensitive" as const } },
+                  { courseNumber: { contains: searchText, mode: "insensitive" as const } },
+                  {
+                    sectionAttributes: {
+                      some: { code: { contains: searchText, mode: "insensitive" as const } },
                     },
                   },
-                },
-              },
-              {
-                subject: {
-                  contains: query,
-                  //search: query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                courseNumber: {
-                  contains: query,
-                  //search: query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                instructor: {
-                  displayName: {
-                    contains: query,
-                    //search: query,
-                    mode: "insensitive",
+                  {
+                    instructor: {
+                      displayName: { contains: searchText, mode: "insensitive" as const },
+                    },
                   },
+                ],
+              },
+            ]
+          : []),
+        ...(distributions.length > 0
+          ? [
+              {
+                sectionAttributes: {
+                  some: { code: { in: distributions } },
                 },
               },
-            ],
-          }
-        : {}),
-
-      AND: [
+            ]
+          : []),
         {
           ...(startTime.length > 0
             ? {
