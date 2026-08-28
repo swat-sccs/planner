@@ -1,465 +1,365 @@
-//edit modal for the my ratings page
 "use client";
+
+import { useEffect, useState } from "react";
 import {
-  Card,
-  CardBody,
-  CardHeader,
-  Textarea,
-  Autocomplete,
-  AutocompleteItem,
+  Button,
   Checkbox,
+  Chip,
+  Divider,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Select,
   SelectItem,
-  Divider,
-  Button,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  useDisclosure,
-  Skeleton,
-  Link,
+  Textarea,
 } from "@nextui-org/react";
-import { useCallback, useEffect, useState } from "react";
-import React from "react";
-import { Faculty, Course, Rating } from "@prisma/client";
-
-import Person from "@mui/icons-material/Person";
-import Class from "@mui/icons-material/Class";
-import Star from "@mui/icons-material/Star";
-
+import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
+import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import MUIRating from "@mui/material/Rating";
-import { Alert } from "@nextui-org/alert";
+import type { Rating } from "@prisma/client";
 
-import axios from "axios";
-import { getProfs, getUniqueProfs, getYears } from "../app/actions/getProfs";
-import { CardActions } from "@mui/material";
+import { getYears } from "@/actions/getProfs";
 
-const labels: { [index: string]: string } = {
+const ratingLabels: Record<number, string> = {
   1: "Awful",
   2: "OK",
   3: "Good",
   4: "Great",
   5: "Awesome",
 };
-const diffLabels: { [index: string]: string } = {
-  1: "Very Easy",
+
+const difficultyLabels: Record<number, string> = {
+  1: "Very easy",
   2: "Easy",
   3: "Average",
   4: "Difficult",
-  5: "Very Difficult",
+  5: "Very difficult",
 };
 
 const gradeOptions = [
-  { key: "A+", label: "A+" },
-  { key: "A", label: "A" },
-  { key: "A-", label: "A-" },
-  { key: "B+", label: "B+" },
-  { key: "B", label: "B" },
-  { key: "B-", label: "B-" },
-  { key: "C+", label: "C+" },
-  { key: "C", label: "C" },
-  { key: "C-", label: "C-" },
-  { key: "D+", label: "D+" },
-  { key: "D", label: "D" },
-  { key: "D-", label: "D-" },
-  { key: "F", label: "F" },
-  { key: "Audit/No Grade", label: "Audit/No Grade" },
-  { key: "Dropped", label: "Dropped" },
-  { key: "Not sure yet", label: "Not sure yet" },
-  { key: "Rather Not Disclose", label: "Rather Not Disclose" },
+  "A+",
+  "A",
+  "A-",
+  "B+",
+  "B",
+  "B-",
+  "C+",
+  "C",
+  "C-",
+  "D+",
+  "D",
+  "D-",
+  "F",
+  "Audit/No Grade",
+  "Dropped",
+  "Not sure yet",
+  "Rather Not Disclose",
 ];
 
-function getDiffText(value: number) {
-  return `${value} Star${value !== 1 ? "s" : ""}, ${labels[value]}`;
-}
-
-function getLabelText(value: number) {
-  return `${value} Star${value !== 1 ? "s" : ""}, ${labels[value]}`;
-}
-
-export default function EditModal(props: {
+type EditModalProps = {
   open: boolean;
-  setIsOpen: Function;
-  editRating: any;
-}) {
-  const [selectedProf, setSelectedProf]: any = useState(1);
-  const [selectedClass, setSelectedClass]: any = useState();
-  const [selectedFullClass, setSelectedFullClass] = useState<Course>();
-  const [selectedProfessor, setSelectedProfessor] = useState<Faculty>();
-  const [rating, setRating] = React.useState<number | any>(
-    props.editRating?.overallRating
-  );
-  const [hover, setHover] = React.useState(-1);
-  const [diffValue, setDiffValue] = React.useState<number | null | any>(
-    props.editRating.difficulty
-  );
-  const [diffHover, setDiffHover] = React.useState<number | null>(
-    props.editRating.difficulty
-  );
-  const [takeAgain, setTakeAgain] = React.useState<any>(
-    props.editRating?.takeAgain
-  );
-  const [forCredit, setForCredit] = React.useState<any>(
-    props.editRating?.forCredit
-  );
+  setIsOpen: (isOpen: boolean) => void;
+  editRating: Rating | null;
+  onUpdated?: () => void | Promise<void>;
+};
 
-  const [submitSuccess, setSubmitSuccess] = React.useState(false);
-  const [submitError, setSubmitError] = React.useState(false);
-
-  const [grade, setGrade] = React.useState<string | null | any>(
-    props.editRating?.grade
-  );
-  const [term, setTerm] = React.useState<any>(props.editRating?.termTaken);
-  const [year, setYear] = React.useState<string>("");
-  const [selectedYearKeys, setSelectedYearKeys] = useState<string>("");
-  const [yearOptions, setYearOptions] = React.useState<Array<string>>([]);
-
-  const [review, setReview] = React.useState<any>(props.editRating?.review);
-
-  //const { isOpen, onOpenChange } = useDisclosure();
-
-  const [profs, setProfs] = useState<Faculty[] | null>(null);
-
-  const [classes, setClasses] = useState<Course[]>();
-  const [isLoading, setIsLoading] = useState(true);
-
-  const getData = useCallback(async () => {
-    setIsLoading(true);
-    const myProfs = await getUniqueProfs();
-    const myYears = await getYears();
-    setProfs(myProfs);
-    setYearOptions(myYears);
-    setIsLoading(false);
-  }, []);
+export default function EditModal({
+  open,
+  setIsOpen,
+  editRating,
+  onUpdated,
+}: EditModalProps) {
+  const [overallRating, setOverallRating] = useState<number | null>(null);
+  const [difficulty, setDifficulty] = useState<number | null>(null);
+  const [overallHover, setOverallHover] = useState(-1);
+  const [difficultyHover, setDifficultyHover] = useState(-1);
+  const [takeAgain, setTakeAgain] = useState(false);
+  const [forCredit, setForCredit] = useState(false);
+  const [grade, setGrade] = useState("");
+  const [semester, setSemester] = useState("");
+  const [review, setReview] = useState("");
+  const [yearOptions, setYearOptions] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    getData();
-    let thing: any = props.editRating?.termTaken
-      ? props.editRating?.termTaken.charAt(0)
-      : null;
+    if (!editRating) return;
 
-    setSelectedYearKeys(thing + props.editRating?.yearTaken);
+    setOverallRating(editRating.overallRating);
+    setDifficulty(editRating.difficulty);
+    setTakeAgain(Boolean(editRating.takeAgain));
+    setForCredit(Boolean(editRating.forCredit));
+    setGrade(editRating.grade || "");
+    setReview(editRating.review || "");
+    setSemester(
+      editRating.termTaken && editRating.yearTaken
+        ? `${editRating.termTaken.charAt(0)}${editRating.yearTaken}`
+        : ""
+    );
+    setError("");
+  }, [editRating]);
 
-    //setDiffValue(props.editRating?.difficulty);
-    //setDiffHover(props.editRating?.difficulty);
-  }, [props.editRating]);
-
-  async function onProfSelectionChange(key: any) {
-    setSelectedProf(key);
-    const res: any = await fetch(`/api/getProfClasses?prof=${key}`);
-    const fetchedClasses = await res.json();
-    setClasses(fetchedClasses);
-  }
-
-  const onClassSelectionChange = (key: any) => {
-    setSelectedClass(key);
-  };
-  const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    props.editRating.grade = e.target.value;
-    setGrade(e.target.value);
-  };
-
-  const handleReviewChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log(e);
-    props.editRating.review = e;
-    setReview(e);
-  };
-
-  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    // console.log(e.target.value);
-    // props.editRating.termTaken;
-    // props.editRating.yearTaken;
-    //console.log(e.target.value.replace("S", "Spring").replace("F", "Fall"));
-    setSelectedYearKeys(e.target.value);
-    if (Array.from(e.target.value)[0] == "F") {
-      props.editRating.termTaken = "Fall";
-      props.editRating.yearTaken = e.target.value.replace("F", "");
-      setTerm("Fall");
-    }
-    if (Array.from(e.target.value)[0] == "S") {
-      props.editRating.termTaken = "Spring";
-      props.editRating.yearTaken = e.target.value.replace("S", "");
-      setTerm("Spring");
-    }
-    setYear(e.target.value.replace("S", "").replace("F", ""));
-  };
+  useEffect(() => {
+    if (!open || yearOptions.length > 0) return;
+    getYears().then(setYearOptions).catch(console.error);
+  }, [open, yearOptions.length]);
 
   async function updateReview() {
-    //Reset all vals to defaults... Send to DB!
-    if (!props.editRating) {
-      alert("Please fill out all required fields!");
-    } else {
-      await axios
-        .post("/api/updateReview", {
-          id: props.editRating.id,
-          overallRating: props.editRating.overallRating,
-          difficulty: props.editRating.difficulty,
-          takeAgain: props.editRating.takeAgain,
-          forCredit: props.editRating.forCredit,
-          grade: props.editRating.grade,
-          review: props.editRating.review,
-          termTaken: props.editRating.termTaken,
-          yearTaken: props.editRating.yearTaken,
-        })
-        .then(function (response) {
-          // Handle response
-          props.setIsOpen(false);
-          setRating(0);
-          setDiffValue(0);
-          setTakeAgain(false);
-          setForCredit(false);
-          setSelectedYearKeys("");
-          setGrade("");
-          setSelectedClass([]);
-          setSelectedProf(1);
-          setReview("");
-          setYear(""), setTerm(""), setSubmitSuccess(true);
-          setTimeout(() => {
-            setSubmitSuccess(false);
-          }, 5000);
-        })
-        .catch(function (error) {
-          console.log(error);
-          setSubmitError(true);
-          setTimeout(() => {
-            setSubmitError(false);
-          }, 5000);
-        });
+    if (!editRating || !semester) {
+      setError("Please select a semester before saving.");
+      return;
+    }
+
+    setIsSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/updateReview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editRating.id,
+          overallRating,
+          difficulty,
+          takeAgain,
+          forCredit,
+          grade,
+          review,
+          termTaken: semester.startsWith("F") ? "Fall" : "Spring",
+          yearTaken: Number(semester.slice(1)),
+        }),
+      });
+
+      if (!response.ok) throw new Error("Unable to update rating");
+
+      await onUpdated?.();
+      setIsOpen(false);
+    } catch (updateError) {
+      console.error(updateError);
+      setError("We could not update this rating. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   }
 
+  const displayName =
+    editRating?.profDisplayName?.replace("&#39;", "'") || "Professor";
+  const courseLabel =
+    [editRating?.courseSubject, editRating?.courseNumber]
+      .filter(Boolean)
+      .join(" ") || editRating?.courseName || "Course not listed";
+
   return (
-    <>
-      <div className="absolute top-30 right-20 bg-transparent w-2/12 z-50 ">
-        <Alert
-          isVisible={submitSuccess}
-          color={"success"}
-          title={`Success!`}
-          description={"Rating updated"}
-        />
-        <Alert
-          isVisible={submitError}
-          className="absolute top-30 right-20 bg-transparent border-2 w-1/12 "
-          color={"danger"}
-          title={`Error!`}
-          description={"Error submitted rating. Please try again."}
-        />{" "}
-      </div>
-      <Modal
-        isOpen={props.open}
-        onOpenChange={() => props.setIsOpen(false)}
-        isDismissable={true}
-        isKeyboardDismissDisabled={true}
-        backdrop={"blur"}
-        size={"xl"}
-        placement={"center"}
-      >
-        <ModalContent className="scrollbar bg-light_foreground flex  h-5/6 overflow-y-scroll">
-          <ModalHeader>
-            <h2 className="text-2xl text-center  ">
-              Edit Rating: {props.editRating?.courseName}
-            </h2>
-          </ModalHeader>
+    <Modal
+      backdrop="blur"
+      classNames={{
+        base: "max-h-[88vh] border border-default-200 bg-content1",
+        wrapper: "overflow-hidden",
+      }}
+      isDismissable={!isSaving}
+      isKeyboardDismissDisabled={isSaving}
+      isOpen={open}
+      placement="center"
+      scrollBehavior="inside"
+      size="2xl"
+      onOpenChange={(isOpen) => {
+        if (!isOpen && !isSaving) setIsOpen(false);
+      }}
+    >
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="flex shrink-0 flex-col gap-1 border-b border-default-200 px-6 py-5">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                Edit your rating
+              </p>
+              <h2 className="text-xl font-bold tracking-tight text-foreground">
+                {displayName}
+              </h2>
+              <p className="text-sm font-normal text-default-500">
+                {courseLabel}
+              </p>
+            </ModalHeader>
 
-          <ModalBody className="gap-5 px-4 lg:px-20 overflow-y-scroll">
-            <h2>Professor: {props.editRating?.profDisplayName}</h2>
-            <h2>Course: {props.editRating?.courseName}</h2>
+            <ModalBody className="gap-5 px-6 py-5 scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
+              {error ? (
+                <div className="rounded-xl border border-danger-200 bg-danger-50 px-4 py-3 text-sm font-medium text-danger-700 dark:bg-danger-50/10">
+                  {error}
+                </div>
+              ) : null}
 
-            <h2>Select Semester</h2>
-            <div className="grid-rows-subgrid columns-1 sm:columns-2">
+              <section>
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-bold text-foreground">Semester</h3>
+                  {grade ? (
+                    <Chip size="sm" variant="flat">
+                      Grade {grade}
+                    </Chip>
+                  ) : null}
+                </div>
+                <Select
+                  isRequired
+                  aria-label="Semester"
+                  className="max-w-sm"
+                  label="Semester taken"
+                  selectedKeys={semester ? [semester] : []}
+                  onChange={(event) => setSemester(event.target.value)}
+                >
+                  {yearOptions.map((year) => (
+                    <SelectItem key={year}>
+                      {year.replace(/^F/, "Fall ").replace(/^S/, "Spring ")}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </section>
+
+              <Divider />
+
+              <section className="grid gap-5 sm:grid-cols-2">
+                <div className="rounded-xl border border-default-200 bg-default-50/60 p-4">
+                  <p className="text-sm font-bold text-foreground">
+                    Overall rating
+                  </p>
+                  <p className="mb-3 text-xs text-default-500">
+                    Your overall experience
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <MUIRating
+                      emptyIcon={
+                        <StarRoundedIcon
+                          fontSize="inherit"
+                          style={{ color: "grey", opacity: 0.65 }}
+                        />
+                      }
+                      getLabelText={(value) =>
+                        `${value} stars, ${ratingLabels[value]}`
+                      }
+                      name="edit-overall-rating"
+                      value={overallRating}
+                      onChange={(_event, value) => setOverallRating(value)}
+                      onChangeActive={(_event, value) => setOverallHover(value)}
+                    />
+                    <span className="text-xs font-semibold text-default-500">
+                      {overallRating
+                        ? ratingLabels[
+                            overallHover !== -1 ? overallHover : overallRating
+                          ]
+                        : "Not rated"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-default-200 bg-default-50/60 p-4">
+                  <p className="text-sm font-bold text-foreground">Difficulty</p>
+                  <p className="mb-3 text-xs text-default-500">
+                    How challenging was the course?
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <MUIRating
+                      emptyIcon={
+                        <StarRoundedIcon
+                          fontSize="inherit"
+                          style={{ color: "grey", opacity: 0.65 }}
+                        />
+                      }
+                      getLabelText={(value) =>
+                        `${value} stars, ${difficultyLabels[value]}`
+                      }
+                      name="edit-difficulty-rating"
+                      value={difficulty}
+                      onChange={(_event, value) => setDifficulty(value)}
+                      onChangeActive={(_event, value) =>
+                        setDifficultyHover(value)
+                      }
+                    />
+                    <span className="text-xs font-semibold text-default-500">
+                      {difficulty
+                        ? difficultyLabels[
+                            difficultyHover !== -1
+                              ? difficultyHover
+                              : difficulty
+                          ]
+                        : "Not rated"}
+                    </span>
+                  </div>
+                </div>
+              </section>
+
+              <section className="grid gap-3 sm:grid-cols-2">
+                <Checkbox
+                  classNames={{
+                    base: "m-0 max-w-none rounded-xl border border-default-200 p-3",
+                    label: "w-full",
+                  }}
+                  isSelected={takeAgain}
+                  onValueChange={setTakeAgain}
+                >
+                  <span className="text-sm font-semibold">
+                    I would take this professor again
+                  </span>
+                </Checkbox>
+                <Checkbox
+                  classNames={{
+                    base: "m-0 max-w-none rounded-xl border border-default-200 p-3",
+                    label: "w-full",
+                  }}
+                  isSelected={forCredit}
+                  onValueChange={setForCredit}
+                >
+                  <span className="text-sm font-semibold">
+                    I took this class CR/NC
+                  </span>
+                </Checkbox>
+              </section>
+
               <Select
-                selectionMode="single"
                 isRequired
-                selectedKeys={[selectedYearKeys]}
-                className="max-w-sm mt-5 sm:mt-0"
-                label="Semester"
-                onChange={handleYearChange}
+                aria-label="Grade"
+                className="max-w-sm"
+                label="Grade received"
+                selectedKeys={grade ? [grade] : []}
+                onChange={(event) => setGrade(event.target.value)}
               >
-                {yearOptions.map((year) => (
-                  <SelectItem key={year}>
-                    {year.replace("F", "Fall ").replace("S", "Spring ")}
-                  </SelectItem>
+                {gradeOptions.map((option) => (
+                  <SelectItem key={option}>{option}</SelectItem>
                 ))}
               </Select>
-            </div>
-            <Divider className="mt-5" orientation="horizontal" />
-            <div className="mt-5">Rate Your Professor</div>
-            <div className="grid grid-cols-2">
-              <MUIRating
-                className="ml-5"
-                name="rate-prof"
-                value={props.editRating.overallRating}
-                precision={1}
-                getLabelText={getLabelText}
-                onChange={(event, newValue) => {
-                  props.editRating.overallRating = newValue;
-                  setRating(newValue);
-                }}
-                onChangeActive={(event, newHover) => {
-                  setHover(newHover);
-                }}
-                emptyIcon={
-                  <Star
-                    style={{ opacity: 0.8, color: "grey" }}
-                    fontSize="inherit"
-                  />
-                }
-              />
-              {rating !== null && (
-                <div className="ml-5">
-                  {labels[hover !== -1 ? hover : rating]}
-                </div>
-              )}
-            </div>
-            <div>How difficult was this professor?</div>
-            <div className="grid grid-cols-2 mb-5">
-              <MUIRating
-                className="ml-5"
-                name="rate-prof-diff"
-                value={props.editRating.difficulty}
-                precision={1}
-                getLabelText={getDiffText}
-                onChange={(event, newValue) => {
-                  props.editRating.difficulty = newValue;
-                  setDiffValue(newValue);
-                }}
-                onChangeActive={(event, newHover) => {
-                  setDiffHover(newHover);
-                }}
-                emptyIcon={
-                  <Star
-                    style={{ opacity: 0.8, color: "grey" }}
-                    fontSize="inherit"
-                  />
-                }
-              />
-              {diffValue !== null && (
-                <div className="ml-5">
-                  {diffLabels[diffHover !== -1 ? diffHover : diffValue]}
-                </div>
-              )}
-            </div>
-            <div>Would you take this professor again?</div>
-            <Checkbox
-              className="ml-5"
-              isSelected={
-                props.editRating?.takeAgain
-                  ? props.editRating?.takeAgain
-                  : undefined
-              }
-              onValueChange={setTakeAgain}
-            >
-              Yes! <div className="text-tiny">(leave blank for no)</div>
-            </Checkbox>
-            <div>Did you mark this class as CR/NC?</div>
-            <Checkbox
-              className="ml-5"
-              isSelected={
-                props.editRating?.takeAgain
-                  ? props.editRating?.takeAgain
-                  : undefined
-              }
-              onValueChange={setForCredit}
-            >
-              Yes! <div className="text-tiny">(leave blank for no)</div>
-            </Checkbox>
-            <div>Select grade recieved</div>
-            <Select
-              isRequired
-              selectionMode="single"
-              selectedKeys={[props.editRating.grade]}
-              className="max-w-sm"
-              onChange={handleSelectionChange}
-              label="Grade"
-            >
-              {gradeOptions.map((grade) => (
-                <SelectItem key={grade.key}>{grade.label}</SelectItem>
-              ))}
-            </Select>
-            <Textarea
-              value={props.editRating.review}
-              size="lg"
-              className=""
-              rows={5}
-              labelPlacement="outside"
-              disableAutosize
-              label="Write a Review"
-              placeholder="What did you think of this prof/class?"
-              onValueChange={(e: any) => handleReviewChange(e)}
-            />
 
-            <ModalFooter>
-              <Button onPress={updateReview} color="primary" size="lg">
-                Update Review
+              <Textarea
+                disableAutosize
+                label="Written review"
+                labelPlacement="outside"
+                minRows={5}
+                placeholder="What did you think of this professor and course?"
+                value={review}
+                onValueChange={setReview}
+              />
+            </ModalBody>
+
+            <ModalFooter className="shrink-0 border-t border-default-200 px-6 py-4">
+              <Button
+                isDisabled={isSaving}
+                variant="light"
+                onPress={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-[#f46523] font-semibold text-white dark:bg-orange-400 dark:text-slate-950"
+                isLoading={isSaving}
+                startContent={
+                  isSaving ? null : <SaveRoundedIcon fontSize="small" />
+                }
+                onPress={updateReview}
+              >
+                Save changes
               </Button>
             </ModalFooter>
-          </ModalBody>
-
-          {/* 
-          <CardActions className="ml-auto">
-            <Button onPress={onOpen} color="primary" size="lg">
-              Submit
-            </Button>
-          </CardActions>
-          <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            isDismissable={false}
-            isKeyboardDismissDisabled={true}
-            backdrop={"blur"}
-          >
-            <ModalContent>
-              {(onClose) => (
-                <>
-                  <ModalHeader className="flex flex-col gap-1">
-                    Confirm Rating Submission
-                  </ModalHeader>
-                  <ModalBody>
-                    <div>
-                      By submiting a rating to SCCS you agree to abide by the
-                      SCCS
-                      <Link
-                        className="ml-1 mr-1"
-                        isExternal
-                        href="https://www.sccs.swarthmore.edu/docs/policy"
-                        title="SCCS Usage & Data Policy"
-                      >
-                        <span className=" underline">
-                          {" "}
-                          Usage & Data Policy{" "}
-                        </span>
-                      </Link>
-                    </div>
-
-                    <p>
-                      While reviews submitted through this site are completly
-                      anonymous we collect user identifiable information for the
-                      safety and continued usage of this platform. We do reserve
-                      the right to remove reviews that are not in good spirit.
-                    </p>
-                  </ModalBody>
-                  <ModalFooter>
-                    <Button color="danger" variant="light" onPress={onClose}>
-                      Close
-                    </Button>
-                    <Button
-                      color="primary"
-                      onPress={() => {
-                        onClose(), submitReview();
-                      }}
-                    >
-                      Submit
-                    </Button>
-                  </ModalFooter>
-                </>
-              )}
-            </ModalContent>
-          </Modal>
-          */}
-        </ModalContent>
-      </Modal>
-    </>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
   );
 }
