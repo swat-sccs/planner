@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 COPY . .
 EXPOSE 3000
 
-RUN chown -R node /usr/src/app
+RUN chmod +x /usr/src/app/docker-startup.sh && chown -R node /usr/src/app
 USER node
 RUN npm install --production
 RUN npx prisma generate
