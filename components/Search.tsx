@@ -102,6 +102,7 @@ export default function Search(props: any) {
   function resetFilters() {
     params.delete("dotw");
     params.delete("stime");
+    params.delete("dist");
     replace(`${pathname}?${params.toString()}`);
   }
 

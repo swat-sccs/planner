@@ -12,7 +12,7 @@ import {
   getPlanCourses,
   getTerms,
   getUniqueStartEndTimes,
-  getUniqueCodes,
+  getDistributions,
   getCoursePlans,
 } from "../app/actions/getCourses";
 
@@ -29,6 +29,7 @@ export default async function Page(props: {
     prof?: string;
     dotw?: Array<string>;
     stime?: Array<string>;
+    dist?: string;
   }>;
 }) {
   const cookieStore = await cookies();
@@ -48,6 +49,7 @@ export default async function Page(props: {
     searchParams?.term || (await cookieStore.get("termCookie")?.value) || "";
   const dotw = searchParams?.dotw || [];
   const stime = searchParams?.stime || [];
+  const distributions = searchParams?.dist?.split(",").filter(Boolean) || [];
   const profQuery = searchParams?.prof || "";
   const homePageProps: any = {};
 
@@ -57,12 +59,12 @@ export default async function Page(props: {
   let lastSelectedCoursePlan;
 
   if (session?.user) {
-    initalCourses = await getInitialCourses(query, term, dotw, stime);
+    initalCourses = await getInitialCourses(query, term, dotw, stime, distributions);
     planCourses = await getPlanCourses();
     coursePlans = await getCoursePlans();
     lastSelectedCoursePlan = await getSelectedCoursePlan(session);
   } else {
-    initalCourses = await getInitialCourses(query, term, dotw, stime);
+    initalCourses = await getInitialCourses(query, term, dotw, stime, distributions);
   }
   homePageProps["courseWrapper"] = (
     <Suspense
@@ -76,6 +78,7 @@ export default async function Page(props: {
         dotw={dotw}
         query={query}
         stime={stime}
+        distributions={distributions}
         term={term}
         initalPlanCourses={planCourses}
         coursePlans={coursePlans}
@@ -90,12 +93,12 @@ export default async function Page(props: {
 async function Home(props: any) {
   const terms = await getTerms();
   const uniqueTimes = await getUniqueStartEndTimes();
-  const codes = await getUniqueCodes();
+  const distributions = await getDistributions();
 
   return (
     <>
       <div className="grid grid-cols-12 p-3 lg:p-4 lg:py-0 h-full lg:h-[88.8vh] gap-5">
-        <div className=" lg:col-span-2 lg:flex hidden">
+        <div className="lg:col-span-2 lg:flex hidden">
           <Suspense
             fallback={
               <Skeleton className="rounded-lg w-8/12 h-fit align-top justify-start" />
@@ -103,7 +106,7 @@ async function Home(props: any) {
           >
             <Filters
               className="scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
-              codes={codes}
+              distributions={distributions}
               terms={terms}
               times={uniqueTimes}
               mobile={false}
@@ -117,7 +120,7 @@ async function Home(props: any) {
             filters={
               <Filters
                 className="scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
-                codes={codes}
+                distributions={distributions}
                 terms={terms}
                 times={uniqueTimes}
                 mobile={true}

@@ -67,7 +67,7 @@ export default function CoursePlanContext(props: any) {
     <>
       {props.courseList ? (
         <div className="col-span-12 lg:col-span-7">
-          <div className="lg:h-[88vh] h-[60vh]  overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
+          <div className="lg:h-[88vh] h-[60vh] overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
             <Suspense
               fallback={
                 <div className="grid gap-3">
@@ -83,6 +83,7 @@ export default function CoursePlanContext(props: any) {
                 dotw={props.dotw}
                 query={props.query}
                 stime={props.stime}
+                distributions={props.distributions}
                 term={props.term}
                 selectedCourses={props.auth ? courses : null}
                 updatePlan={(newCourses: Course[]) => setCourses(newCourses)}

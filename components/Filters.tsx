@@ -19,6 +19,7 @@ export default function Filters(props: any) {
   const [dotw, setdotw] = useState<any>([]);
   const [selectedTerm, setSelectedTerm]: any = useState([]);
   const [selectedStartTime, setSelectedStartTime]: any = useState([]);
+  const [selectedDistributions, setSelectedDistributions]: any = useState([]);
 
   const params = useMemo(
     () => new URLSearchParams(searchParams),
@@ -87,6 +88,17 @@ export default function Filters(props: any) {
     replace(`${pathname}?${params.toString()}`);
   };
 
+  const handleDistributionChange = (e: any) => {
+    setSelectedDistributions(e);
+
+    if (e.length > 0) {
+      params.set("dist", e.join(","));
+    } else {
+      params.delete("dist");
+    }
+    replace(`${pathname}?${params.toString()}`);
+  };
+
   const RenderSelectOptions = () => {
     const output = [];
 
@@ -124,7 +136,9 @@ export default function Filters(props: any) {
     let termCookie = cookies.get("termCookie");
     let searchTermCookie = cookies.get("searchTermCookie");
 
-    setdotw(searchParams.get("dotw")?.toString().split(","));
+    setdotw(searchParams.get("dotw")?.toString().split(",").filter(Boolean) || []);
+    setSelectedStartTime(searchParams.get("stime")?.toString().split(",").filter(Boolean) || []);
+    setSelectedDistributions(searchParams.get("dist")?.toString().split(",").filter(Boolean) || []);
     // setSelectedStartTime(searchParams.get("stime")?.toString().split(","));
     if (!termCookie) {
       cookies.set("termCookie", props.terms[0]);
@@ -161,73 +175,56 @@ export default function Filters(props: any) {
 
         <Divider className="mt-5 w-50" />
 
-        {props.mobile ? (
-          <div className="grid grid-cols-2 h-60 overflow-y-clip">
-            <div>
-              <div className="mt-5 font-semibold mb-2">Days of the Week</div>
-              <CheckboxGroup value={dotw} onValueChange={handleDOTWChange}>
-                {days.map((day: any) => (
-                  <Checkbox key={day.key} color="primary" value={day.key}>
-                    {day.label}
-                  </Checkbox>
-                ))}
-              </CheckboxGroup>
-            </div>
+        <Select
+          classNames={inputStyle}
+          size="sm"
+          label="Days of the Week"
+          placeholder="Any day"
+          selectedKeys={dotw}
+          selectionMode="multiple"
+          onSelectionChange={(keys) =>
+            handleDOTWChange(Array.from(keys).map(String))
+          }
+        >
+          {days.map((day: any) => (
+            <SelectItem key={day.key}>{day.label}</SelectItem>
+          ))}
+        </Select>
 
-            <div>
-              <div className="mt-5 font-semibold mb-2 ">Start Time</div>
-              <CheckboxGroup
-                value={selectedStartTime}
-                onValueChange={handleSTimeChange}
-                className="lg:max-h-72 overflow-y-scroll h-48 scrollbar-thinscrollbar-thumb-accent-500 scrollbar-track-transparent"
-              >
-                {props.times.startTimes.map((startTime: any) => {
-                  const time = startTime.slice(0, 2) + ":" + startTime.slice(2);
-                  const daTime = moment(time, "HH:mm").format("hh:mm A");
+        <div>
+          <div className="mt-5 font-semibold">Distribution</div>
+          <CheckboxGroup
+            value={selectedDistributions}
+            onValueChange={handleDistributionChange}
+            className="max-h-36 overflow-y-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
+          >
+            {(props.distributions || []).map((distribution: string) => (
+              <Checkbox color="primary" key={distribution} value={distribution}>
+                {distribution}
+              </Checkbox>
+            ))}
+          </CheckboxGroup>
+        </div>
 
-                  return (
-                    <Checkbox
-                      color="secondary"
-                      key={startTime}
-                      value={startTime}
-                    >
-                      {daTime}
-                    </Checkbox>
-                  );
-                })}
-              </CheckboxGroup>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="mt-5 font-semibold">Days of the Week</div>
-            <CheckboxGroup value={dotw} onValueChange={handleDOTWChange}>
-              {days.map((day: any) => (
-                <Checkbox key={day.key} color="primary" value={day.key}>
-                  {day.label}
+        <div>
+          <div className="mt-5 font-semibold">Start Time</div>
+          <CheckboxGroup
+            value={selectedStartTime}
+            onValueChange={handleSTimeChange}
+            className="lg:max-h-72 max-h-[12vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
+          >
+            {props.times.startTimes.map((startTime: any) => {
+              const time = startTime.slice(0, 2) + ":" + startTime.slice(2);
+              const daTime = moment(time, "HH:mm").format("hh:mm A");
+
+              return (
+                <Checkbox color="secondary" key={startTime} value={startTime}>
+                  {daTime}
                 </Checkbox>
-              ))}
-            </CheckboxGroup>
-
-            <div className="mt-5 font-semibold">Start Time</div>
-            <CheckboxGroup
-              value={selectedStartTime}
-              onValueChange={handleSTimeChange}
-              className="lg:max-h-72 max-h-[12vh] overflow-y-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
-            >
-              {props.times.startTimes.map((startTime: any) => {
-                const time = startTime.slice(0, 2) + ":" + startTime.slice(2);
-                const daTime = moment(time, "HH:mm").format("hh:mm A");
-
-                return (
-                  <Checkbox color="secondary" key={startTime} value={startTime}>
-                    {daTime}
-                  </Checkbox>
-                );
-              })}
-            </CheckboxGroup>
-          </>
-        )}
+              );
+            })}
+          </CheckboxGroup>
+        </div>
       </div>
     </>
   );

@@ -29,6 +29,7 @@ export function FullCourseList({
   term,
   dotw,
   stime,
+  distributions,
   selectedCourses,
   updatePlan,
   auth,
@@ -38,6 +39,7 @@ export function FullCourseList({
   term: string;
   dotw: Array<string>;
   stime: Array<string>;
+  distributions: Array<string>;
   selectedCourses: Course[] | null;
   updatePlan: any;
   auth: any;
@@ -61,7 +63,7 @@ export function FullCourseList({
     setCursor((cursor) => cursor + NUMBER_OF_USERS_TO_FETCH);
     setTake((take) => take + NUMBER_OF_USERS_TO_FETCH);
     //console.log(take, query, term);
-    const apiCourses = await getCourses(take, query, term, dotw, stime);
+    const apiCourses = await getCourses(take, query, term, dotw, stime, distributions);
 
     if (inView) {
       if (apiCourses.length == 0 || apiCourses.length == courses?.length) {
@@ -87,7 +89,7 @@ export function FullCourseList({
 
     // Prevent an infinite loop. TODO: better solution.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, term, dotw, stime, inView]);
+  }, [query, term, dotw, stime, distributions, inView]);
 
   async function loadCourseIds(course?: any) {
     if (selectedCourses) {
@@ -124,7 +126,7 @@ export function FullCourseList({
     //setIsDone(false);
     loadMoreCourses();
     loadCourseIds();
-  }, [query, term, dotw, stime, loadMoreCourses]);
+  }, [query, term, dotw, stime, distributions, loadMoreCourses]);
 
   const card = tv({
     slots: {
