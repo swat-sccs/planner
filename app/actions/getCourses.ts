@@ -181,7 +181,16 @@ export async function getInitialCourses(
   stime: any,
   distributions: string[] = []
 ) {
-  return getCourses(20, query, term, dotw, stime, distributions);
+  return fetchCoursePage(
+    null,
+    20,
+    query,
+    term,
+    dotw,
+    stime,
+    distributions,
+    true
+  );
 }
 
 export async function getCoursePlans() {
@@ -258,310 +267,197 @@ async function getCourseDescription(url: string) {
   }
 }
 
-export async function getCourses(
-  take: any,
-  query: any,
-  term: any,
-  dotw: any,
-  stime: any,
-  distributions: string[] = []
+function buildCourseQuery(
+  rawQuery: string,
+  term: string,
+  selectedDays: string[],
+  selectedStartTimes: string[],
+  distributions: string[]
 ) {
-  const startTime = stime.toString().split(",").filter(Number);
+  let query = rawQuery || "";
+  const properties = { dist: "", dep: "", prof: "" };
+  const tokenPattern = /(\w+):(\S+)/g;
+  let match: RegExpExecArray | null;
 
-  let properties = {
-    dist: "",
-    dep: "",
-    prof: "",
-  };
-
-  if (query.includes(":")) {
-    const regex = /(\w+):(\S+)/g; // global flag to catch all key:value pairs
-    let match;
-
-    while ((match = regex.exec(query)) !== null) {
-      const [, field, value] = match;
-
-      switch (field.toLowerCase()) {
-        case "dist":
-          properties.dist = value;
-          break;
-        case "dep":
-          properties.dep = value;
-          break;
-        case "prof":
-          properties.prof = value;
-          break;
-      }
-    }
-
-    // Remove all key:value tokens from query
-    query = query.replace(regex, "").trim();
+  while ((match = tokenPattern.exec(query)) !== null) {
+    const [, field, value] = match;
+    if (field.toLowerCase() === "dist") properties.dist = value;
+    if (field.toLowerCase() === "dep") properties.dep = value;
+    if (field.toLowerCase() === "prof") properties.prof = value;
   }
 
-  const searchText = query.trim();
-  const fullTextQuery = searchText.split(/\s+/).join(" | ");
+  query = query.replace(tokenPattern, "").trim();
+  const fullTextQuery = query.split(/\s+/).filter(Boolean).join(" | ");
+  const andFilters: Prisma.CourseWhereInput[] = [];
 
-  return await prisma.course.findMany({
-    take: take,
-    include: {
-      sectionAttributes: true,
-      facultyMeet: {
-        include: {
-          meetingTimes: true,
+  if (query) {
+    andFilters.push({
+      OR: [
+        { courseTitle: { contains: query, mode: "insensitive" } },
+        { subject: { contains: query, mode: "insensitive" } },
+        { courseNumber: { contains: query, mode: "insensitive" } },
+        {
+          sectionAttributes: {
+            some: { code: { contains: query, mode: "insensitive" } },
+          },
         },
+        {
+          instructor: {
+            displayName: { contains: query, mode: "insensitive" },
+          },
+        },
+      ],
+    });
+  }
+
+  if (distributions.length > 0) {
+    andFilters.push({
+      sectionAttributes: { some: { code: { in: distributions } } },
+    });
+  }
+
+  if (selectedStartTimes.length > 0) {
+    andFilters.push({
+      facultyMeet: {
+        meetingTimes: { beginTime: { in: selectedStartTimes } },
       },
-      instructor: true,
-    },
-    ...(fullTextQuery
+    });
+  }
+
+  if (selectedDays.length > 0) {
+    const dayFilters: Prisma.MeetingTimeWhereInput = {};
+    const validDays = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday",
+    ] as const;
+
+    for (const day of validDays) {
+      if (selectedDays.includes(day)) dayFilters[day] = true;
+    }
+
+    andFilters.push({
+      facultyMeet: { meetingTimes: { is: dayFilters } },
+    });
+  }
+
+  const where: Prisma.CourseWhereInput = {
+    isShown: true,
+    ...(term ? { year: term } : {}),
+    ...(properties.dist
       ? {
-          orderBy: [
-            {
-              _relevance: {
-                fields: ["courseTitle", "subject", "courseNumber"],
-                search: fullTextQuery,
-                sort: "desc",
-              },
+          sectionAttributes: {
+            some: {
+              code: { contains: properties.dist, mode: "insensitive" },
             },
-          ],
+          },
         }
-      : ""),
-    where: {
-      ...(term
-        ? {
-            year: term,
-            isShown: true,
-          }
-        : {}),
-      /*
-      courseTitle: {
-        contains: query,
-        mode: "insensitive",
-      },*/
-
-      ...(properties.dist != ""
-        ? {
-            sectionAttributes: {
-              some: {
-                code: {
-                  contains: properties.dist,
-                  mode: "insensitive",
-                },
-              },
-            },
-          }
-        : {}),
-
-      ...(properties.prof != ""
-        ? {
-            instructor: {
-              displayName: {
-                contains: properties.prof,
-                mode: "insensitive",
-              },
-            },
-          }
-        : {}),
-
-      ...(properties.dep != ""
-        ? {
-            subject: {
-              contains: properties.dep,
+      : {}),
+    ...(properties.prof
+      ? {
+          instructor: {
+            displayName: {
+              contains: properties.prof,
               mode: "insensitive",
             },
-          }
-        : {}),
-
-      AND: [
-        ...(searchText
-          ? [
-              {
-                OR: [
-                  { courseTitle: { contains: searchText, mode: "insensitive" as const } },
-                  { subject: { contains: searchText, mode: "insensitive" as const } },
-                  { courseNumber: { contains: searchText, mode: "insensitive" as const } },
-                  {
-                    sectionAttributes: {
-                      some: { code: { contains: searchText, mode: "insensitive" as const } },
-                    },
-                  },
-                  {
-                    instructor: {
-                      displayName: { contains: searchText, mode: "insensitive" as const },
-                    },
-                  },
-                ],
-              },
-            ]
-          : []),
-        ...(distributions.length > 0
-          ? [
-              {
-                sectionAttributes: {
-                  some: { code: { in: distributions } },
-                },
-              },
-            ]
-          : []),
-        {
-          ...(startTime.length > 0
-            ? {
-                facultyMeet: {
-                  meetingTimes: {
-                    beginTime: {
-                      in: startTime,
-                    },
-                  },
-                },
-              }
-            : {}),
-        },
-        {
-          ...(dotw.length > 0
-            ? {
-                facultyMeet: {
-                  meetingTimes: {
-                    is: {
-                      monday: dotw.includes("monday") ? true : Prisma.skip,
-                      tuesday: dotw.includes("tuesday") ? true : Prisma.skip,
-                      wednesday: dotw.includes("wednesday")
-                        ? true
-                        : Prisma.skip,
-                      thursday: dotw.includes("thursday") ? true : Prisma.skip,
-                      friday: dotw.includes("friday") ? true : Prisma.skip,
-                      saturday: dotw.includes("saturday") ? true : Prisma.skip,
-                      sunday: dotw.includes("sunday") ? true : Prisma.skip,
-                    },
-                  },
-                },
-              }
-            : {}),
-        },
-      ],
-    },
-  });
-  /*
-  return await prisma.course.findMany({
-    take: take,
-    include: {
-      sectionAttributes: true,
-      facultyMeet: {
-        include: {
-          meetingTimes: true,
-        },
-      },
-      instructor: true,
-    },
-
-    ...(query
-      ? {
-          orderBy: [
-            {
-              _relevance: {
-                fields: ["courseTitle", "subject", "courseNumber"],
-                search: query,
-                sort: "desc",
-              },
-            },
-          ],
+          },
         }
-      : ""),
-    where: {
-      ...(term
-        ? {
-            year: term,
-            isShown: true,
-          }
-        : {}),
+      : {}),
+    ...(properties.dep
+      ? {
+          subject: { contains: properties.dep, mode: "insensitive" },
+        }
+      : {}),
+    AND: andFilters,
+  };
 
-      //year: term,
+  const orderBy: Prisma.CourseOrderByWithRelationInput[] = [
+    ...(fullTextQuery
+      ? [
+          {
+            _relevance: {
+              fields: [
+                Prisma.CourseOrderByRelevanceFieldEnum.courseTitle,
+                Prisma.CourseOrderByRelevanceFieldEnum.subject,
+                Prisma.CourseOrderByRelevanceFieldEnum.courseNumber,
+              ],
+              search: fullTextQuery,
+              sort: Prisma.SortOrder.desc,
+            },
+          },
+        ]
+      : []),
+    { id: "asc" },
+  ];
 
-      ...(query
-        ? {
-            OR: [
-              {
-                courseTitle: {
-                  contains: query,
-                  //search: query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                sectionAttributes: {
-                  some: {
-                    code: {
-                      contains: query,
-                      //search: query,
-                      mode: "insensitive",
-                    },
-                  },
-                },
-              },
-              {
-                subject: {
-                  contains: query,
-                  //search: query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                courseNumber: {
-                  contains: query,
-                  //search: query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                instructor: {
-                  displayName: {
-                    contains: query,
-                    //search: query,
-                    mode: "insensitive",
-                  },
-                },
-              },
-            ],
-          }
-        : {}),
+  return { where, orderBy };
+}
 
-      AND: [
-        {
-          ...(startTime.length > 0
-            ? {
-                facultyMeet: {
-                  meetingTimes: {
-                    beginTime: {
-                      in: startTime,
-                    },
-                  },
-                },
-              }
-            : {}),
-        },
-        {
-          ...(dotw.length > 0
-            ? {
-                facultyMeet: {
-                  meetingTimes: {
-                    is: {
-                      monday: dotw.includes("monday") ? true : Prisma.skip,
-                      tuesday: dotw.includes("tuesday") ? true : Prisma.skip,
-                      wednesday: dotw.includes("wednesday")
-                        ? true
-                        : Prisma.skip,
-                      thursday: dotw.includes("thursday") ? true : Prisma.skip,
-                      friday: dotw.includes("friday") ? true : Prisma.skip,
-                      saturday: dotw.includes("saturday") ? true : Prisma.skip,
-                      sunday: dotw.includes("sunday") ? true : Prisma.skip,
-                    },
-                  },
-                },
-              }
-            : {}),
-        },
-      ],
-    },
-  });
-  */
+async function fetchCoursePage(
+  cursor: number | null,
+  pageSize: number,
+  query: string,
+  term: string,
+  dotw: string[],
+  stime: string[],
+  distributions: string[],
+  includeTotal = false
+) {
+  const selectedDays = Array.isArray(dotw) ? dotw : [];
+  const selectedStartTimes = Array.isArray(stime)
+    ? stime.filter(Boolean)
+    : String(stime || "")
+        .split(",")
+        .filter(Boolean);
+  const selectedDistributions = Array.isArray(distributions)
+    ? distributions.filter(Boolean)
+    : [];
+  const { where, orderBy } = buildCourseQuery(
+    query,
+    term,
+    selectedDays,
+    selectedStartTimes,
+    selectedDistributions
+  );
+
+  const [rows, totalCount] = await Promise.all([
+    prisma.course.findMany({
+      take: pageSize + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      include: {
+        sectionAttributes: true,
+        facultyMeet: { include: { meetingTimes: true } },
+        instructor: true,
+      },
+      orderBy,
+      where,
+    }),
+    includeTotal ? prisma.course.count({ where }) : Promise.resolve(null),
+  ]);
+
+  const hasMore = rows.length > pageSize;
+  const courses = hasMore ? rows.slice(0, pageSize) : rows;
+
+  return {
+    courses,
+    nextCursor: hasMore ? courses[courses.length - 1]?.id || null : null,
+    totalCount,
+  };
+}
+
+export async function getCourses(
+  cursor: number | null,
+  query: string,
+  term: string,
+  dotw: string[],
+  stime: string[],
+  distributions: string[] = []
+) {
+  return fetchCoursePage(cursor, 20, query, term, dotw, stime, distributions);
 }
 export async function getEvents(courses: any) {
   let output: any = [];

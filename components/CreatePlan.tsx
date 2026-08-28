@@ -16,6 +16,8 @@ import SaveIcon from "@mui/icons-material/Save";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
+import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 
 import axios from "axios";
 import { Select, SelectItem } from "@nextui-org/react";
@@ -332,34 +334,8 @@ export default function CreatePlan({
 
   return (
     <>
-      <Card
-        isBlurred
-        className={`w-[92%] lg:w-[23%] h-[83vh] z-20 absolute  ${auth ? "hidden" : null}`}
-      >
-        <CardBody className="h-full flex flex-col justify-center space-y-10">
-          <div className="text-center text-3xl ">
-            <h1>Save Your Plans</h1>
-            <h1>
-              With a <strong>Free </strong>
-            </h1>
-            <h1>
-              <strong className="bg-gradient-to-b to-blue-950 from-orange-600 bg-clip-text text-transparent">
-                SCCS
-              </strong>{" "}
-              Account
-            </h1>
-          </div>
-
-          <div className=" text-center">
-            <Button onPress={() => signIn("keycloak", { callbackUrl: "/" })}>
-              <div className="text-xl">Get Started</div>
-            </Button>
-          </div>
-        </CardBody>
-      </Card>
-
       <Button
-        className="rounded-full fixed md:hidden bottom-5 right-5 z-20 w-12 h-12 shadow-md"
+        className="fixed bottom-5 right-5 z-20 h-12 w-12 rounded-full shadow-md md:hidden"
         color="secondary"
         isIconOnly
         onPress={() => {
@@ -367,166 +343,237 @@ export default function CreatePlan({
         }}
       >
         <ExpandLessIcon
-          className={"transition" + (isScrolled ? " rotate-0" : " rotate-180")}
+          className={
+            "transition-transform" + (isScrolled ? " rotate-0" : " rotate-180")
+          }
         />
       </Button>
-      <div className="flex flex-col mt-5 lg:mt-0 gap-5">
-        <div className="flex flex-col gap-3">
-          <div ref={scrollRef}>
-            <div className="font-bold text-lg">Create a Plan</div>
-            <div className="flex mt-2 items-center gap-2">
-              <Input
-                isRequired
-                label="Plan Name"
-                placeholder="Name your plan..."
-                size="lg"
-                value={coursePlanName}
-                onChange={(event: any) => {
-                  setCoursePlanName(event.target.value);
-                }}
-              />
+
+      {!auth ? (
+        <div className="mt-5 h-auto min-h-80 w-full lg:mt-0 lg:h-[83vh]">
+          <div className="grid h-full place-items-center px-6 text-center">
+            <div className="max-w-xs">
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
+                <SchoolRoundedIcon fontSize="large" />
+              </div>
+              <p className="mt-5 text-xs font-bold uppercase tracking-[0.14em] text-primary">
+                Plan builder
+              </p>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground">
+                Save your schedule
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-default-500">
+                Sign in with your free SCCS account to create plans and keep
+                your courses organized.
+              </p>
               <Button
-                aria-label="Create new plan! Name required."
-                startContent={<AddIcon />}
-                size="md"
-                onPress={() => createPlan()}
-              ></Button>
+                className="mt-5 bg-[#f46523] font-semibold text-white dark:bg-orange-400 dark:text-slate-950"
+                startContent={<LoginRoundedIcon fontSize="small" />}
+                onPress={() => signIn("keycloak", { callbackUrl: "/" })}
+              >
+                Get started
+              </Button>
             </div>
-            {alert ? (
-              <div className="mt-2 text-red-500 text-center">{alert}</div>
-            ) : null}
           </div>
-
-          <div className="grid grid-cols-3 items-center">
-            <Divider />
-            {/* --------------------------------- or --------------------------- */}
-            <div className="text-center mt-1">or</div>
-            <Divider />
-          </div>
-
-          <div>
-            <div className="font-bold text-lg">
-              {!edit ? "Select a Plan" : "Edit your plan"}
+        </div>
+      ) : (
+        <div className="mt-5 h-auto w-full lg:mt-0 lg:h-[83vh] lg:min-h-0">
+          <div className="flex h-full min-h-0 flex-col gap-4 px-1 py-2">
+            <div className="shrink-0" ref={scrollRef}>
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">
+                Plan builder
+              </p>
+              <div className="mt-1 flex items-center justify-between gap-3">
+                <h2 className="text-xl font-bold tracking-tight text-foreground">
+                  Your schedule
+                </h2>
+                <Chip size="sm" variant="flat">
+                  {courses?.length || 0}{" "}
+                  {courses?.length === 1 ? "course" : "courses"}
+                </Chip>
+              </div>
             </div>
-            <div className="flex mt-2 items-center justify gap-2">
-              {!edit ? (
-                <Select
-                  className="col-span-3"
-                  label="Current Plan"
-                  selectedKeys={selectedCoursePlan}
-                  selectionMode="single"
-                  size="lg"
-                  onChange={handleSelectionChange}
-                  disallowEmptySelection
-                  items={planItems}
-                >
-                  {
-                    /*   {coursePlans?.map((plan: any) => (
-                    <SelectItem key={plan.id}>{plan.name}</SelectItem>
-                  ))}*/ (plan: any) => (
-                      <SelectItem key={plan.key}>{plan.label}</SelectItem>
-                    )
-                  }
-                </Select>
-              ) : null}
-              {edit ? (
+
+            <section className="shrink-0 rounded-xl border border-default-200 bg-default-50/60 p-3">
+              <h3 className="text-xs font-bold text-default-500">
+                Create a plan
+              </h3>
+              <div className="mt-2 flex items-center gap-2">
                 <Input
                   isRequired
-                  label="Edit Plan Name"
-                  size="lg"
-                  value={editable}
-                  onChange={(event: any) => {
-                    setEditable(event.target.value),
-                      handleNameChange(event.target.value, selectedCoursePlan);
-                  }}
+                  aria-label="New plan name"
+                  classNames={{ inputWrapper: "bg-content1 shadow-none" }}
+                  placeholder="Name your plan"
+                  size="sm"
+                  value={coursePlanName}
+                  onChange={(event) => setCoursePlanName(event.target.value)}
                 />
+                <Button
+                  isIconOnly
+                  aria-label="Create new plan"
+                  color="primary"
+                  size="sm"
+                  startContent={<AddIcon />}
+                  onPress={createPlan}
+                />
+              </div>
+              {alert ? (
+                <p className="mt-2 text-xs font-medium text-danger">{alert}</p>
               ) : null}
-              <Tooltip content="Duplicate Plan" showArrow>
-                <Button
-                  aria-label="Duplicate the current plan"
-                  isIconOnly
-                  size="md"
-                  onPress={() => duplicatePlan()}
-                  startContent={<ContentCopyIcon />}
-                />
-              </Tooltip>
-              <Tooltip content="Delete Plan">
-                <Popover
-                  placement="bottom"
-                  showArrow={true}
-                  color={"foreground"}
-                  isOpen={deleteIsOpen}
-                  onOpenChange={(open) => setDeleteIsOpen(open)}
-                >
-                  <PopoverTrigger>
-                    <Button
-                      aria-label="Delete the current plan"
-                      isIconOnly
-                      size="md"
-                      startContent={<DeleteIcon />}
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                    <div className="px-1 py-2">
-                      <div
-                        role="button"
-                        onClick={() => {
-                          deletePlan(), setDeleteIsOpen(false);
-                        }}
-                        className="text-small font-bold"
-                      >
-                        Delete Plan?
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </Tooltip>
+            </section>
 
-              {edit ? (
-                <Button
-                  aria-label="Save new plan name"
-                  isIconOnly
-                  size="md"
-                  onPress={() => setEdit(false)}
-                  startContent={<SaveIcon />}
-                />
-              ) : (
-                <Tooltip content="Edit Plan Name" showArrow>
+            <Divider className="shrink-0" />
+
+            <section className="shrink-0">
+              <h3 className="text-xs font-bold text-default-500">
+                {edit ? "Rename current plan" : "Current plan"}
+              </h3>
+              <div className="mt-2 flex items-center gap-2">
+                {!edit ? (
+                  <Select
+                    className="min-w-0 flex-1"
+                    classNames={{
+                      trigger:
+                        "border border-default-200 bg-default-50 shadow-none",
+                    }}
+                    disallowEmptySelection
+                    items={planItems}
+                    label="Current plan"
+                    selectedKeys={selectedCoursePlan}
+                    selectionMode="single"
+                    size="sm"
+                    onChange={handleSelectionChange}
+                  >
+                    {(plan: any) => (
+                      <SelectItem key={plan.key}>{plan.label}</SelectItem>
+                    )}
+                  </Select>
+                ) : (
+                  <Input
+                    isRequired
+                    className="min-w-0 flex-1"
+                    label="Plan name"
+                    size="sm"
+                    value={editable}
+                    onChange={(event) => {
+                      setEditable(event.target.value);
+                      handleNameChange(event.target.value, selectedCoursePlan);
+                    }}
+                  />
+                )}
+
+                <Tooltip content="Duplicate plan" showArrow>
                   <Button
-                    aria-label="Edit name of course plan"
                     isIconOnly
-                    size="md"
-                    onPress={() => {
-                      setEdit(true),
+                    aria-label="Duplicate the current plan"
+                    size="sm"
+                    startContent={<ContentCopyIcon fontSize="small" />}
+                    variant="flat"
+                    onPress={duplicatePlan}
+                  />
+                </Tooltip>
+
+                <Tooltip content="Delete plan">
+                  <Popover
+                    color="foreground"
+                    isOpen={deleteIsOpen}
+                    placement="bottom"
+                    showArrow
+                    onOpenChange={setDeleteIsOpen}
+                  >
+                    <PopoverTrigger>
+                      <Button
+                        isIconOnly
+                        aria-label="Delete the current plan"
+                        color="danger"
+                        size="sm"
+                        startContent={<DeleteIcon fontSize="small" />}
+                        variant="light"
+                      />
+                    </PopoverTrigger>
+                    <PopoverContent>
+                      <div className="flex flex-col gap-2 px-1 py-2">
+                        <p className="text-small font-bold">
+                          Delete this plan?
+                        </p>
+                        <Button
+                          color="danger"
+                          size="sm"
+                          onPress={() => {
+                            deletePlan();
+                            setDeleteIsOpen(false);
+                          }}
+                        >
+                          Delete plan
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </Tooltip>
+
+                {edit ? (
+                  <Button
+                    isIconOnly
+                    aria-label="Finish renaming plan"
+                    color="success"
+                    size="sm"
+                    startContent={<SaveIcon fontSize="small" />}
+                    variant="flat"
+                    onPress={() => setEdit(false)}
+                  />
+                ) : (
+                  <Tooltip content="Rename plan" showArrow>
+                    <Button
+                      isIconOnly
+                      aria-label="Rename current plan"
+                      size="sm"
+                      startContent={<EditIcon fontSize="small" />}
+                      variant="flat"
+                      onPress={() => {
+                        setEdit(true);
                         setEditable(
                           coursePlans?.find(
                             (plan: any) =>
                               plan.id === parseInt(selectedCoursePlan)
-                          )?.name
+                          )?.name || ""
                         );
-                    }}
-                    startContent={<EditIcon />}
-                  />
-                </Tooltip>
-              )}
+                      }}
+                    />
+                  </Tooltip>
+                )}
+              </div>
+            </section>
+
+            {warning ? (
+              <div className="shrink-0 rounded-lg bg-danger-50 px-3 py-2 text-center text-xs font-semibold text-danger-600 dark:bg-danger-50/10">
+                Different semesters detected
+              </div>
+            ) : null}
+
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="mb-2 flex shrink-0 items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-[0.1em] text-default-500">
+                  Planned courses
+                </h3>
+              </div>
+              <div
+                aria-label="List of courses in plan"
+                className="flex min-h-36 flex-1 flex-col gap-3 overflow-y-scroll pr-1 scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
+                id="scrollMe"
+                ref={scrollRef}
+              >
+                {courses?.length > 0 ? (
+                  <CoursesList />
+                ) : (
+                  <div className="grid min-h-32 place-items-center rounded-xl border border-dashed border-default-300 px-4 text-center text-sm text-default-500">
+                    Add a course from the results to begin building this plan.
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-        {warning && (
-          <div className="text-red-600 text-center text-sm">
-            <strong>Warning:</strong> Different Semesters Detected
-          </div>
-        )}
-
-        <div
-          className="flex flex-col h-auto mb-20 md:mb-0 md:h-[50vh] overflow-y-scroll gap-3 scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
-          id="scrollMe"
-          ref={scrollRef}
-          aria-label="List of Courses in plan"
-        >
-          {courses?.length > 0 ? <CoursesList /> : null}
-        </div>
-      </div>
+      )}
     </>
   );
 }

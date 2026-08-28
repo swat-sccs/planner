@@ -66,8 +66,8 @@ export default function CoursePlanContext(props: any) {
   return (
     <>
       {props.courseList ? (
-        <div className="col-span-12 lg:col-span-7">
-          <div className="lg:h-[88vh] h-[60vh] overflow-y-scroll overflow-x-clip scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
+        <div className="col-span-12 min-h-0 lg:col-span-7">
+          <div className="h-[60vh] overflow-x-clip overflow-y-scroll scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent lg:h-[88vh]">
             <Suspense
               fallback={
                 <div className="grid gap-3">
@@ -114,7 +114,7 @@ export default function CoursePlanContext(props: any) {
         </div>
       )}
 
-      <div className="col-span-12 lg:col-span-3 ">
+      <div className="col-span-12 min-h-0 lg:col-span-3">
         <CreatePlan
           auth={props.auth}
           updatePlan={(newCourses: any) => {

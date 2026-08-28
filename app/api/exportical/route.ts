@@ -3,45 +3,80 @@ import { MeetingTime } from "@prisma/client";
 import { NextResponse, NextRequest } from "next/server";
 
 import prisma from "../../../lib/prisma";
+import { auth } from "../../../lib/auth";
 import ical, {
   ICalCalendarMethod,
   ICalEventRepeatingFreq,
   ICalWeekday,
 } from "ical-generator";
 
-/**
- * Get the first occurrence day offset from firstDayOfSem (which is a Monday)
- * Returns the number of days to add to firstDayOfSem to get the first class meeting
- */
-function getFirstClassOffset(meetingTimes: MeetingTime): number {
-  // First day of semester is Monday
-  // Check days in order starting from Monday
-  if (meetingTimes.monday) return 0;      // Monday = 0 days offset
-  if (meetingTimes.tuesday) return 1;     // Tuesday = 1 day offset
-  if (meetingTimes.wednesday) return 2;   // Wednesday = 2 days offset
-  if (meetingTimes.thursday) return 3;    // Thursday = 3 days offset
-  if (meetingTimes.friday) return 4;      // Friday = 4 days offset
-  if (meetingTimes.saturday) return 5;    // Saturday = 5 days offset
-  if (meetingTimes.sunday) return 6;      // Sunday = 6 days offset
-  
-  return 0; // Default to Monday if no days specified
+function getFirstClassOffset(
+  firstDayOfSemester: Date,
+  meetingTimes: MeetingTime
+) {
+  const meetingDays = [
+    meetingTimes.sunday,
+    meetingTimes.monday,
+    meetingTimes.tuesday,
+    meetingTimes.wednesday,
+    meetingTimes.thursday,
+    meetingTimes.friday,
+    meetingTimes.saturday,
+  ];
+  const offsets = meetingDays
+    .map((meets, day) =>
+      meets ? (day - firstDayOfSemester.getDay() + 7) % 7 : null
+    )
+    .filter((offset): offset is number => offset !== null);
+
+  return offsets.length > 0 ? Math.min(...offsets) : 0;
+}
+
+function parseExportDate(value: string | null, endOfDay = false) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || "");
+  if (!match) return null;
+
+  const date = new Date(
+    Number(match[1]),
+    Number(match[2]) - 1,
+    Number(match[3]),
+    endOfDay ? 23 : 0,
+    endOfDay ? 59 : 0,
+    endOfDay ? 59 : 0,
+    0
+  );
+
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const lastSelectedCoursePlan = searchParams.get("id");
+  const planId = Number(searchParams.get("id"));
+  const firstDayOfSem = parseExportDate(searchParams.get("start"));
+  const lastDayOfSem = parseExportDate(searchParams.get("end"), true);
+  const session = await auth();
 
-  // Spring 2026 semester dates - first day is Monday, January 19, 2026
-  const firstDayOfSem = new Date(2026, 0, 19, 0, 0, 0, 0); // January 19, 2026 (Monday)
-  const lastDayOfSem = new Date(2026, 4, 1, 23, 59, 59, 0); // May 1, 2026 (typical spring semester end)
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!Number.isInteger(planId) || planId <= 0) {
+    return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+  }
+  if (!firstDayOfSem || !lastDayOfSem || firstDayOfSem > lastDayOfSem) {
+    return NextResponse.json(
+      { error: "A valid semester start and end date are required" },
+      { status: 400 }
+    );
+  }
 
   // Given an incoming request...
   const newHeaders = new Headers();
 
-  if (lastSelectedCoursePlan) {
-    const coursePlan = await prisma.coursePlan.findUnique({
+  if (planId) {
+    const coursePlan = await prisma.coursePlan.findFirst({
       where: {
-        id: parseInt(lastSelectedCoursePlan),
+        id: planId,
+        User: { uuid: session.user.id },
       },
       include: {
         courses: {
@@ -76,14 +111,17 @@ export async function GET(request: NextRequest) {
           if (meetingTimes.sunday) repeatArray.push(ICalWeekday.SU);
 
           // Parse the time strings (format: "HHMM" like "0930" or "1445")
-          const beginHour = parseInt(meetingTimes.beginTime.substring(0, 2), 10);
+          const beginHour = parseInt(
+            meetingTimes.beginTime.substring(0, 2),
+            10
+          );
           const beginMin = parseInt(meetingTimes.beginTime.substring(2), 10);
           const endHour = parseInt(meetingTimes.endTime.substring(0, 2), 10);
           const endMin = parseInt(meetingTimes.endTime.substring(2), 10);
 
           // Calculate the first occurrence date based on meeting days
-          const dayOffset = getFirstClassOffset(meetingTimes);
-          
+          const dayOffset = getFirstClassOffset(firstDayOfSem, meetingTimes);
+
           // Create the start date: first day of semester + offset to first meeting day
           const classStart = new Date(firstDayOfSem);
           classStart.setDate(classStart.getDate() + dayOffset);
@@ -99,10 +137,7 @@ export async function GET(request: NextRequest) {
               end: classEnd,
               summary: course.courseTitle.replace("&amp;", "&"),
               description: course.subject + " " + course.courseNumber,
-              location:
-                meetingTimes.building +
-                " " +
-                meetingTimes.room,
+              location: meetingTimes.building + " " + meetingTimes.room,
             })
             .repeating({
               freq: ICalEventRepeatingFreq.WEEKLY,
@@ -117,7 +152,7 @@ export async function GET(request: NextRequest) {
       newHeaders.set("Content-Type", "text/calendar; charset=utf-8");
       newHeaders.set(
         "Content-Disposition",
-        `attachment; filename="${coursePlan?.name}.ics"`
+        `attachment; filename="${coursePlan.name.replace(/[\r\n"\\/]/g, "_")}.ics"`
       );
       return new Response(
         new Blob([calendar.toString()], { type: "text/calendar" }),
@@ -127,11 +162,11 @@ export async function GET(request: NextRequest) {
         }
       );
     }
-    return NextResponse.json("Server Error - No Course Plan Number Provided", {
-      status: 500,
+    return NextResponse.json("Course plan not found", {
+      status: 404,
     });
   }
-  return NextResponse.json("Server Error - No Course Plan Number Provided", {
-    status: 500,
+  return NextResponse.json("Invalid course plan", {
+    status: 400,
   });
 }

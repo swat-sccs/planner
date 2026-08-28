@@ -1,28 +1,23 @@
 "use client";
-import { Course } from "@prisma/client";
 
-import { useCallback, useEffect, useState } from "react";
-
-import CourseCard from "./CourseCard";
-import React from "react";
-import {
-  getCourses,
-  getCourseIds,
-  updateDBPlan,
-  getPlanCourses,
-} from "../app/actions/getCourses";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Course } from "@prisma/client";
+import { Button, Card, CardBody, Chip, Skeleton } from "@nextui-org/react";
+import ClearAllRoundedIcon from "@mui/icons-material/ClearAllRounded";
+import SearchOffRoundedIcon from "@mui/icons-material/SearchOffRounded";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import { useInView } from "react-intersection-observer";
-import { Card, CardBody, CardHeader, Skeleton } from "@nextui-org/react";
-import { useRouter } from "next/navigation";
-import CourseCardAdded from "./CourseCardAdded";
-import {
-  getSelectedCoursesCookie,
-  setSelectedCookie,
-} from "app/actions/actions";
-import { tv } from "tailwind-variants";
-import { announceCourseAdded } from "@/lib/courseAddedEvent";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-const NUMBER_OF_USERS_TO_FETCH = 10;
+import { getCourses, getPlanCourses, updateDBPlan } from "@/actions/getCourses";
+import { announceCourseAdded } from "@/lib/courseAddedEvent";
+import CourseCard from "./CourseCard";
+
+type CoursePage = {
+  courses: Course[];
+  nextCursor: number | null;
+  totalCount: number | null;
+};
 
 export function FullCourseList({
   init,
@@ -35,157 +30,209 @@ export function FullCourseList({
   updatePlan,
   auth,
 }: {
-  init: Course[];
+  init: CoursePage;
   query: string;
   term: string;
-  dotw: Array<string>;
-  stime: Array<string>;
-  distributions: Array<string>;
+  dotw: string[];
+  stime: string[];
+  distributions: string[];
   selectedCourses: Course[] | null;
-  updatePlan: any;
+  updatePlan: (courses: Course[]) => void;
   auth: any;
 }) {
+  const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialPage = Array.isArray(init)
+    ? { courses: init, nextCursor: null, totalCount: init.length }
+    : init;
+  const [courses, setCourses] = useState<Course[]>(initialPage.courses);
+  const [nextCursor, setNextCursor] = useState<number | null>(
+    initialPage.nextCursor
+  );
+  const [totalCount, setTotalCount] = useState<number>(
+    initialPage.totalCount ?? initialPage.courses.length
+  );
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [selectedCourseIds, setSelectedCourseIds] = useState<number[]>([]);
+  const { ref, inView } = useInView({ rootMargin: "240px" });
 
-  const [cursor, setCursor] = useState(1);
-  const [take, setTake] = useState(20);
-  const [isDone, setIsDone] = useState(false);
+  useEffect(() => {
+    const page = Array.isArray(init)
+      ? { courses: init, nextCursor: null, totalCount: init.length }
+      : init;
+    setCourses(page.courses);
+    setNextCursor(page.nextCursor);
+    setTotalCount(page.totalCount ?? page.courses.length);
+    setIsLoadingMore(false);
+  }, [init]);
 
-  //const [selectedCourses, setSelectedCourses]: any = useState([]);
-  const [selectedCourseIDS, setSelectedCourseIDS]: any = useState([]);
-  const [courses, setCourses] = useState<Course[]>(init);
-  const { ref, inView } = useInView();
+  useEffect(() => {
+    setSelectedCourseIds(selectedCourses?.map((course) => course.id) || []);
+  }, [selectedCourses]);
 
   const loadMoreCourses = useCallback(async () => {
-    // NOTE: if this isn't done every time we get a double take and a
-    // race condition desync, breaking isDone. Maybe we'll have better
-    // logic in the future.
+    if (!nextCursor || isLoadingMore) return;
 
-    setCursor((cursor) => cursor + NUMBER_OF_USERS_TO_FETCH);
-    setTake((take) => take + NUMBER_OF_USERS_TO_FETCH);
-    //console.log(take, query, term);
-    const apiCourses = await getCourses(take, query, term, dotw, stime, distributions);
+    setIsLoadingMore(true);
+    try {
+      const nextPage = await getCourses(
+        nextCursor,
+        query,
+        term,
+        dotw,
+        stime,
+        distributions
+      );
 
-    if (inView) {
-      if (apiCourses.length == 0 || apiCourses.length == courses?.length) {
-        setIsDone(true);
-      } else {
-        setIsDone(false);
-      }
+      setCourses((current) => {
+        const uniqueCourses = new Map(
+          current.map((course) => [course.id, course])
+        );
+        for (const course of nextPage.courses)
+          uniqueCourses.set(course.id, course);
+        return Array.from(uniqueCourses.values());
+      });
+      setNextCursor(nextPage.nextCursor);
+    } catch (error) {
+      console.error("Unable to load more courses", error);
+    } finally {
+      setIsLoadingMore(false);
     }
+  }, [nextCursor, isLoadingMore, query, term, dotw, stime, distributions]);
 
-    /*
-    if (
-      inView &&
-      (apiCourses.length == 0 || apiCourses.length == courses?.length)
-    ) {
-      console.log("setting isDone true");
-      console.log(apiCourses.length);
-      console.log(courses?.length);
-      setIsDone(true);
-    } else {
-      setIsDone(false);
-    }*/
-    setCourses(apiCourses);
+  useEffect(() => {
+    if (inView) loadMoreCourses();
+  }, [inView, loadMoreCourses]);
 
-    // Prevent an infinite loop. TODO: better solution.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, term, dotw, stime, distributions, inView]);
+  async function addCourse(course: Course) {
+    if (!selectedCourses || selectedCourseIds.includes(course.id)) return;
 
-  async function loadCourseIds(course?: any) {
-    if (selectedCourses) {
-      if (course && !selectedCourses?.some((e) => e.id == course.id)) {
-        const theCourses = Array.from(selectedCourses);
-        theCourses.push(course);
-        updatePlan(theCourses);
-        selectedCourses = theCourses;
+    const updatedCourses = [...selectedCourses, course];
+    setSelectedCourseIds((current) => [...current, course.id]);
+    updatePlan(updatedCourses);
 
-        updateDBPlan(course)
-          .then((updatedPlan) => {
-            if (updatedPlan) announceCourseAdded();
-          })
-          .catch((thing) => {
-            //something went wrong then get current db state and update with that
-            const planCourses: any = getPlanCourses();
-            if (planCourses) {
-              updatePlan(planCourses?.courses);
-            }
-          });
-      }
-      let ids: any = [];
-      for (let course of selectedCourses) {
-        ids.push(course.id);
-      }
-      setSelectedCourseIDS(ids);
+    try {
+      const updatedPlan = await updateDBPlan(course);
+      if (updatedPlan) announceCourseAdded();
+    } catch (error) {
+      console.error("Unable to add course to plan", error);
+      const currentPlan: any = await getPlanCourses();
+      updatePlan(currentPlan?.courses || []);
     }
   }
 
-  useEffect(() => {
-    if (inView) {
-      loadMoreCourses();
-      loadCourseIds();
-    }
-  }, [inView, loadMoreCourses]);
+  const activeFilterCount = dotw.length + stime.length + distributions.length;
+  const resultLabel = `${totalCount.toLocaleString()} ${
+    totalCount === 1 ? "course" : "courses"
+  }`;
 
-  useEffect(() => {
-    //setIsDone(false);
-    loadMoreCourses();
-    loadCourseIds();
-  }, [query, term, dotw, stime, distributions, loadMoreCourses]);
-
-  const card = tv({
-    slots: {
-      base: "hover:cursor-pointer bg-light_foreground min-h-32 max-h-62 w-[98%] rounded-md scroll-none drop-shadow-lg transition-colors",
-      role: "font-bold text-primary ",
-    },
-  });
-
-  const { base, role } = card();
+  function clearFilters() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("dotw");
+    params.delete("stime");
+    params.delete("dist");
+    router.replace(`${pathname}?${params.toString()}`);
+  }
 
   return (
-    <>
-      <div className="flex flex-col gap-3 ">
-        {courses?.map((course: any) => (
-          <div key={course.id} /* onClick={() => loadCourseIds(course)} */>
-            <CourseCard
-              courses={courses}
-              course={course}
-              added={auth ? selectedCourseIDS?.includes(course.id) : false}
-              loadCourseIds={(course: Course) => loadCourseIds(course)}
-              //not used anymore updatePlan={(newCourses: Course[]) => updatePlan(newCourses)}
-            />
+    <div className="flex min-h-full flex-col gap-3 pr-1">
+      <div className="sticky top-0 z-20 flex flex-col gap-3 rounded-xl border border-default-200 bg-background/95 px-4 py-3 shadow-sm backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-base font-bold text-foreground">
+              Course results
+            </h1>
+            <Chip size="sm" variant="flat">
+              {resultLabel}
+            </Chip>
           </div>
-        ))}
-        {courses?.length == 0 ? (
-          <Card isHoverable className={base()} shadow="sm">
-            <CardHeader className="pl-6 text-3xl">
-              Oops! Looks like that class does not exist!
-            </CardHeader>
+          <p className="mt-0.5 truncate text-xs text-default-500">
+            {query
+              ? `Results for “${query}”`
+              : term
+                ? `Browsing ${term.replace(/^F/, "Fall ").replace(/^S/, "Spring ")}`
+                : "Browse the current course catalog"}
+          </p>
+        </div>
 
-            <CardBody className="pt-0 pl-6 ">
-              Please try refining your search. You can search for any of the
-              following:
-              <ul className="ml-5">
-                <li>Course Name</li>
-                <li>Instructor Name</li>
-                <li>Course Department Code/Number (ex. CPSC 035)</li>
-                <li>Course Tags: (w), SS, NSE</li>
-              </ul>
-            </CardBody>
-          </Card>
-        ) : null}
-
-        <div>
-          {isDone ? (
-            <></>
-          ) : (
-            <Skeleton
-              ref={ref}
-              className="rounded-md w-[98%] h-48 align-top justify-start"
-            />
-          )}
+        <div className="flex items-center gap-2">
+          <Chip
+            size="sm"
+            startContent={
+              <TuneRoundedIcon className="ml-0.5" fontSize="small" />
+            }
+            variant={activeFilterCount > 0 ? "flat" : "bordered"}
+          >
+            {activeFilterCount} active
+          </Chip>
+          {activeFilterCount > 0 ? (
+            <Button
+              size="sm"
+              startContent={<ClearAllRoundedIcon fontSize="small" />}
+              variant="light"
+              onPress={clearFilters}
+            >
+              Clear filters
+            </Button>
+          ) : null}
         </div>
       </div>
-    </>
+
+      {courses.length > 0 ? (
+        <div className="flex flex-col gap-3">
+          {courses.map((course: any) => (
+            <CourseCard
+              added={auth ? selectedCourseIds.includes(course.id) : false}
+              course={course}
+              courses={courses}
+              key={course.id}
+              loadCourseIds={addCourse}
+            />
+          ))}
+        </div>
+      ) : (
+        <Card className="border border-default-200 bg-content1/80 shadow-sm">
+          <CardBody className="grid min-h-64 place-items-center px-6 text-center">
+            <div className="max-w-md">
+              <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
+                <SearchOffRoundedIcon />
+              </div>
+              <h2 className="mt-4 text-lg font-bold text-foreground">
+                No courses found
+              </h2>
+              <p className="mt-1 text-sm leading-6 text-default-500">
+                Try a broader search or clear a few filters to see more of the
+                catalog.
+              </p>
+              {activeFilterCount > 0 ? (
+                <Button
+                  className="mt-4"
+                  color="primary"
+                  startContent={<ClearAllRoundedIcon fontSize="small" />}
+                  variant="flat"
+                  onPress={clearFilters}
+                >
+                  Clear filters
+                </Button>
+              ) : null}
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {nextCursor ? (
+        <div ref={ref} className="grid gap-3 py-1">
+          <Skeleton className="h-28 w-full rounded-xl" />
+          {isLoadingMore ? (
+            <Skeleton className="h-28 w-full rounded-xl" />
+          ) : null}
+        </div>
+      ) : courses.length > 0 ? (
+        <div className="py-4 text-center text-xs font-semibold text-default-400">
+          You have reached the end of the catalog.
+        </div>
+      ) : null}
+    </div>
   );
 }

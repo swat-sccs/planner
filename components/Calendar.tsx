@@ -10,7 +10,7 @@ import timeGridPlugin from "@fullcalendar/timegrid"; // a plugin!
 import listPlugin from "@fullcalendar/list";
 
 import moment from "moment";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import CalendarExportButton from "./CalendarExportButton";
 
 export default function Calendar({
   events,
@@ -58,7 +58,8 @@ export default function Calendar({
             {subject} {courseNumber}
           </span>
           <span className="font-normal text-white/90">
-            {" "}— {eventInfo.event.title}
+            {" "}
+            — {eventInfo.event.title}
           </span>
         </div>
         <div className="mt-1 truncate text-[11px] leading-tight text-white/75">
@@ -72,14 +73,7 @@ export default function Calendar({
     <div className="planner-calendar relative h-full w-full overflow-hidden rounded-xl border border-slate-200/80 bg-white/70 shadow-sm backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-950/30">
       {lastSelectedCoursePlan ? (
         <div className="absolute left-3 top-2 z-10">
-          <a
-            download
-            className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800/90 dark:text-slate-100 dark:hover:bg-slate-700"
-            href={`/api/exportical?id= + ${lastSelectedCoursePlan}`}
-          >
-            <CalendarMonthIcon fontSize="small" />
-            <span>Export</span>
-          </a>
+          <CalendarExportButton planId={lastSelectedCoursePlan} />
         </div>
       ) : null}
 
