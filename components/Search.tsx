@@ -58,7 +58,7 @@ export default function Search(props: any) {
       }
     }
     replace(`${pathname}?${params.toString()}`);
-  }, 700);
+  }, 200);
 
   const firstLoad = async () => {
     if (pathname === "/") {
