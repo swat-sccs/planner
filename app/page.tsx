@@ -59,12 +59,24 @@ export default async function Page(props: {
   let lastSelectedCoursePlan;
 
   if (session?.user) {
-    initalCourses = await getInitialCourses(query, term, dotw, stime, distributions);
+    initalCourses = await getInitialCourses(
+      query,
+      term,
+      dotw,
+      stime,
+      distributions
+    );
     planCourses = await getPlanCourses();
     coursePlans = await getCoursePlans();
     lastSelectedCoursePlan = await getSelectedCoursePlan(session);
   } else {
-    initalCourses = await getInitialCourses(query, term, dotw, stime, distributions);
+    initalCourses = await getInitialCourses(
+      query,
+      term,
+      dotw,
+      stime,
+      distributions
+    );
   }
   homePageProps["courseWrapper"] = (
     <Suspense
@@ -97,13 +109,9 @@ async function Home(props: any) {
 
   return (
     <>
-      <div className="grid grid-cols-12 p-3 lg:p-4 lg:py-0 h-full lg:h-[88.8vh] gap-5">
-        <div className="lg:col-span-2 lg:flex hidden">
-          <Suspense
-            fallback={
-              <Skeleton className="rounded-lg w-8/12 h-fit align-top justify-start" />
-            }
-          >
+      <div className="grid h-full grid-cols-12 gap-5 p-3 lg:h-[88.8vh] lg:px-4 lg:py-0">
+        <div className="hidden min-h-0 lg:col-span-2 lg:flex">
+          <Suspense fallback={<Skeleton className="h-80 w-full rounded-xl" />}>
             <Filters
               className="scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent"
               distributions={distributions}
@@ -114,7 +122,7 @@ async function Home(props: any) {
           </Suspense>
         </div>
 
-        <div className="col-span-12 lg:hidden flex w-[98%]">
+        <div className="col-span-12 flex w-[98%] lg:hidden">
           <Search
             mobile={true}
             filters={
