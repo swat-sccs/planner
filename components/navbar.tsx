@@ -31,6 +31,7 @@ import { siteConfig } from "../config/site";
 import { ThemeSwitch } from "../components/theme-switch";
 import { Button } from "@nextui-org/button";
 import Logo from "../public/logo.svg";
+import NotificationBell from "./NotificationBell";
 
 export const Navbar = (props: any) => {
   const cookies = useCookies();
@@ -208,6 +209,9 @@ export const Navbar = (props: any) => {
               </Button>
             )}
           </NavbarItem>
+          <NavbarItem>
+            <NotificationBell />
+          </NavbarItem>
           <NavbarItem className="hidden lg:flex gap-2">
             <ThemeSwitch />
           </NavbarItem>
@@ -216,6 +220,7 @@ export const Navbar = (props: any) => {
         {/* Mobile?*/}
 
         <NavbarContent className="flex lg:hidden" justify="end">
+          <NotificationBell />
           <ThemeSwitch />
 
           <NavbarMenuToggle

@@ -146,7 +146,7 @@ export async function updateDBPlan(course: any) {
   // const id: any = await getPlanCookie();
   //let DOTW: Array<String> = dotw.split(",");
   if (id) {
-    const updatedCourse = await prisma.coursePlan.update({
+    return prisma.coursePlan.update({
       where: {
         id: parseInt(id),
       },
@@ -159,6 +159,8 @@ export async function updateDBPlan(course: any) {
       },
     });
   }
+
+  return null;
 }
 
 export async function getInitialCoursePlans() {

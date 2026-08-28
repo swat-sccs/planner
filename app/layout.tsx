@@ -9,6 +9,7 @@ import { sccsLD, siteConfig } from "../config/site";
 import { fontSans } from "../config/fonts";
 import { Navbar } from "../components/navbar";
 import FooterInfo from "../components/FooterInfo";
+import SwatGptPromo from "../components/SwatGptPromo";
 
 import { Providers } from "./providers";
 
@@ -66,6 +67,7 @@ export default function RootLayout({
                 <main className="container mx-auto lg:mx-0 px-1 lg:px-7 lg:pt-5 justify-center items-center flex-grow max-w-full">
                   {children}
                 </main>
+                <SwatGptPromo />
                 <FooterInfo />
               </div>
             </Providers>

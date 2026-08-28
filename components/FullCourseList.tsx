@@ -20,6 +20,7 @@ import {
   setSelectedCookie,
 } from "app/actions/actions";
 import { tv } from "tailwind-variants";
+import { announceCourseAdded } from "@/lib/courseAddedEvent";
 
 const NUMBER_OF_USERS_TO_FETCH = 10;
 
@@ -99,13 +100,17 @@ export function FullCourseList({
         updatePlan(theCourses);
         selectedCourses = theCourses;
 
-        updateDBPlan(course).catch((thing) => {
-          //something went wrong then get current db state and update with that
-          const planCourses: any = getPlanCourses();
-          if (planCourses) {
-            updatePlan(planCourses?.courses);
-          }
-        });
+        updateDBPlan(course)
+          .then((updatedPlan) => {
+            if (updatedPlan) announceCourseAdded();
+          })
+          .catch((thing) => {
+            //something went wrong then get current db state and update with that
+            const planCourses: any = getPlanCourses();
+            if (planCourses) {
+              updatePlan(planCourses?.courses);
+            }
+          });
       }
       let ids: any = [];
       for (let course of selectedCourses) {

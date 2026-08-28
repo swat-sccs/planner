@@ -27,6 +27,7 @@ import {
   getCourseDetails,
   getUserPlanOptions,
 } from "@/actions/getStats";
+import { announceCourseAdded } from "@/lib/courseAddedEvent";
 
 type PlanOption = {
   id: number;
@@ -161,6 +162,7 @@ export default function CourseDetailsModal({
       if (result.ok) {
         setAddedPlanName(plan?.name || "plan");
         setAddState("added");
+        announceCourseAdded();
       } else {
         setAddState(result.reason === "not-found" ? "no-plan" : "error");
       }
