@@ -2,6 +2,7 @@
 import {
   Card,
   CardBody,
+  CardFooter,
   CardHeader,
   Textarea,
   Autocomplete,
@@ -22,7 +23,8 @@ import {
 } from "@nextui-org/react";
 import { useCallback, useEffect, useState } from "react";
 import React from "react";
-import { Faculty, Course } from "@prisma/client";
+import { Course, Faculty } from "@prisma/client";
+import { useSearchParams } from "next/navigation";
 
 import Person from "@mui/icons-material/Person";
 import Class from "@mui/icons-material/Class";
@@ -30,10 +32,10 @@ import Star from "@mui/icons-material/Star";
 
 import Rating from "@mui/material/Rating";
 import { Alert } from "@nextui-org/alert";
+import RateReviewRoundedIcon from "@mui/icons-material/RateReviewRounded";
 
 import axios from "axios";
-import { getProfs, getUniqueProfs, getYears } from "../../app/actions/getProfs";
-import { CardActions } from "@mui/material";
+import { getUniqueProfs, getYears } from "../../app/actions/getProfs";
 
 const labels: { [index: string]: string } = {
   1: "Awful",
@@ -79,10 +81,9 @@ function getLabelText(value: number) {
 }
 
 export default function RatingPage() {
-  const [selectedProf, setSelectedProf]: any = useState(1);
+  const searchParams = useSearchParams();
+  const [selectedProf, setSelectedProf]: any = useState(null);
   const [selectedClass, setSelectedClass]: any = useState();
-  const [selectedFullClass, setSelectedFullClass] = useState<Course>();
-  const [selectedProfessor, setSelectedProfessor] = useState<Faculty>();
   const [rating, setRating] = React.useState<number | null>(0);
   const [hover, setHover] = React.useState(-1);
   const [diffValue, setDiffValue] = React.useState<number | null>(0);
@@ -114,8 +115,18 @@ export default function RatingPage() {
     const myYears = await getYears();
     setProfs(myProfs);
     setYearOptions(myYears);
+
+    const requestedProfessor = searchParams.get("prof");
+    if (requestedProfessor) {
+      const professorId = Number(requestedProfessor);
+      if (myProfs.some((professor) => professor.id === professorId)) {
+        setSelectedProf(professorId);
+        const response = await fetch(`/api/getProfClasses?prof=${professorId}`);
+        setClasses(await response.json());
+      }
+    }
     setIsLoading(false);
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     getData();
@@ -123,6 +134,13 @@ export default function RatingPage() {
 
   async function onProfSelectionChange(key: any) {
     setSelectedProf(key);
+    setSelectedClass(undefined);
+
+    if (key == null) {
+      setClasses(undefined);
+      return;
+    }
+
     const res: any = await fetch(`/api/getProfClasses?prof=${key}`);
     const fetchedClasses = await res.json();
     setClasses(fetchedClasses);
@@ -182,7 +200,8 @@ export default function RatingPage() {
           setSelectedYearKeys("");
           setGrade("");
           setSelectedClass([]);
-          setSelectedProf(1);
+          setSelectedProf(null);
+          setClasses(undefined);
           setReview("");
           setYear(""), setTerm(""), setSubmitSuccess(true);
           setTimeout(() => {
@@ -200,112 +219,124 @@ export default function RatingPage() {
   }
 
   return (
-    <>
-      <div className=" pt-5 sm:pt-0 sm:h-[83vh] h-[80vh] scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent">
-        <div className="absolute top-30 right-20 bg-transparent w-2/12 z-50 ">
-          <Alert
-            isVisible={submitSuccess}
-            color={"success"}
-            title={`Success!`}
-            description={"Rating submitted"}
-          />
-          <Alert
-            isVisible={submitError}
-            className="absolute top-30 right-20 bg-transparent border-2 w-1/12 "
-            color={"danger"}
-            title={`Error!`}
-            description={"Error submitted rating. Please try again."}
-          />{" "}
-        </div>
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 pb-5 pt-2 lg:h-[83vh] lg:min-h-0 lg:px-0 lg:pb-0">
+      <div className="fixed right-4 top-24 z-50 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2">
+        <Alert
+          isVisible={submitSuccess}
+          color="success"
+          title="Rating submitted"
+          description="Thanks for sharing your experience."
+        />
+        <Alert
+          isVisible={submitError}
+          color="danger"
+          title="Submission failed"
+          description="Your rating could not be submitted. Please try again."
+        />
+      </div>
 
-        <Card className="scrollbar bg-light_foreground mx-10 justify-center items-center sm:w-3/6 flex ml-auto mr-auto w-5/6 h-[85vh]">
-          <CardHeader className="">
-            <h1 className=" text-center ml-auto mr-auto col-span-3 row-start-1 row-span-1 text-2xl mb-2 mt-2">
-              Leave a Rating
-            </h1>
-          </CardHeader>
+      <header className="shrink-0">
+        <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-primary">
+          Share your experience
+        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Leave a professor rating
+        </h1>
+        <p className="mt-1 text-sm text-default-500">
+          Help other students make informed course decisions. Required fields
+          are marked with an asterisk.
+        </p>
+      </header>
 
-          <CardBody className="gap-5 px-4 lg:px-20 w-full overflow-y-scroll ">
+      <Card className="flex min-h-0 flex-1 overflow-hidden border border-default-200 bg-content1/80 shadow-sm">
+        <CardHeader className="shrink-0 border-b border-default-200 px-5 py-3 sm:px-6">
+          <div>
+            <h2 className="font-bold">Review details</h2>
+            <p className="text-xs text-default-500">
+              Ratings are anonymous to other students.
+            </p>
+          </div>
+        </CardHeader>
+
+        <CardBody className="grid min-h-0 flex-1 grid-cols-1 gap-6 overflow-y-auto px-5 py-4 scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent lg:grid-cols-2 lg:overflow-hidden lg:px-6">
+          <section className="flex flex-col gap-4">
+            <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-default-500">
+              Course information
+            </h3>
+
             <Autocomplete
               isRequired
+              isDisabled={isLoading}
               aria-label="Select Professor"
-              className=" max-w-sm "
-              label="Select Professor"
+              label="Professor"
               labelPlacement="outside"
-              placeholder="Select Professor"
-              variant={"bordered"}
-              size="lg"
-              startContent={<Person />}
+              placeholder="Search professors"
+              variant="bordered"
+              startContent={<Person className="text-default-400" />}
               selectedKey={selectedProf}
               onSelectionChange={onProfSelectionChange}
             >
               {profs ? (
                 profs.map((prof: Faculty) => (
-                  <AutocompleteItem
-                    onPress={() => setSelectedProfessor(prof)}
-                    key={prof.id}
-                    textValue={prof.displayName}
-                  >
-                    <div className="flex gap-2 items-center">
-                      <div className="flex flex-col">
-                        <span className="text-small">{prof.displayName}</span>
-                        {prof.avgRating ? (
-                          <span className="text-tiny text-default-400">
-                            Rating: {prof.avgRating}
-                          </span>
-                        ) : null}
-                      </div>
+                  <AutocompleteItem key={prof.id} textValue={prof.displayName}>
+                    <div className="flex flex-col">
+                      <span className="text-small font-medium">
+                        {prof.displayName}
+                      </span>
+                      {prof.avgRating ? (
+                        <span className="text-tiny text-default-400">
+                          Current rating: {prof.avgRating.toFixed(1)}
+                        </span>
+                      ) : null}
                     </div>
                   </AutocompleteItem>
                 ))
               ) : (
-                <AutocompleteItem key={"id"}>
-                  <Skeleton></Skeleton>
+                <AutocompleteItem key="loading-professors">
+                  <Skeleton className="h-5 w-full rounded-lg" />
                 </AutocompleteItem>
               )}
             </Autocomplete>
+
             <Autocomplete
               isRequired
+              isDisabled={!classes}
               aria-label="Select Class"
-              className=" max-w-sm "
-              label="Select Class"
+              label="Course"
               labelPlacement="outside"
-              placeholder="Select Class"
-              variant={"bordered"}
-              size="lg"
-              startContent={<Class />}
+              placeholder={classes ? "Search courses" : "Select a professor first"}
+              variant="bordered"
+              startContent={<Class className="text-default-400" />}
               selectedKey={selectedClass}
               onSelectionChange={onClassSelectionChange}
             >
               {classes
-                ? classes.map((thing: any) => (
+                ? classes.map((course: any) => (
                     <AutocompleteItem
-                      aria-label={thing.Subject + " " + thing.courseNumber}
-                      key={thing.id}
-                      textValue={thing.subject + " " + thing.courseNumber}
+                      aria-label={`${course.subject} ${course.courseNumber}`}
+                      key={course.id}
+                      textValue={`${course.subject} ${course.courseNumber} ${course.courseTitle}`}
                     >
-                      <div className="flex gap-2 items-center">
-                        <div className="flex flex-col">
-                          <span className="text-small">
-                            {thing.subject} {thing.courseNumber}
-                          </span>
-                          <span className="text-tiny text-default-400">
-                            {thing.courseTitle}
-                          </span>
-                        </div>
+                      <div className="flex flex-col">
+                        <span className="text-small font-medium">
+                          {course.subject} {course.courseNumber}
+                        </span>
+                        <span className="text-tiny text-default-400">
+                          {course.courseTitle}
+                        </span>
                       </div>
                     </AutocompleteItem>
                   ))
                 : null}
             </Autocomplete>
-            <h2>Select Semester</h2>
-            <div className="grid-rows-subgrid columns-1 sm:columns-2">
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Select
-                selectionMode="single"
                 isRequired
+                selectionMode="single"
                 selectedKeys={[selectedYearKeys]}
-                className="max-w-sm mt-5 sm:mt-0"
-                label="Semester"
+                label="Semester taken"
+                variant="bordered"
                 onChange={handleYearChange}
               >
                 {yearOptions.map((year) => (
@@ -314,163 +345,195 @@ export default function RatingPage() {
                   </SelectItem>
                 ))}
               </Select>
+
+              <Select
+                isRequired
+                selectionMode="single"
+                selectedKeys={[grade]}
+                label="Grade received"
+                variant="bordered"
+                onChange={handleSelectionChange}
+              >
+                {gradeOptions.map((gradeOption) => (
+                  <SelectItem key={gradeOption.key}>
+                    {gradeOption.label}
+                  </SelectItem>
+                ))}
+              </Select>
             </div>
-            <Divider className="mt-5" orientation="horizontal" />
-            <div className="mt-5">Rate Your Professor</div>
-            <div className="grid grid-cols-2">
-              <Rating
-                className="ml-5"
-                name="rate-prof"
-                value={rating}
-                precision={1}
-                getLabelText={getLabelText}
-                onChange={(event, newValue) => {
-                  setRating(newValue);
-                }}
-                onChangeActive={(event, newHover) => {
-                  setHover(newHover);
-                }}
-                emptyIcon={
-                  <Star
-                    style={{ opacity: 0.8, color: "grey" }}
-                    fontSize="inherit"
+
+            <Divider />
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-default-200 p-4">
+                <div className="text-sm font-bold">Overall rating</div>
+                <div className="mt-2 flex items-center gap-3">
+                  <Rating
+                    name="rate-prof"
+                    value={rating}
+                    precision={1}
+                    getLabelText={getLabelText}
+                    onChange={(_event, newValue) => setRating(newValue)}
+                    onChangeActive={(_event, newHover) => setHover(newHover)}
+                    emptyIcon={
+                      <Star
+                        style={{ opacity: 0.65, color: "grey" }}
+                        fontSize="inherit"
+                      />
+                    }
                   />
-                }
-              />
-              {rating !== null && (
-                <div className="ml-5">
-                  {labels[hover !== -1 ? hover : rating]}
+                  <span className="text-xs font-semibold text-default-500">
+                    {rating !== null
+                      ? labels[hover !== -1 ? hover : rating]
+                      : ""}
+                  </span>
                 </div>
-              )}
-            </div>
-            <div>How difficult was this professor?</div>
-            <div className="grid grid-cols-2 mb-5">
-              <Rating
-                className="ml-5"
-                name="rate-prof-diff"
-                value={diffValue}
-                precision={1}
-                getLabelText={getDiffText}
-                onChange={(event, newValue) => {
-                  setDiffValue(newValue);
-                }}
-                onChangeActive={(event, newHover) => {
-                  setDiffHover(newHover);
-                }}
-                emptyIcon={
-                  <Star
-                    style={{ opacity: 0.8, color: "grey" }}
-                    fontSize="inherit"
+              </div>
+
+              <div className="rounded-xl border border-default-200 p-4">
+                <div className="text-sm font-bold">Course difficulty</div>
+                <div className="mt-2 flex items-center gap-3">
+                  <Rating
+                    name="rate-prof-diff"
+                    value={diffValue}
+                    precision={1}
+                    getLabelText={getDiffText}
+                    onChange={(_event, newValue) => setDiffValue(newValue)}
+                    onChangeActive={(_event, newHover) =>
+                      setDiffHover(newHover)
+                    }
+                    emptyIcon={
+                      <Star
+                        style={{ opacity: 0.65, color: "grey" }}
+                        fontSize="inherit"
+                      />
+                    }
                   />
-                }
-              />
-              {diffValue !== null && (
-                <div className="ml-5">
-                  {diffLabels[diffHover !== -1 ? diffHover : diffValue]}
+                  <span className="text-xs font-semibold text-default-500">
+                    {diffValue !== null
+                      ? diffLabels[diffHover !== -1 ? diffHover : diffValue]
+                      : ""}
+                  </span>
                 </div>
-              )}
+              </div>
             </div>
-            <div>Would you take this professor again?</div>
-            <Checkbox
-              className="ml-5"
-              isSelected={takeAgain}
-              onValueChange={setTakeAgain}
-            >
-              Yes! <div className="text-tiny">(leave blank for no)</div>
-            </Checkbox>
-            <div>Did you mark this class as CR/NC?</div>
-            <Checkbox
-              className="ml-5"
-              isSelected={forCredit}
-              onValueChange={setForCredit}
-            >
-              Yes! <div className="text-tiny">(leave blank for no)</div>
-            </Checkbox>
-            <div>Select grade recieved</div>
-            <Select
-              isRequired
-              selectionMode="single"
-              selectedKeys={[grade]}
-              className="max-w-sm"
-              onChange={handleSelectionChange}
-              label="Grade"
-            >
-              {gradeOptions.map((grade) => (
-                <SelectItem key={grade.key}>{grade.label}</SelectItem>
-              ))}
-            </Select>
+          </section>
+
+          <section className="flex min-h-0 flex-col gap-4">
+            <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-default-500">
+              Your experience
+            </h3>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Checkbox
+                classNames={{
+                  base: "m-0 max-w-none rounded-xl border border-default-200 p-3",
+                  label: "w-full",
+                }}
+                isSelected={takeAgain}
+                onValueChange={setTakeAgain}
+              >
+                <div className="font-semibold">Would take again</div>
+                <div className="text-xs text-default-500">
+                  Select if you would take this professor again.
+                </div>
+              </Checkbox>
+              <Checkbox
+                classNames={{
+                  base: "m-0 max-w-none rounded-xl border border-default-200 p-3",
+                  label: "w-full",
+                }}
+                isSelected={forCredit}
+                onValueChange={setForCredit}
+              >
+                <div className="font-semibold">Taken CR/NC</div>
+                <div className="text-xs text-default-500">
+                  Select if you marked this course CR/NC.
+                </div>
+              </Checkbox>
+            </div>
+
             <Textarea
               value={review}
-              size="lg"
-              className=""
-              rows={5}
+              className="min-h-0 flex-1"
+              classNames={{
+                inputWrapper: "h-full min-h-40",
+                input: "h-full min-h-36 resize-none leading-6",
+              }}
               labelPlacement="outside"
-              disableAutosize
-              label="Write a Review"
-              placeholder="What did you think of this prof/class?"
+              label="Written review"
+              placeholder="What should other students know about this professor and course?"
+              variant="bordered"
               onValueChange={setReview}
             />
-          </CardBody>
-          <CardActions className="ml-auto">
-            <Button onPress={onOpen} color="primary" variant={"flat"} size="lg">
-              Submit
-            </Button>
-          </CardActions>
-          <Modal
-            isOpen={isOpen}
-            onOpenChange={onOpenChange}
-            isDismissable={false}
-            isKeyboardDismissDisabled={true}
-            backdrop={"blur"}
-          >
-            <ModalContent>
-              {(onClose) => (
-                <>
-                  <ModalHeader className="flex flex-col gap-1">
-                    Confirm Rating Submission
-                  </ModalHeader>
-                  <ModalBody>
-                    <div>
-                      By submiting a rating to SCCS you agree to abide by the
-                      SCCS
-                      <Link
-                        className="ml-1 mr-1"
-                        isExternal
-                        href="https://www.sccs.swarthmore.edu/docs/policy"
-                        title="SCCS Usage & Data Policy"
-                      >
-                        <span className=" underline">
-                          {" "}
-                          Usage & Data Policy{" "}
-                        </span>
-                      </Link>
-                    </div>
+          </section>
+        </CardBody>
 
-                    <p>
-                      While reviews submitted through this site are completly
-                      anonymous we collect user identifiable information for the
-                      safety and continued usage of this platform. We do reserve
-                      the right to remove reviews that are not in good spirit.
-                    </p>
-                  </ModalBody>
-                  <ModalFooter>
-                    <Button color="danger" variant="light" onPress={onClose}>
-                      Close
-                    </Button>
-                    <Button
-                      onPress={() => {
-                        onClose(), submitReview();
-                      }}
-                    >
-                      Submit
-                    </Button>
-                  </ModalFooter>
-                </>
-              )}
-            </ModalContent>
-          </Modal>
-        </Card>
-      </div>
-    </>
+        <CardFooter className="shrink-0 justify-between border-t border-default-200 px-5 py-3 sm:px-6">
+          <span className="hidden text-xs text-default-500 sm:block">
+            Please keep feedback constructive and course-focused.
+          </span>
+          <Button
+            className="ml-auto bg-[#f46523] font-semibold text-white dark:bg-orange-400 dark:text-slate-950"
+            size="lg"
+            startContent={<RateReviewRoundedIcon fontSize="small" />}
+            onPress={onOpen}
+          >
+            Review submission
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        isDismissable={false}
+        isKeyboardDismissDisabled
+        backdrop="blur"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1 border-b border-default-200">
+                Confirm rating submission
+              </ModalHeader>
+              <ModalBody className="gap-4 py-5 text-sm leading-6 text-default-600">
+                <p>
+                  By submitting a rating, you agree to the SCCS
+                  <Link
+                    className="mx-1 font-semibold"
+                    isExternal
+                    href="https://www.sccs.swarthmore.edu/docs/policy"
+                    title="SCCS Usage & Data Policy"
+                  >
+                    Usage &amp; Data Policy
+                  </Link>
+                  .
+                </p>
+                <p>
+                  Reviews are anonymous to other students. SCCS retains limited
+                  identifying information for platform safety and may remove
+                  reviews that violate community expectations.
+                </p>
+              </ModalBody>
+              <ModalFooter className="border-t border-default-200">
+                <Button variant="light" onPress={onClose}>
+                  Go back
+                </Button>
+                <Button
+                  className="bg-[#f46523] font-semibold text-white dark:bg-orange-400 dark:text-slate-950"
+                  onPress={() => {
+                    onClose();
+                    submitReview();
+                  }}
+                >
+                  Submit rating
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </div>
   );
 }
