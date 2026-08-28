@@ -6,12 +6,6 @@ import {
   CardFooter,
   CardHeader,
   Chip,
-  Divider,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
 import Image from "next/image";
@@ -31,6 +25,7 @@ import {
 import { useRouter } from "next/navigation";
 import moment from "moment";
 import { useSession } from "next-auth/react";
+import CourseDetailsModal from "./CourseDetailsModal";
 
 export const card = tv({
   slots: {
@@ -42,7 +37,7 @@ export const card = tv({
 const { base, role } = card();
 
 export default function CourseCard(props: any) {
-  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const color = generateColorFromName(props.course.subject);
 
@@ -307,28 +302,11 @@ export default function CourseCard(props: any) {
         </CardFooter>
       </Card>
 
-      <Modal
+      <CourseDetailsModal
+        course={props.course}
         isOpen={isOpen}
-        onClose={onClose}
-        size="xl"
-        placement="center"
         onOpenChange={onOpenChange}
-        isDismissable={true}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                {props.course.courseTitle.replace("&amp;", "&")}
-              </ModalHeader>
-              <ModalBody>
-                <p>{props.course.description}</p>
-              </ModalBody>
-              <ModalFooter></ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      />
     </div>
   );
 }
