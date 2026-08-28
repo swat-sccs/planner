@@ -9,13 +9,9 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid"; // a plugin!
 import listPlugin from "@fullcalendar/list";
 
-import { Button, Card } from "@nextui-org/react";
 import moment from "moment";
-import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import axios from "axios";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+
 export default function Calendar({
   events,
   startTime,
@@ -30,39 +26,59 @@ export default function Calendar({
   lastSelectedCoursePlan: Number | undefined;
 }) {
   function dayHeaderContent(args: DayHeaderContentArg) {
-    return moment(args.date).format("ddd");
-  }
-
-  function renderEventContent(eventInfo: EventContentArg) {
     return (
-      <Card
-        className={`h-16 sm:h-16 lg:h-18 fc-event-main-frame w-[100%] rounded-md group min-h-0 hover:min-h-28 ease-in-out px-1 z-0 hover:z-10 hover:transition-all duration-700 text-white ${eventInfo.event.extendedProps.daColor}`}
-      >
-        <b className="font-sans text-[10px] font-normal">
-          {eventInfo.timeText} {"|"} {eventInfo.event.extendedProps.room}
-        </b>
-        <div className="font-sans text-[12px] font-bold inline">
-          {eventInfo.event.extendedProps.subject}
-          {eventInfo.event.extendedProps.courseNumber} :
-          <p className="font-normal inline"> {eventInfo.event.title}</p>
-        </div>
-
-        <div className="transition-all opacity-0 group-hover:opacity-100 font-sans text-[10px] mt-5 ">
-          {eventInfo.event.extendedProps.instructor.replace("&#39;", "'")}
-        </div>
-      </Card>
+      <div className="planner-calendar-day-header">
+        <span>{moment(args.date).format("ddd")}</span>
+        <strong>{moment(args.date).format("D")}</strong>
+      </div>
     );
   }
 
-  const router = useRouter();
+  function renderEventContent(eventInfo: EventContentArg) {
+    const { courseNumber, daColor, instructor, room, subject } =
+      eventInfo.event.extendedProps;
+
+    return (
+      <div
+        className={`planner-calendar-event h-full min-h-0 w-full overflow-hidden rounded-lg px-2 py-1.5 text-white ${daColor}`}
+      >
+        <div className="flex min-w-0 items-center gap-1.5 text-[11px] font-medium leading-tight text-white/85">
+          <span className="shrink-0">{eventInfo.timeText}</span>
+          {room ? (
+            <>
+              <span aria-hidden className="text-white/45">
+                •
+              </span>
+              <span className="truncate">{room}</span>
+            </>
+          ) : null}
+        </div>
+        <div className="mt-1 truncate text-[13px] font-semibold leading-tight tracking-[-0.01em]">
+          <span className="font-bold">
+            {subject} {courseNumber}
+          </span>
+          <span className="font-normal text-white/90">
+            {" "}— {eventInfo.event.title}
+          </span>
+        </div>
+        <div className="mt-1 truncate text-[11px] leading-tight text-white/75">
+          {instructor?.replace("&#39;", "'")}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-primary dark:bg-transparent w-full h-full rounded-lg">
+    <div className="planner-calendar relative h-full w-full overflow-hidden rounded-xl border border-slate-200/80 bg-white/70 shadow-sm backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-950/30">
       {lastSelectedCoursePlan ? (
-        <div className=" absolute dark:bg-slate-700 rounded-md shadow-md w-44 h-10  flex items-center justify-center hover:scale-105 transition-all ">
-          <a download href={`/api/exportical?id= + ${lastSelectedCoursePlan}`}>
-            <CalendarMonthIcon />
-            <span className="inline-block "> Export Calendar</span>
+        <div className="absolute left-3 top-2 z-10">
+          <a
+            download
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800/90 dark:text-slate-100 dark:hover:bg-slate-700"
+            href={`/api/exportical?id= + ${lastSelectedCoursePlan}`}
+          >
+            <CalendarMonthIcon fontSize="small" />
+            <span>Export</span>
           </a>
         </div>
       ) : null}
@@ -81,7 +97,13 @@ export default function Calendar({
         }}
         height="100%"
         initialView={initialView}
+        nowIndicator
         plugins={[timeGridPlugin, listPlugin]}
+        stickyHeaderDates
+        buttonText={{
+          timeGridWeek: "Week",
+          listWeek: "Agenda",
+        }}
         slotDuration="01:00:00"
         slotLabelFormat={{
           hour: "numeric",
