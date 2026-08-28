@@ -108,7 +108,7 @@ services:
       - planner-pgadmindata:/var/lib/pgadmin
 
   planner-cron:
-    image: registry.sccs.swarthmore.edu/sccs/planner-cron/planner-cron:${IMAGE_TAG:-latest}
+    image: registry.sccs.swarthmore.edu/sccs/planner/planner-cron:${IMAGE_TAG:-latest}
     deploy:
       placement:
         constraints:

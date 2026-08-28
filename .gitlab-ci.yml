@@ -8,8 +8,6 @@ variables:
   DOCKER_TLS_CERTDIR: ""
   DOCKER_BUILDKIT: "1"
   REGISTRY: registry.sccs.swarthmore.edu/$CI_PROJECT_PATH
-  PLANNER_IMAGE: $REGISTRY/planner
-  CRON_IMAGE: registry.sccs.swarthmore.edu/sccs/planner-cron/planner-cron
 
 default:
   image: docker:29.1.5
@@ -24,35 +22,31 @@ default:
     - docker info
     - printf '%s' "$SCCS_REGISTRY_TOKEN" | docker login --username "$SCCS_REGISTRY_USER" --password-stdin "$SCCS_REGISTRY"
 
-# Build immutable images for this commit. The rolling latest tags are only used
-# as cache sources; deployment always uses CI_COMMIT_SHORT_SHA.
+# Build both immutable images concurrently. The rolling latest tags are only
+# used as cache sources; deployment always uses CI_COMMIT_SHORT_SHA.
 build:
   stage: build
+  parallel:
+    matrix:
+      - IMAGE_NAME: planner
+        DOCKERFILE: Dockerfile
+      - IMAGE_NAME: planner-cron
+        DOCKERFILE: Dockerfile.cron
   script:
     - |
-      docker pull "$PLANNER_IMAGE:latest" || echo "No planner cache image found; continuing without it."
-      docker pull "$CRON_IMAGE:latest" || echo "No cron cache image found; continuing without it."
+      IMAGE="$REGISTRY/$IMAGE_NAME"
+      docker pull "$IMAGE:latest" || echo "No $IMAGE_NAME cache image found; continuing without it."
 
       docker build \
-        --cache-from "$PLANNER_IMAGE:latest" \
+        --cache-from "$IMAGE:latest" \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
-        --file Dockerfile \
-        --tag "$PLANNER_IMAGE:$CI_COMMIT_SHORT_SHA" \
-        .
-      docker build \
-        --cache-from "$CRON_IMAGE:latest" \
-        --build-arg BUILDKIT_INLINE_CACHE=1 \
-        --file Dockerfile.cron \
-        --tag "$CRON_IMAGE:$CI_COMMIT_SHORT_SHA" \
+        --file "$DOCKERFILE" \
+        --tag "$IMAGE:$CI_COMMIT_SHORT_SHA" \
         .
 
-      docker push "$PLANNER_IMAGE:$CI_COMMIT_SHORT_SHA"
-      docker push "$CRON_IMAGE:$CI_COMMIT_SHORT_SHA"
-
-      docker tag "$PLANNER_IMAGE:$CI_COMMIT_SHORT_SHA" "$PLANNER_IMAGE:latest"
-      docker tag "$CRON_IMAGE:$CI_COMMIT_SHORT_SHA" "$CRON_IMAGE:latest"
-      docker push "$PLANNER_IMAGE:latest"
-      docker push "$CRON_IMAGE:latest"
+      docker push "$IMAGE:$CI_COMMIT_SHORT_SHA"
+      docker tag "$IMAGE:$CI_COMMIT_SHORT_SHA" "$IMAGE:latest"
+      docker push "$IMAGE:latest"
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
 
