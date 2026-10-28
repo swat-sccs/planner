@@ -9,7 +9,7 @@ import {
   CardBody,
   Chip,
   Skeleton,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import RateReviewRoundedIcon from "@mui/icons-material/RateReviewRounded";

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Course } from "@prisma/client";
-import { Button, Card, CardBody, Chip, Skeleton } from "@nextui-org/react";
+import { Button, Card, CardBody, Chip, Skeleton } from "@heroui/react";
 import ClearAllRoundedIcon from "@mui/icons-material/ClearAllRounded";
 import SearchOffRoundedIcon from "@mui/icons-material/SearchOffRounded";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";

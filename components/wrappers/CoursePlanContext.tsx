@@ -2,7 +2,7 @@
 import { Course } from "@prisma/client";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import CreatePlan from "../CreatePlan";
-import { Skeleton } from "@nextui-org/react";
+import { Skeleton } from "@heroui/react";
 import { FullCourseList } from "../FullCourseList";
 import Calendar from "../Calendar";
 import { getEvents } from "app/actions/getCourses";

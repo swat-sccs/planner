@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import {
   Button,
   Chip,
@@ -12,7 +12,7 @@ import {
   ModalFooter,
   ModalHeader,
   Spinner,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
@@ -206,7 +206,7 @@ export default function CalendarExportButton({ planId }: { planId: Number }) {
                           isRequired
                           granularity="day"
                           label="Classes begin"
-                          value={startDate}
+                          value={startDate as ComponentProps<typeof DatePicker>["value"]}
                           onChange={setStartDate}
                         />
                         <Chip className="w-fit" size="sm" variant="flat">
@@ -218,8 +218,8 @@ export default function CalendarExportButton({ planId }: { planId: Number }) {
                           isRequired
                           granularity="day"
                           label="Classes end"
-                          minValue={startDate || undefined}
-                          value={endDate}
+                          minValue={startDate as ComponentProps<typeof DatePicker>["minValue"]}
+                          value={endDate as ComponentProps<typeof DatePicker>["value"]}
                           onChange={setEndDate}
                         />
                         <Chip className="w-fit" size="sm" variant="flat">

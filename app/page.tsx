@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Suspense, useState } from "react";
-import { Skeleton } from "@nextui-org/skeleton";
+import { Skeleton } from "@heroui/react";
 
 import { cookies } from "next/headers";
 import Search from "../components/Search";

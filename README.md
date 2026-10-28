@@ -90,7 +90,7 @@ Head on over to http://localhost:5555. Use this to confirm your database is popu
 ## 📡 Technologies in Use
 
 - [Next.js 14](https://nextjs.org/docs/getting-started)
-- [NextUI v2](https://nextui.org/)
+- [HeroUI v2](https://v2.heroui.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [Tailwind Variants](https://tailwind-variants.org)
 - [TypeScript](https://www.typescriptlang.org/)

@@ -7,7 +7,7 @@ import {
   CardHeader,
   Chip,
   Divider,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import Star from "@mui/icons-material/Star";
 import StarRating from "@mui/material/Rating";
 

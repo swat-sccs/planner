@@ -10,7 +10,7 @@ import {
 } from "../../app/actions/getProfs";
 import { Faculty } from "@prisma/client";
 import Search from "@/components/Search";
-import { Button, Card, CardBody, Skeleton } from "@nextui-org/react";
+import { Button, Card, CardBody, Skeleton } from "@heroui/react";
 import RateReviewRoundedIcon from "@mui/icons-material/RateReviewRounded";
 import NextLink from "next/link";
 
