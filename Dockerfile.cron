@@ -19,7 +19,7 @@ USER cronuser
 COPY ./swatscraper/go.mod ./swatscraper/go.sum ./
 RUN go mod download
 
-COPY --chown=cronuser:cronuser ./scraper.env ./.env
+COPY --chown=cronuser:cronuser ./.env ./.env
 COPY --chown=cronuser:cronuser ./swatscraper/*.go ./
 
 RUN GOCACHE=/app/.cache CGO_ENABLED=0 GOOS=linux go build -o /app/swatscraper

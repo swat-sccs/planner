@@ -1,2 +1,2 @@
 * * * * * root date 2>&1 | /usr/bin/tee -a /var/log/cron.log /proc/1/fd/1
-0 0 * * 0 root /app/swatscraper -semester=fall -year=2026 -env=/app/.env 2>&1 | /usr/bin/tee -a /var/log/cron.log /proc/1/fd/1
+0 0 * * 0 root /app/swatscraper -semester=spring -year=2027 -env=/app/.env 2>&1 | /usr/bin/tee -a /var/log/cron.log /proc/1/fd/1
