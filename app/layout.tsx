@@ -1,5 +1,6 @@
 import "../styles/globals.css";
 import { Metadata, Viewport } from "next";
+import { Link } from "@nextui-org/link";
 import clsx from "clsx";
 import { CookiesProvider } from "next-client-cookies/server";
 

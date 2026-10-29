@@ -7,6 +7,7 @@ import { auth } from "@/lib/auth";
 import { getPlanCookie, setSelectedCookie } from "./actions";
 import { getSelectedCoursePlan } from "./userActions";
 import { generateColorFromName } from "../../components/primitives";
+import { el } from "@fullcalendar/core/internal-common";
 
 export async function getUniqueCodes() {
   return getDistributions();

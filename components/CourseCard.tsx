@@ -7,7 +7,7 @@ import {
   CardHeader,
   Chip,
   useDisclosure,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import Image from "next/image";
 import { tv } from "tailwind-variants";
 import axios from "axios";

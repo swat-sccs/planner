@@ -13,7 +13,7 @@ import {
   ModalFooter,
   ModalHeader,
   Spinner,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import RateReviewRoundedIcon from "@mui/icons-material/RateReviewRounded";
 import { Rating } from "@prisma/client";

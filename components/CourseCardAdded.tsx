@@ -1,5 +1,5 @@
 "use client";
-import { Card, CardBody, CardHeader, Chip, Divider } from "@heroui/react";
+import { Card, CardBody, CardHeader, Chip, Divider } from "@nextui-org/react";
 import Image from "next/image";
 import { tv } from "tailwind-variants";
 import axios from "axios";

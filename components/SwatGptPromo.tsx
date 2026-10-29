@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, CardBody, Link } from "@heroui/react";
+import { Button, Card, CardBody, Link } from "@nextui-org/react";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";

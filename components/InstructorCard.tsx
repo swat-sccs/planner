@@ -6,7 +6,7 @@ import {
   CardBody,
   CardFooter,
   CardHeader,
-} from "@heroui/react";
+} from "@nextui-org/react";
 
 export const InstructorCard = (props: any) => {
   const [isFollowed, setIsFollowed] = React.useState(false);
@@ -42,7 +42,7 @@ export const InstructorCard = (props: any) => {
       </CardHeader>
       <CardBody className="px-3 py-0">
         <p className="text-small pl-px text-default-500">
-          Full-stack developer, @getheroui lover she/her
+          Full-stack developer, @getnextui lover she/her
           <span aria-label="confetti" role="img">
             🎉
           </span>

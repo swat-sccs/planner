@@ -1,5 +1,5 @@
 "use client";
-import { Card, Button, CardHeader } from "@heroui/react";
+import { Card, Button, CardHeader } from "@nextui-org/react";
 
 import { generateColorFromName } from "../components/primitives";
 

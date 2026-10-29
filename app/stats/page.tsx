@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState, startTransition } from "react";
 import { Bar } from "react-chartjs-2";
-import { Button, ButtonGroup } from "@heroui/react";
+import { Button, ButtonGroup } from "@nextui-org/button";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,7 +17,7 @@ import {
   Select,
   SelectItem,
   useDisclosure,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import { getYears } from "@/actions/getProfs";
 import { preload, getItem } from "@/actions/getStats";
 import CourseDetailsModal from "@/components/CourseDetailsModal";

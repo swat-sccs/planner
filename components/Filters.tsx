@@ -8,7 +8,7 @@ import {
   Divider,
   Select,
   SelectItem,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCookies } from "next-client-cookies";

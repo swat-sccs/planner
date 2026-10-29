@@ -20,7 +20,7 @@ import {
   useDisclosure,
   Skeleton,
   Link,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import { useCallback, useEffect, useState } from "react";
 import React from "react";
 import { Course, Faculty } from "@prisma/client";
@@ -31,7 +31,7 @@ import Class from "@mui/icons-material/Class";
 import Star from "@mui/icons-material/Star";
 
 import Rating from "@mui/material/Rating";
-import { Alert } from "@heroui/react";
+import { Alert } from "@nextui-org/alert";
 import RateReviewRoundedIcon from "@mui/icons-material/RateReviewRounded";
 
 import axios from "axios";

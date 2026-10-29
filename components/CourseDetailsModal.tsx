@@ -14,7 +14,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";

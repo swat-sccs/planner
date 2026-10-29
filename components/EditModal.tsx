@@ -14,7 +14,7 @@ import {
   Select,
   SelectItem,
   Textarea,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import MUIRating from "@mui/material/Rating";

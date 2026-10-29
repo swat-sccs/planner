@@ -10,7 +10,7 @@ import {
   ModalFooter,
   ModalHeader,
   useDisclosure,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import packageInfo from "../package.json";
 
 export default function FooterInfo() {
