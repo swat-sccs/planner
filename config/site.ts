@@ -36,9 +36,9 @@ export const siteConfig = {
     },
   ],
   links: {
-    github: "https://github.com/nextui-org/nextui",
-    twitter: "https://twitter.com/getnextui",
-    docs: "https://nextui.org",
+    github: "https://github.com/heroui-inc/heroui",
+    twitter: "https://x.com/hero_ui",
+    docs: "https://v2.heroui.com",
     discord: "https://discord.gg/9b6yyZKmH4",
     sponsor: "https://patreon.com/jrgarciadev",
   },

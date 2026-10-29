@@ -8,7 +8,7 @@ import {
   CardBody,
   Chip,
   Tooltip,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -20,7 +20,7 @@ import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 
 import axios from "axios";
-import { Select, SelectItem } from "@nextui-org/react";
+import { Select, SelectItem } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -42,7 +42,7 @@ import {
   PopoverTrigger,
   PopoverContent,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 
 import {
   getCourseIds,

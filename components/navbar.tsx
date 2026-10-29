@@ -4,21 +4,21 @@ import React, { useEffect } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
-  Navbar as NextUINavbar,
+  Navbar as HeroUINavbar,
   NavbarContent,
   NavbarMenu,
   NavbarMenuToggle,
   NavbarBrand,
   NavbarItem,
   NavbarMenuItem,
-} from "@nextui-org/navbar";
+} from "@heroui/react";
 import {
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-} from "@nextui-org/dropdown";
-import { Link } from "@nextui-org/link";
+} from "@heroui/react";
+import { Link } from "@heroui/react";
 import Search from "../components/Search";
 
 import { usePathname } from "next/navigation";
@@ -29,7 +29,7 @@ import axios from "axios";
 
 import { siteConfig } from "../config/site";
 import { ThemeSwitch } from "../components/theme-switch";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/react";
 import Logo from "../public/logo.svg";
 import NotificationBell from "./NotificationBell";
 
@@ -75,7 +75,7 @@ export const Navbar = (props: any) => {
 
   return (
     <div className="bg-background_navbar h-auto">
-      <NextUINavbar
+      <HeroUINavbar
         classNames={{
           toggleIcon: ["text-primary"],
         }}
@@ -316,7 +316,7 @@ export const Navbar = (props: any) => {
             )}
           </NavbarItem>
         </NavbarMenu>
-      </NextUINavbar>
+      </HeroUINavbar>
     </div>
   );
 };

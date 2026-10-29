@@ -5,7 +5,7 @@ import {
   CardBody,
   Chip,
   useDisclosure,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import ProfessorDetailsModal from "./ProfessorDetailsModal";
