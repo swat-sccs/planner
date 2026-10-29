@@ -2,8 +2,11 @@ FROM node:lts-bullseye
 ARG DATABASE_URL
 ENV NODE_ENV=production
 
-RUN apt-get update
-RUN apt-get install -y vim netcat-openbsd
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        vim \
+        netcat-openbsd && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/app
 COPY . .
