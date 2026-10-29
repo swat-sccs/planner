@@ -12,8 +12,6 @@ services:
     depends_on:
       - planner-db
     command: ["./docker-startup.sh"]
-    ports:
-      - "3000:3000"
     networks:
       - internal
     healthcheck:
