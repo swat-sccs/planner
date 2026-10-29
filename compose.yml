@@ -1,0 +1,75 @@
+services:
+  planner:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DOMAIN: https://plan.sccs.swarthmore.edu
+    depends_on:
+      - planner-db
+    command: ["./docker-startup.sh"]
+    ports:
+      - "3000:3000"
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "-G", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 150s
+
+  planner-db:
+    hostname: planner-db
+    image: postgres:16.4-bullseye
+    volumes:
+      - planner-dbdata:/var/lib/postgresql/data
+    env_file:
+      - .env
+    networks:
+      - internal
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'pg_isready --dbname "$${POSTGRES_DB:-postgres}" --username "$${POSTGRES_USER:-postgres}"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
+  planner-cron:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.cron
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - planner-db
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  planner-dbdata:
+    name: planner-dbdata
+    driver_opts:
+      type: nfs
+      o: "nfsvers=4,addr=130.58.218.26,rw,nolock,soft"
+      device: ":/volumes/scheduler-dbdata"
+  planner-pgadmindata:
+    name: planner-pgadmindata
+    driver_opts:
+      type: nfs
+      o: "nfsvers=4,addr=130.58.218.26,rw,nolock,soft"
+      device: ":/volumes/planner-pgadmindata"
