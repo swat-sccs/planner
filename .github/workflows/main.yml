@@ -21,4 +21,4 @@ jobs:
           # GitLab username
           username: mirrorbot
           # GitLab token
-          token: ${{ secrets.GITLAB_TOKEN }}
+          token: ${{ secrets.MIRRORBOT_PAT }}
