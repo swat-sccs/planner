@@ -146,7 +146,7 @@ volumes:
     driver_opts:
       type: nfs
       o: "nfsvers=4,addr=130.58.218.26,rw,nolock,soft"
-      device: ":/volumes/scheduler-dbdata"
+      device: ":/volumes/planner-dbdata"
   planner-pgadmindata:
     name: planner-pgadmindata
     driver_opts:
