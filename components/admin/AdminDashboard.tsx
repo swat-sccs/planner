@@ -20,7 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/react";
-import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
@@ -31,6 +30,7 @@ import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import ThumbUpAltRoundedIcon from "@mui/icons-material/ThumbUpAltRounded";
 import TrendingUpRoundedIcon from "@mui/icons-material/TrendingUpRounded";
+import ShowChartRoundedIcon from "@mui/icons-material/ShowChartRounded";
 import { deleteAdminRating } from "@/actions/admin";
 
 type Rating = {
@@ -68,6 +68,7 @@ type DashboardData = {
     mostPopularTerm: { year: string; count: number } | undefined;
   };
   ratings: Rating[];
+  dailyActiveUsers: string[];
 };
 
 const ROWS_PER_PAGE = 15;
@@ -80,6 +81,110 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 function formatTerm(term?: string) {
   if (!term) return "No term data";
   return term.replace(/^F/, "Fall ").replace(/^S/, "Spring ");
+}
+
+const activityDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
+function getUtcDateKey(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function DailyUsageChart({ dailyActiveUsers }: { dailyActiveUsers: string[] }) {
+  const [range, setRange] = useState<7 | 30 | 60>(30);
+  const points = useMemo(() => {
+    const visitsByDate = new Map<string, number>();
+    for (const activityDate of dailyActiveUsers) {
+      const key = activityDate.slice(0, 10);
+      visitsByDate.set(key, (visitsByDate.get(key) || 0) + 1);
+    }
+
+    const today = new Date();
+    const end = new Date(
+      Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+    );
+
+    return Array.from({ length: range }, (_, index) => {
+      const date = new Date(end);
+      date.setUTCDate(end.getUTCDate() - (range - index - 1));
+      return { date, count: visitsByDate.get(getUtcDateKey(date)) || 0 };
+    });
+  }, [dailyActiveUsers, range]);
+
+  const maxCount = Math.max(...points.map((point) => point.count), 1);
+  const totalActiveDays = points.reduce((total, point) => total + point.count, 0);
+  const polylinePoints = points
+    .map((point, index) => {
+      const x = (index / Math.max(points.length - 1, 1)) * 100;
+      const y = 100 - (point.count / maxCount) * 86 - 7;
+      return `${x},${y}`;
+    })
+    .join(" ");
+
+  return (
+    <Card className="border border-default-200 bg-content1/85 shadow-sm">
+      <CardBody className="gap-4 p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <ShowChartRoundedIcon className="text-primary" fontSize="small" />
+              <h2 className="font-bold text-foreground">Daily active students</h2>
+            </div>
+            <p className="mt-1 text-xs text-default-500">
+              {totalActiveDays.toLocaleString()} signed-in visits in the last {range} days
+            </p>
+          </div>
+          <div className="flex rounded-lg bg-default-100 p-1">
+            {([7, 30, 60] as const).map((days) => (
+              <Button
+                key={days}
+                className="min-w-11"
+                color={range === days ? "primary" : "default"}
+                size="sm"
+                variant={range === days ? "solid" : "light"}
+                onPress={() => setRange(days)}
+              >
+                {days}d
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-44 rounded-xl border border-default-100 bg-default-50/60 px-3 pb-2 pt-3">
+          <svg
+            aria-label={`Daily active students over the last ${range} days`}
+            className="h-full w-full overflow-visible"
+            preserveAspectRatio="none"
+            role="img"
+            viewBox="0 0 100 100"
+          >
+            <line stroke="currentColor" className="text-default-200" x1="0" x2="100" y1="93" y2="93" />
+            <polyline
+              fill="none"
+              points={polylinePoints}
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              className="text-primary"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+          <div className="flex justify-between pt-1 text-[11px] text-default-400">
+            <span>{activityDateFormatter.format(points[0].date)}</span>
+            <span>{maxCount} active</span>
+            <span>{activityDateFormatter.format(points[points.length - 1].date)}</span>
+          </div>
+        </div>
+        <p className="text-[11px] text-default-400">
+          Tracks one visit per signed-in student per UTC day. Collection begins with this release.
+        </p>
+      </CardBody>
+    </Card>
+  );
 }
 
 function MetricCard({
@@ -169,24 +274,6 @@ export default function AdminDashboard({
 
   return (
     <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-4 px-4 pb-6 pt-2 lg:h-[80vh] lg:min-h-0 lg:px-0 lg:pb-0">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
-            <AdminPanelSettingsRoundedIcon fontSize="small" />
-            Admin workspace
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Planner overview
-          </h1>
-          <p className="mt-1 text-sm text-default-500">
-            Monitor adoption, catalog coverage, and community reviews.
-          </p>
-        </div>
-        <Chip color="success" size="sm" variant="flat">
-          Admin access
-        </Chip>
-      </header>
-
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           label="Students"
@@ -217,6 +304,8 @@ export default function AdminDashboard({
           icon={<MenuBookRoundedIcon />}
         />
       </section>
+
+      <DailyUsageChart dailyActiveUsers={initialData.dailyActiveUsers} />
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card className="border border-default-200 bg-content1/70 shadow-none">

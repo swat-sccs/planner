@@ -23,6 +23,18 @@ model User {
   lastSelectedPlan String?
   plans            CoursePlan[]
   ratings          Rating[]
+  activities       UserActivity[]
+}
+
+model UserActivity {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([date])
 }
 
 model CoursePlan {

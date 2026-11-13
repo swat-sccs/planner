@@ -68,8 +68,28 @@ export async function getUniqueProfsWithRatings() {
 }
 
 export async function searchProfs(query: any) {
-  let profs: Faculty[] = [];
-  let AllProfs = await prisma.faculty.findMany({
+  // `Faculty.avgRating` is a cache that is not populated for older reviews.
+  // Drive this directory from Rating instead, so every professor with a
+  // submitted rating appears even when their cached value is null or stale.
+  const ratingSummaries = await prisma.rating.groupBy({
+    by: ["profUid"],
+    where: {
+      profUid: { not: null },
+      overallRating: { not: null },
+    },
+    _count: { _all: true },
+    _avg: { overallRating: true },
+  });
+
+  const ratingsByUid = new Map(
+    ratingSummaries
+      .filter((summary): summary is typeof summary & { profUid: string } =>
+        Boolean(summary.profUid)
+      )
+      .map((summary) => [summary.profUid, summary])
+  );
+
+  const AllProfs = await prisma.faculty.findMany({
     ...(query
       ? {
           orderBy: [
@@ -88,33 +108,33 @@ export async function searchProfs(query: any) {
       courses: true,
     },
     where: {
-      AND: {
-        NOT: {
-          avgRating: null,
-        },
-        ...(query
-          ? {
-              displayName: {
-                // search: query.trim().split(" ").join(" | "),
-                mode: "insensitive",
-                contains: query.trim().split(" ").join(" | "),
-              },
-            }
-          : ""),
-      },
+      uid: { in: Array.from(ratingsByUid.keys()) },
+      ...(query
+        ? {
+            displayName: {
+              // search: query.trim().split(" ").join(" | "),
+              mode: "insensitive",
+              contains: query.trim().split(" ").join(" | "),
+            },
+          }
+        : {}),
     },
   });
 
-  for (let prof of AllProfs) {
+  const profs: Array<Faculty & { numRatings: number }> = [];
+  for (const prof of AllProfs) {
     let uniqueNames = returnProfNameList(profs);
     if (!uniqueNames.includes(prof.displayName)) {
-      let RatingCount = await prisma.rating.findMany({
-        where: {
-          profUid: prof.uid,
-        },
-      });
-      let myProf: any = prof;
-      myProf.numRatings = RatingCount.length;
+      const summary = ratingsByUid.get(prof.uid);
+      if (!summary) continue;
+
+      const myProf = {
+        ...prof,
+        // Use the aggregate as the source of truth, rather than a cached
+        // Faculty value which may not have been backfilled in production.
+        avgRating: summary._avg.overallRating,
+        numRatings: summary._count._all,
+      };
       profs.push(myProf);
     }
   }

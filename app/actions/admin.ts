@@ -17,6 +17,9 @@ export async function getAdminDashboardData() {
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const activityStartDate = new Date();
+  activityStartDate.setUTCDate(activityStartDate.getUTCDate() - 59);
+  activityStartDate.setUTCHours(0, 0, 0, 0);
 
   const [
     userCount,
@@ -30,6 +33,7 @@ export async function getAdminDashboardData() {
     takeAgainResponseCount,
     plansByTerm,
     ratings,
+    dailyActivity,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.coursePlan.count(),
@@ -59,6 +63,10 @@ export async function getAdminDashboardData() {
         },
       },
       orderBy: { createdAt: "desc" },
+    }),
+    prisma.userActivity.findMany({
+      where: { date: { gte: activityStartDate } },
+      select: { date: true },
     }),
   ]);
 
@@ -93,6 +101,9 @@ export async function getAdminDashboardData() {
       createdAt: rating.createdAt.toISOString(),
       updatedAt: rating.updatedAt.toISOString(),
     })),
+    dailyActiveUsers: dailyActivity.map((activity) =>
+      activity.date.toISOString()
+    ),
   };
 }
 

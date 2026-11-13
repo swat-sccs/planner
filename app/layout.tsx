@@ -11,6 +11,8 @@ import FooterInfo from "../components/FooterInfo";
 import SwatGptPromo from "../components/SwatGptPromo";
 
 import { Providers } from "./providers";
+import { auth } from "@/lib/auth";
+import { recordDailyActivity } from "@/lib/activity";
 
 export const metadata: Metadata = {
   title: {
@@ -27,11 +29,17 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+
+  if (session?.user?.id) {
+    await recordDailyActivity(session.user.id);
+  }
+
   return (
     <CookiesProvider>
       <NextAuthProvider>

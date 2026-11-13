@@ -7,7 +7,8 @@
     "scan": "next dev & npx react-scan@latest localhost:3000",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate:backfill": "node scripts/backfill-new-data.mjs"
   },
   "overrides": {
     "@tanstack/react-virtual": "^3.11.2",
