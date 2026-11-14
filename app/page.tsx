@@ -20,7 +20,6 @@ import { getSelectedCoursePlan } from "./actions/userActions";
 import { redirect } from "next/navigation";
 import CoursePlanContext from "../components/wrappers/CoursePlanContext";
 import { auth } from "@/lib/auth";
-import SwatSwimSurprisePopup from "@/components/SwatSwimSurprisePopup";
 
 export default async function Page(props: {
   searchParams?: Promise<{
@@ -139,7 +138,6 @@ async function Home(props: any) {
         </div>
         {props.courseWrapper}
       </div>
-      <SwatSwimSurprisePopup />
     </>
   );
 }
