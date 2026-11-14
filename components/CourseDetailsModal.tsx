@@ -203,7 +203,7 @@ export default function CourseDetailsModal({
   return (
     <Modal
       classNames={{
-        wrapper: "!fixed !inset-0 !overflow-hidden",
+        wrapper: "!fixed !inset-0 !h-[100dvh] !overflow-hidden",
         base: "!m-0 h-[92dvh] max-h-[92dvh] overflow-hidden",
         body: "!overflow-hidden",
       }}

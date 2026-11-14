@@ -29,7 +29,7 @@ import CourseDetailsModal from "./CourseDetailsModal";
 
 export const card = tv({
   slots: {
-    base: `bg-light_foreground min-h-32 max-h-70 w-[98%] rounded-md scroll-none drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none`,
+    base: `bg-light_foreground min-h-32 w-[98%] rounded-md scroll-none drop-shadow-lg hover:transition-all duration-500 md:hover:translate-y-0.5 ease-in-out md:hover:drop-shadow-none`,
     role: "font-bold text-primary ",
   },
 });
@@ -114,7 +114,7 @@ export default function CourseCard(props: any) {
                 {props.course.creditHours} credit(s)
                 {props.course.sectionAttributes.length > 0 && (
                   <>
-                    <div className="hidden sm:flex flex-row max-w-48 md:max-w-full overflow-x-auto scrollbar-thin scrollbar-thumb-accent-500 scrollbar-track-transparent grid-cols-6 gap-1">
+                    <div className="hidden sm:flex max-w-48 flex-row flex-wrap gap-1 md:max-w-full">
                       &nbsp;|&nbsp;{attributeCodes}
                     </div>
                   </>
@@ -151,7 +151,7 @@ export default function CourseCard(props: any) {
           </div>
         </CardHeader>
 
-        <CardBody className="pt-0 pl-6 ">
+        <CardBody className="overflow-visible pt-0 pl-6">
           <div className="flex justify-between flex-row gap-3">
             <div className="gap-4 basis-1/2">
               {props.course.facultyMeet.meetingTimes.room ? (

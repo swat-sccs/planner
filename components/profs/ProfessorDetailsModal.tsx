@@ -93,6 +93,11 @@ export default function ProfessorDetailsModal({
 
   return (
     <Modal
+      classNames={{
+        // Keep the modal's layout viewport stable while a touch pinch changes
+        // visualViewport dimensions.
+        wrapper: "!h-[100dvh]",
+      }}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       placement="center"
